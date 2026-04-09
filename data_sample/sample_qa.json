@@ -1,0 +1,41 @@
+[
+    {
+        "image": "sample_1.png",
+        "question": "What is the \u2018actual\u2019 value per 1000, during the year 1975?",
+        "answers": [
+            "0.28"
+        ]
+    },
+    {
+        "image": "sample_2.png",
+        "question": "What is name of university?",
+        "answers": [
+            "university of california",
+            "University of California",
+            "university of california, san diego"
+        ]
+    },
+    {
+        "image": "sample_3.png",
+        "question": "What is the name of the company?",
+        "answers": [
+            "itc limited",
+            "ITC Limited"
+        ]
+    },
+    {
+        "image": "sample_4.png",
+        "question": "Where is the university located ?",
+        "answers": [
+            "san diego",
+            "San Diego"
+        ]
+    },
+    {
+        "image": "sample_5.png",
+        "question": "To whom is the document sent?",
+        "answers": [
+            "Paul"
+        ]
+    }
+]

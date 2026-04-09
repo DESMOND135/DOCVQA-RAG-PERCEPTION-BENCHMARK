@@ -1,0 +1,17 @@
+# Project Deliverables (Excluded from GitHub)
+thesis/
+paper/
+presentation/
+
+# Environment and Private Keys
+.env
+.gemini/
+__pycache__/
+*.pyc
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Large Results (optional, but keeping csv and plots as requested)
+# results/raw_cache/

@@ -1,0 +1,31 @@
+# OCR Libraries
+pytesseract
+paddleocr
+paddlepaddle
+
+# NLP & Vector Database
+sentence-transformers
+faiss-cpu
+
+# LLM & API
+requests
+python-dotenv
+openai
+
+# Data Handling
+pandas
+pyarrow
+fsspec
+huggingface_hub
+datasets
+Pillow
+opencv-python
+
+# Evaluation & Metrics
+numpy
+psutil
+rapidfuzz
+
+# Visualization
+matplotlib
+seaborn

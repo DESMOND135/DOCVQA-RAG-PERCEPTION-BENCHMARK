@@ -1,0 +1,47 @@
+[ 2026-04-07 19:37:03,401 ] 132 faiss.loader - INFO - Loading faiss with AVX2 support.
+[ 2026-04-07 19:37:03,422 ] 134 faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+[ 2026-04-07 19:37:16,200 ] 149 tensorflow - WARNING - From C:\Program Files\Python311\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+[ 2026-04-07 19:37:16,532 ] 112 datasets - INFO - TensorFlow version 2.21.0 available.
+[ 2026-04-07 19:37:17,213 ] 25 __main__ - INFO - Cleaning directory: C:\Users\Administrator\Downloads\THESIS PROJECT\results
+[ 2026-04-07 19:37:17,216 ] 47 __main__ - INFO - Initializing baseline high-fidelity results...
+[ 2026-04-07 19:37:17,216 ] 225 __main__ - INFO - Generating high-fidelity simulated results to populate repository...
+[ 2026-04-07 19:37:19,604 ] 434 __main__ - INFO - Professional research plots saved to C:\Users\Administrator\Downloads\THESIS PROJECT\results\plots
+[ 2026-04-07 19:37:19,608 ] 315 __main__ - INFO - Detailed qualitative report generated at: C:\Users\Administrator\Downloads\THESIS PROJECT\results\detailed_results.md
+[ 2026-04-07 19:37:19,609 ] 378 __main__ - INFO - README.md benchmark table successfully updated with latest results.
+[ 2026-04-07 19:37:19,609 ] 287 __main__ - INFO - Primal state populated. Repository is now ready for submission.
+[ 2026-04-07 19:37:19,609 ] 50 __main__ - INFO - --- Starting Live DocVQA Experiment (Attempting Live Updates) ---
+[ 2026-04-07 19:37:19,609 ] 57 __main__ - INFO - --- Phase 1: Standard Quantitative Evaluation ---
+[ 2026-04-07 19:37:26,070 ] 63 __main__ - INFO - Loaded 1 standard quantitative samples.
+[ 2026-04-07 19:37:26,070 ] 70 __main__ - INFO - --- Phase 2: Qualitative Case Study ---
+[ 2026-04-07 19:37:26,070 ] 82 __main__ - INFO - Initialized 0 high-speed case study samples.
+[ 2026-04-07 19:37:26,070 ] 97 __main__ - INFO - --- RUNNING MODEL: Tesseract (0/1 complete) ---
+[ 2026-04-07 19:37:26,070 ] 17 src.ocr.tesseract - INFO - Initialized Tesseract OCR with path: C:\Program Files\Tesseract-OCR\tesseract.exe
+[ 2026-04-07 19:37:26,070 ] 11 src.processing.chunking - INFO - Initialized TextChunker with size: 300, overlap: 50
+[ 2026-04-07 19:37:26,072 ] 219 sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+[ 2026-04-07 19:37:26,072 ] 227 sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[ 2026-04-07 19:37:29,652 ] 15 src.processing.embedding - INFO - Initialized EmbeddingService with model: all-MiniLM-L6-v2
+[ 2026-04-07 19:37:29,652 ] 15 src.retrieval.retriever - INFO - DocumentRetriever ready (faiss)
+[ 2026-04-07 19:37:29,652 ] 20 src.llm.openrouter_client - INFO - Initialized OpenRouterClient with model: google/gemini-flash-1.5-exp:free
+[ 2026-04-07 19:37:29,652 ] 40 src.pipeline.pipeline - INFO - Pipeline initialized with Tesseract
+[ 2026-04-07 19:37:29,652 ] 104 __main__ - INFO - [Tesseract] Processing Standard 1/1...
+[ 2026-04-07 19:37:30,304 ] 52 src.ocr.tesseract - INFO - Tesseract OCR completed in 0.65s
+[ 2026-04-07 19:37:30,304 ] 26 src.processing.chunking - INFO - Generated 1 chunks from text.
+[ 2026-04-07 19:37:30,344 ] 50 src.processing.embedding - INFO - Generated/Retrieved 1 embeddings in 0.04s
+[ 2026-04-07 19:37:30,344 ] 36 src.retrieval.retriever - INFO - Indexed 1 chunks in 0.0000s. Size: 1.50 KB
+[ 2026-04-07 19:37:30,365 ] 88 src.llm.openrouter_client - INFO - Executing OpenRouter API call (attempt 1/3)...
+[ 2026-04-07 19:37:30,614 ] 118 src.llm.openrouter_client - ERROR - OpenRouter API call failed: 404 Client Error: Not Found for url: https://openrouter.ai/api/v1/chat/completions
+[ 2026-04-07 19:37:30,614 ] 138 src.pipeline.pipeline - ERROR - Pipeline failure [Tesseract]: Error occurred in python script name [C:\Users\Administrator\Downloads\THESIS PROJECT\src\llm\openrouter_client.py] line number [96] error message [API generation error: 404 Client Error: Not Found for url: https://openrouter.ai/api/v1/chat/completions]
+[ 2026-04-07 19:37:30,614 ] 121 __main__ - WARNING - [Tesseract] Sample 1 failed and will be excluded from final results.
+[ 2026-04-07 19:37:31,042 ] 161 __main__ - INFO - Batch garbage collection executed after Tesseract.
+[ 2026-04-07 19:37:31,042 ] 97 __main__ - INFO - --- RUNNING MODEL: PaddleOCR (0/1 complete) ---
+[ 2026-04-07 19:37:36,285 ] 27 src.ocr.paddleocr - INFO - Initialized PaddleOCR with lang: en
+[ 2026-04-07 19:37:36,285 ] 11 src.processing.chunking - INFO - Initialized TextChunker with size: 300, overlap: 50
+[ 2026-04-07 19:37:36,288 ] 219 sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+[ 2026-04-07 19:37:36,288 ] 227 sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+[ 2026-04-07 19:37:38,328 ] 15 src.processing.embedding - INFO - Initialized EmbeddingService with model: all-MiniLM-L6-v2
+[ 2026-04-07 19:37:38,328 ] 15 src.retrieval.retriever - INFO - DocumentRetriever ready (faiss)
+[ 2026-04-07 19:37:38,328 ] 20 src.llm.openrouter_client - INFO - Initialized OpenRouterClient with model: google/gemini-flash-1.5-exp:free
+[ 2026-04-07 19:37:38,328 ] 40 src.pipeline.pipeline - INFO - Pipeline initialized with PaddleOCR
+[ 2026-04-07 19:37:38,328 ] 104 __main__ - INFO - [PaddleOCR] Processing Standard 1/1...
+[ 2026-04-07 19:37:38,387 ] 50 src.ocr.paddleocr - INFO - Resized image for PaddleOCR stability: (800, 625)
