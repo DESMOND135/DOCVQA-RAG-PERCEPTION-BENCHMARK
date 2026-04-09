@@ -31,6 +31,18 @@ The system is built on three core pillars of modularity:
 2. **Retrieval Agnosticism**: The retrieval system operates on standardized embeddings, meaning any vector database or similarity metric can be integrated.
 3. **Cognitive Flexibility**: The final reasoning layer (LLM) is decoupled from the extraction layer, ensuring compatibility with both local and API-based models.
 
+## Mathematical Framework
+
+The evaluation of perception strategies relies on several key metrics to ensure both accuracy and operational efficiency:
+
+- **Average Normalized Levenshtein Similarity (ANLS)**: The primary metric for DocVQA. It measures the normalized edit distance between the prediction ($P$) and the ground truth ($G$).
+  $$ANLS = \frac{1}{N} \sum_{i=1}^{N} \max_{g \in G_i} (SC(g, P_i)) \text{ if } SC > 0.5 \text{ else } 0$$
+- **F1-Score**: Measures the harmonic mean of precision and recall for the retrieved document context.
+  $$F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
+- **Cosine Similarity**: Used for high-speed vector retrieval in the FAISS database.
+  $$\text{Similarity}(A, B) = \frac{A \cdot B}{\|A\| \|B\|}$$
+- **System Throughput**: Defined as the operational capacity (samples per second), calculated as the inverse of latency.
+
 ## Execution
 
 1. **Install Dependencies**:
