@@ -44,6 +44,22 @@ The system is built on three core pillars of modularity:
    python main.py
    ```
 
+## Error Analysis
+
+Based on my research, the DocVQA pipeline's failures are categorized into four primary areas, each impacting the results differently:
+
+1.  **OCR Misinterpretation**: Character confusion (e.g., "0" as "O") which heavily impacts **Exact Match (EM)**.
+2.  **Layout Fragmentation**: Incorrect reading order in multi-column or complex tabular documents.
+3.  **Retrieval Ambiguity**: The system pulls the correct label but the incorrect value due to proximity in the vector space.
+4.  **Output Normalization**: Information is correct but the format differs from the ground truth (e.g., "$1k" vs. "1000").
+
+### Comparative Vulnerability Analysis
+| Error Type | Tesseract | PaddleOCR | VLM | Hybrid |
+| :--- | :---: | :---: | :---: | :---: |
+| **Alphanumeric Confusion** | High | Medium | Low | Low |
+| **Layout Sensitivity** | High | Medium | Low | Low |
+| **Hallucination Risk** | N/A | N/A | Medium | Low |
+
 ## Results
 
 Aggregated metrics are automatically saved to `results/demo_summary.csv` and visualized in `results/plots/`. Key metrics include:
