@@ -1,4 +1,4 @@
-# DocVQA RAG: Comparative Analysis of Perception Strategies
+# Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
 
 This repository contains the source code for a Master's Thesis research project on **Document Visual Question Answering (DocVQA)**. The system implements a Retrieval-Augmented Generation (RAG) pipeline designed to evaluate how different document perception strategies (OCR vs. VLM) impact the accuracy and efficiency of downstream question answering.
 
