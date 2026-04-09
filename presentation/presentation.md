@@ -1,4 +1,4 @@
-# Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
+# DocVQA RAG: Comparative Analysis of Perception Strategies
 **Master's Defense Presentation**  
 Academic Year 2025-2026
 
