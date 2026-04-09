@@ -6,9 +6,9 @@ Academic Year 2025-2026
 
 ## 1. The Challenge & Information Extraction as DocVQA
 - Large volumes of complex PDF documents (invoices, forms, tables) exist.
-- **The Thesis Focus**: We define information extraction dynamically as Document Visual Question Answering (DocVQA)—asking questions over PDFs rather than using rigid templates.
-- **The Cognitive Tool**: Large Language Models (LLMs) act as the central reasoning engine within a Retrieval-Augmented Generation (RAG) pipeline to ingest facts and generate answers.
-- **The Perception Gap**: LLMs are linguistically brilliant but "visually blind." They require images to be processed through external perception strategies (OCR, VLM, Hybrid) to understand PDF spatial layouts before they can generate accurate answers.
+- **The Thesis Focus**: We define information extraction dynamically as Document Visual Question Answering (DocVQA).
+- **The Cognitive Tool**: Large Language Models (LLMs) act as the reasoning engine within a Retrieval-Augmented Generation (RAG) pipeline.
+- **The Perception Gap**: LLMs are "visually blind" to PDF layouts. They require a perception layer (OCR/VLM) to ground their reasoning in the document's spatial reality.
 
 ---
 
@@ -18,52 +18,74 @@ Academic Year 2025-2026
 
 - **Swappable Perception Layers**:
   - Tesseract (Traditional baseline)
-  - PaddleOCR (Deep-learning layout detection)
-  - VLM (End-to-end multimodal extraction)
-  - Hybrid (Dual-stream synchronization)
+  - PaddleOCR (Layout-sensitive extraction)
+  - VLM (End-to-end multimodal reasoning)
+  - **Hybrid** (The Proposed Dual-Stream Solution)
 
 ---
 
-## 3. Mathematical Foundations
-- **ANLS**: Measures soft similarity (String edit distance with OCR noise tolerance).
-- **F1-Score**: Harmonic mean of Precision and Recall in retrieval context.
-- **Throughput [S/s]**: Measures system scalability (samples per second) as the inverse of latency.
-
----
-
-## 4. The Hybrid Perception Strategy
+## 3. The Proposed Solution: Hybrid Perception
 
 ![Hybrid Flow](../results/diagrams_minimal/hybrid_workflow.png)
 
 - **Dual Stream Logic**:
-  - Stream 1: Literal OCR character precision (PaddleOCR).
-  - Stream 2: Semantic VLM layout understanding.
-- **Goal**: Combining literal character grounding with spatial context.
+  - **OCR Stream**: Literal character precision.
+  - **VLM Stream**: High-level spatial layout understanding.
+- **Goal**: Synchronizing text identity with geometric context to eliminate hallucinations.
 
 ---
 
-## 5. Experimental Results
-
-| Strategy | ANLS | EM | Latency [s] |
-| :--- | :---: | :---: | :---: |
-| **Hybrid** | 0.24 | 0.20 | 14.2 |
-| **VLM** | 0.17 | 0.10 | 4.2 |
-| **Tesseract** | 0.17 | 0.10 | 11.0 |
-| **PaddleOCR** | 0.13 | 0.00 | 52.3 |
-
-*(Graphs demonstrating Latency vs ANLS tradeoffs are available in the repository `results/plots/`)*
+## 4. Evaluation Metric: ANLS
+- **Average Normalized Levenshtein Similarity (ANLS)**:
+- Measures edit-distance between prediction and ground truth.
+- Threshold-aware (penalizes hallucinations severely).
+- Essential for scoring extraction fidelity in complex PDFs.
 
 ---
 
-## 6. Error Analysis
-- **OCR Misreading**: Character confusion (`0` vs `O`) cascades into Exact Match (EM) failure.
-- **Layout Fragmentation**: Traditional OCR reads *across* columns, isolating values from their headers.
-- **Retrieval Ambiguity**: FAISS struggles with repeated values (e.g., "$0.00") in dense tables, retrieving the correct string from the wrong geometric row.
-- **Formatting**: Predicting "$1k" instead of "1000".
+## 5. Accuracy Comparison
+
+![Accuracy Metrics](../results/plots/accuracy_comparison.png)
+
+- **Key Finding**: The **Hybrid** model significantly outperforms standalone strategies.
+- **Insight**: Combining OCR grounding with VLM spatial context creates the most accurate info-extraction tool.
 
 ---
 
-## 7. Key Findings & Conclusion
-- **Hybrid** is the gold standard for mission-critical accuracy, suppressing VLM hallucinations using OCR literal grounding.
-- **VLM** is optimal for high-throughput, low-latency applications but cannot be trusted for financial precision.
-- **Future Work**: Optimizing Dual-Stream latency via model quantization and GPU asynchronous execution.
+## 6. System Efficiency (Latency vs Throughput)
+
+![Efficiency Analysis](../results/plots/efficiency_comparison.png)
+
+- **Key Finding**: **VLM** is the fastest (lowest latency), while OCR-heavy pipelines suffer from sequential processing bottlenecks.
+- **Throughput**: VLM offers ~3.4x higher throughput compared to the Hybrid baseline.
+
+---
+
+## 7. Resource Management: Peak Memory
+
+![Memory Usage](../results/plots/memory_comparison.png)
+
+- **Key Finding**: Tesseract is remarkably lightweight (~350MB).
+- **Overhead**: Hybrid and VLM models require multi-gigabyte allocations for transformer weights and image tensors.
+
+---
+
+## 8. Database & Search Performance
+
+![Database Performance](../results/plots/database_efficiency.png)
+
+- **Key Finding**: Retrieval from FAISS is near-instantaneous.
+- **Bottleneck**: The primary overhead in RAG for PDFs is **Indexing** (chunking and embedding) the extracted text.
+
+---
+
+## 9. Error Analysis: Why Models Fail
+- **Spatial Resolution Loss**: VLMs blur dense tabular data, leading to hallucinations.
+- **Layout Fragmentation**: Traditional OCR reads *across* column borders.
+- **Retrieval Ambiguity**: Vector search pulls correct strings from incorrect geometric rows.
+
+---
+
+## 10. Conclusion & Future Work
+- **Conclusion**: The Hybrid strategy is the gold standard for precision-critical PDF extraction.
+- **Optimization**: Future work focuses on reducing Hybrid latency via hardware acceleration and model quantization.
