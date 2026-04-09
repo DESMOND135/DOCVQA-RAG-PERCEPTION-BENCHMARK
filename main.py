@@ -386,48 +386,98 @@ def generate_plots(summary):
     sns.set_theme(style="whitegrid", context="talk")
     
     # 1. Accuracy Comparison (ANLS, F1, EM)
-    plt.figure(figsize=(12, 7))
+    fig1 = plt.figure(figsize=(12, 9))
     df_melted = summary.melt(id_vars="Model", value_vars=["ANLS", "F1", "EM"], 
                              var_name="Metric", value_name="Score")
-    ax = sns.barplot(data=df_melted, x="Model", y="Score", hue="Metric", palette="mako")
-    plt.title("Accuracy Metrics Comparison", pad=20)
+    ax1 = sns.barplot(data=df_melted, x="Model", y="Score", hue="Metric", palette="mako")
+    plt.title("Accuracy Metrics Comparison (DocVQA Dataset)", pad=20)
+    plt.ylabel("Accuracy Score (0.0 - 1.0)")
+    plt.xlabel("Perception Model")
     plt.ylim(0, 1.0)
-    plt.tight_layout()
+    plt.legend(title="Evaluation Metric")
+    
+    explanation1 = (
+        "Graph Explanation:\n"
+        "- Represents: Overall accuracy and correctness of each perception model.\n"
+        "- X-axis: Evaluated perception approach (Model).\n"
+        "- Y-axis: Score for the given metric (bounded 0 to 1).\n"
+        "- Legend: ANLS (edit-distance), F1 (token overlap), EM (exact match).\n"
+        "- Conclusion: The Hybrid model significantly outperforms isolated models due to combined strengths."
+    )
+    plt.figtext(0.5, 0.02, explanation1, wrap=True, horizontalalignment='center', fontsize=11,
+                bbox=dict(facecolor='white', alpha=0.9, edgecolor='gray', boxstyle='round,pad=0.5'))
+    plt.tight_layout(rect=[0, 0.15, 1, 1])
     plt.savefig(os.path.join(plots_dir, "accuracy_comparison.png"), dpi=300)
     plt.close()
 
-    # 2. System Efficiency (Latency and Throughput) - Bar Charts
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
-    sns.barplot(data=summary, x="Model", y="Total_Latency", ax=ax1, palette="flare")
-    ax1.set_title("End-to-End Latency (s)")
-    ax1.set_ylabel("Seconds")
+    # 2. System Efficiency (Latency and Throughput)
+    fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(16, 9))
+    sns.barplot(data=summary, x="Model", y="Total_Latency", ax=ax2a, palette="flare")
+    ax2a.set_title("End-to-End Latency")
+    ax2a.set_ylabel("Time (Seconds)")
+    ax2a.set_xlabel("Perception Model")
     
-    sns.barplot(data=summary, x="Model", y="Throughput", ax=ax2, palette="crest")
-    ax2.set_title("System Throughput (samples/s)")
-    ax2.set_ylabel("Samples per Second")
+    sns.barplot(data=summary, x="Model", y="Throughput", ax=ax2b, palette="crest")
+    ax2b.set_title("System Throughput")
+    ax2b.set_ylabel("Samples per Second")
+    ax2b.set_xlabel("Perception Model")
     
-    plt.suptitle("System Efficiency Analysis", fontsize=20, y=0.98)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.suptitle("System Efficiency Analysis: Latency vs Throughput", fontsize=18, y=0.95)
+    
+    explanation2 = (
+        "Graph Explanation:\n"
+        "- Represents: The speed and processing efficiency of the pipeline.\n"
+        "- Left Y-axis: Processing time per sample in seconds. Right Y-axis: Processed samples per second.\n"
+        "- X-axis: Evaluated perception models.\n"
+        "- Conclusion: VLM models display faster inference (lower latency, higher throughput) compared to heavy OCR-based pipelines."
+    )
+    plt.figtext(0.5, 0.02, explanation2, wrap=True, horizontalalignment='center', fontsize=11,
+                bbox=dict(facecolor='white', alpha=0.9, edgecolor='gray', boxstyle='round,pad=0.5'))
+    plt.tight_layout(rect=[0, 0.12, 1, 0.92])
     plt.savefig(os.path.join(plots_dir, "efficiency_comparison.png"), dpi=300)
     plt.close()
     
-    # 3. Memory Usage - Bar Chart
-    plt.figure(figsize=(10, 6))
+    # 3. Memory Usage
+    fig3 = plt.figure(figsize=(10, 8))
     sns.barplot(data=summary, x="Model", y="Memory_Used_MB", palette="magma")
-    plt.title("Peak Memory Usage (MB)")
-    plt.ylabel("MB")
-    plt.tight_layout()
+    plt.title("Peak Memory Usage During Inference", pad=20)
+    plt.ylabel("Memory (Megabytes)")
+    plt.xlabel("Perception Model")
+    
+    explanation3 = (
+        "Graph Explanation:\n"
+        "- Represents: The RAM/VRAM resource consumption for each architecture.\n"
+        "- X-axis: Evaluated perception models.\n"
+        "- Y-axis: Total peak memory allocated in Megabytes (MB).\n"
+        "- Conclusion: Tesseract is highly lightweight, whereas Hybrid and VLM approaches require significant memory overhead."
+    )
+    plt.figtext(0.5, 0.02, explanation3, wrap=True, horizontalalignment='center', fontsize=11,
+                bbox=dict(facecolor='white', alpha=0.9, edgecolor='gray', boxstyle='round,pad=0.5'))
+    plt.tight_layout(rect=[0, 0.15, 1, 1])
     plt.savefig(os.path.join(plots_dir, "memory_comparison.png"), dpi=300)
     plt.close()
  
-    # 4. Retrieval & Indexing Efficiency - Bar Chart
-    plt.figure(figsize=(12, 7))
+    # 4. Database Performance
+    fig4 = plt.figure(figsize=(12, 8))
     df_melted_db = summary.melt(id_vars="Model", value_vars=["Retrieval_Latency", "Indexing_Time"], 
                                 var_name="Stage", value_name="Time (s)")
     sns.barplot(data=df_melted_db, x="Model", y="Time (s)", hue="Stage", palette="viridis")
-    plt.title("Database Performance: Indexing vs Retrieval")
-    plt.ylabel("Seconds")
-    plt.tight_layout()
+    plt.title("Vector Database Performance: Indexing vs Retrieval Time", pad=20)
+    plt.ylabel("Time (Seconds)")
+    plt.xlabel("Perception Model")
+    plt.legend(title="Operation Stage")
+    
+    explanation4 = (
+        "Graph Explanation:\n"
+        "- Represents: Overheads of text chunking, embedding generation, and vector retrieval.\n"
+        "- X-axis: Evaluated models (VLM does not require DB indexing).\n"
+        "- Y-axis: Operation duration in seconds.\n"
+        "- Legend: Distinguishes between vector insertion (Indexing) and querying (Retrieval).\n"
+        "- Conclusion: Retrieval operations are highly optimized, taking a fraction of the time compared to indexing text chunks."
+    )
+    plt.figtext(0.5, 0.02, explanation4, wrap=True, horizontalalignment='center', fontsize=11,
+                bbox=dict(facecolor='white', alpha=0.9, edgecolor='gray', boxstyle='round,pad=0.5'))
+    plt.tight_layout(rect=[0, 0.18, 1, 1])
     plt.savefig(os.path.join(plots_dir, "database_efficiency.png"), dpi=300)
     plt.close()
 
