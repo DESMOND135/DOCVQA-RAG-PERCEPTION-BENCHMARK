@@ -68,5 +68,4 @@ Aggregated metrics are automatically saved to `results/demo_summary.csv` and vis
 - **Latency / Throughput**: System efficiency benchmarks.
 - **Memory**: Peak resource usage.
 
----
-*For a detailed theoretical analysis and experimental results, please refer to the documents in the `/thesis/` and `/paper/` directories.*
+78: ---
