@@ -1,7 +1,10 @@
-# Project Deliverables (Excluded from GitHub)
+# Private Academic Documents (NOT for public repository)
 thesis/
 paper/
 presentation/
+
+# Temporary Scripts
+tmp_*.py
 
 # Environment and Private Keys
 .env
@@ -12,6 +15,3 @@ __pycache__/
 # Operating System Files
 .DS_Store
 Thumbs.db
-
-# Large Results (optional, but keeping csv and plots as requested)
-# results/raw_cache/
