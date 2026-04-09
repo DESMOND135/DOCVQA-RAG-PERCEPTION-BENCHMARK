@@ -85,4 +85,8 @@ Aggregated metrics are automatically saved to `results/demo_summary.csv` and vis
 - **Latency / Throughput**: System efficiency benchmarks.
 - **Memory**: Peak resource usage.
 
+## Limitations
 
+- **Latency**: The Dual-Stream Hybrid approach is computationally heavy, resulting in higher processing times (~14s) per document.
+- **Hardware Dependency**: Without dedicated GPUs, deep-learning models (PaddleOCR and VLMs) become significant bottlenecks.
+- **Retrieval Bottlenecks**: The system remains vulnerable if the FAISS embedding vectors fail to accurately retrieve the correct semantic chunk.
