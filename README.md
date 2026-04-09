@@ -31,17 +31,21 @@ The system is built on three core pillars of modularity:
 2. **Retrieval Agnosticism**: The retrieval system operates on standardized embeddings, meaning any vector database or similarity metric can be integrated.
 3. **Cognitive Flexibility**: The final reasoning layer (LLM) is decoupled from the extraction layer, ensuring compatibility with both local and API-based models.
 
-## Mathematical Framework
+## Evaluation Framework
 
-The evaluation of perception strategies relies on several key metrics to ensure both accuracy and operational efficiency:
+The system is evaluated using a dual-layer framework:
 
-- **Average Normalized Levenshtein Similarity (ANLS)**: The primary metric for DocVQA. It measures the normalized edit distance between the prediction ($P$) and the ground truth ($G$).
-  $$ANLS = \frac{1}{N} \sum_{i=1}^{N} \max_{g \in G_i} (SC(g, P_i)) \text{ if } SC > 0.5 \text{ else } 0$$
-- **F1-Score**: Measures the harmonic mean of precision and recall for the retrieved document context.
-  $$F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
-- **Cosine Similarity**: Used for high-speed vector retrieval in the FAISS database.
-  $$\text{Similarity}(A, B) = \frac{A \cdot B}{\|A\| \|B\|}$$
-- **System Throughput**: Defined as the operational capacity (samples per second), calculated as the inverse of latency.
+### 1. Perception Quality (Accuracy)
+- **ANLS**: Average Normalized Levenshtein Similarity (Industry standard for DocVQA).
+  $$ANLS = \frac{1}{N} \sum_{i=1}^{N} \max_{g \in G_i} (SC(g, P_i))$$
+- **EM / F1**: Exact Match identity and harmonic mean of Precision/Recall.
+  *Units: Ratio [0-1]*
+
+### 2. Cognition & Infrastructure (Efficiency)
+- **Latency**: End-to-end inference time per document. *Unit: Seconds [s]*
+- **Throughput**: Processing rate of the pipeline. *Unit: Samples per Second [S/s]*
+- **Memory**: Peak RSS memory allocation. *Unit: Megabytes [MB]*
+- **Database**: Indexing overhead and retrieval latency. *Unit: Seconds [s]*
 
 ## Execution
 
@@ -66,11 +70,12 @@ Based on my research, the DocVQA pipeline's failures are categorized into four p
 4.  **Output Normalization**: Information is correct but the format differs from the ground truth (e.g., "$1k" vs. "1000").
 
 ### Comparative Vulnerability Analysis
-| Error Type | Tesseract | PaddleOCR | VLM | Hybrid |
+| Model | ANLS | EM | Latency [s] | Throughput [S/s] |
 | :--- | :---: | :---: | :---: | :---: |
-| **Alphanumeric Confusion** | High | Medium | Low | Low |
-| **Layout Sensitivity** | High | Medium | Low | Low |
-| **Hallucination Risk** | N/A | N/A | Medium | Low |
+| **Hybrid** | 0.24 | 0.20 | 14.2 | 0.07 |
+| **VLM** | 0.17 | 0.10 | 4.2 | 0.24 |
+| **Tesseract** | 0.17 | 0.10 | 11.0 | 0.09 |
+| **PaddleOCR** | 0.13 | 0.00 | 52.3 | 0.02 |
 
 ## Results
 
@@ -80,4 +85,4 @@ Aggregated metrics are automatically saved to `results/demo_summary.csv` and vis
 - **Latency / Throughput**: System efficiency benchmarks.
 - **Memory**: Peak resource usage.
 
-78: ---
+
