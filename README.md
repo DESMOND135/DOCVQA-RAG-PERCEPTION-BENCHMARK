@@ -85,21 +85,42 @@ Based on our research, the information extraction pipeline's failures (validated
 3.  **Retrieval Ambiguity**: The system pulls the correct label but the incorrect value due to proximity in the vector space.
 4.  **Output Normalization**: Information is correct but the format differs from the ground truth (e.g., "$1k" vs. "1000").
 
-### Comparative Vulnerability Analysis
-| Model | ANLS | EM | Latency [s] | Throughput [S/s] |
-| :--- | :---: | :---: | :---: | :---: |
-| **Hybrid** | 0.24 | 0.20 | 14.2 | 0.07 |
-| **VLM** | 0.17 | 0.10 | 4.2 | 0.24 |
-| **Tesseract** | 0.17 | 0.10 | 11.0 | 0.09 |
-| **PaddleOCR** | 0.13 | 0.00 | 52.3 | 0.02 |
+## Performance Comparison of Models
 
-## Results
+The following table summarizes the performance of each perception strategy across accuracy, efficiency, and resource utilization dimensions.
 
-Aggregated metrics are automatically saved to `results/demo_summary.csv` and visualized in `results/plots/`. Key metrics include:
-- **ANLS**: Average Normalized Levenshtein Similarity.
-- **EM / F1**: Accuracy metrics for the final answer.
-- **Latency / Throughput**: System efficiency benchmarks.
-- **Memory**: Peak resource usage.
+| Model | ANLS | EM | F1 Score | Latency [s] | Throughput [S/s] | Memory [MB] | Retrieval [s] | Indexing [s] | Index Size [KB] |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Hybrid** | **0.24** | **0.20** | **0.30** | 14.2 | 0.07 | 4600 | 0.05 | 0.12 | 1.5 |
+| **VLM** | 0.17 | 0.10 | 0.20 | **4.2** | **0.24** | 4100 | 0.00 | 0.00 | 0.0 |
+| **Tesseract** | 0.17 | 0.10 | **0.30** | 11.0 | 0.09 | **350** | 0.05 | 0.12 | 1.5 |
+| **PaddleOCR** | 0.13 | 0.00 | 0.10 | 52.3 | 0.02 | 850 | 0.05 | 0.12 | 1.5 |
+
+### Metric Explanations
+
+- **Accuracy (Correctness)**: 
+  - **ANLS / EM / F1**: Measure how closely the system's generated answer matches the human-annotated ground truth. Higher values indicate better information extraction quality.
+- **Efficiency (Processing Speed)**:
+  - **Latency**: The time required to process a single document from ingestion to answer.
+  - **Throughput**: The number of documents processed per second.
+- **Resource Usage**:
+  - **Memory Usage**: The peak Resident Set Size (RSS) footprint during inference, indicating hardware requirements.
+- **Database Performance**:
+  - **Retrieval Latency**: Time to execute the FAISS similarity search.
+  - **Indexing Time**: Time to chunk and embed the document text into the vector store.
+  - **Index Size**: Storage footprint of the resulting vector embeddings.
+
+### Result Interpretation
+
+The experimental results reveal critical trade-offs between precision and speed in the information extraction pipeline:
+
+- **Accuracy**: The **Hybrid** model achieves the highest ANLS (0.24), confirming that synchronizing literal OCR data with VLM spatial context provides the best answer quality and effectively reduces hallucinations.
+- **Efficiency**: The **VLM** is the fastest configuration (4.2s latency), significantly outperforming OCR-based methods by sidestepping the text detection and vector indexing stages.
+- **Trade-off Analysis**:
+  - **The Hybrid Strategy** offers superior accuracy but incurs higher computational costs (14.2s latency) and the largest memory footprint.
+  - **The VLM Strategy** serves as a high-speed alternative for scenarios where throughput is prioritized over absolute character precision.
+  - **Tesseract** provides a remarkably efficient, lightweight baseline for simple layouts.
+  - **PaddleOCR** demonstrates the highest cost-to-performance ratio in this specific CPU-only evaluation setup.
 
 ## Limitations
 
