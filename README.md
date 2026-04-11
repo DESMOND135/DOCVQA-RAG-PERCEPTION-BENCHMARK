@@ -1,10 +1,24 @@
 # Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
 
-This repository contains the source code for a Master's Thesis research project on **Document Visual Question Answering (DocVQA)**. The system implements a Retrieval-Augmented Generation (RAG) pipeline designed to evaluate how different document perception strategies (OCR vs. VLM) impact the accuracy and efficiency of downstream question answering.
+In the modern digital landscape, a vast amount of actionable data is locked within unstructured formats, primarily scanned PDFs and image-based documents. Financial institutions, healthcare providers, and administrative sectors face the significant challenge of manually extracting structured information from complex layouts like invoices, medical reports, and legal contracts. Traditional template-based extraction methods are brittle and unable to adapt to the inherent spatial and textual diversity of these documents.
+
+This repository implements an advanced system where **Large Language Models (LLMs)** serve as the central cognitive engine for automatic information extraction. By leveraging LLMs within a modular **Retrieval-Augmented Generation (RAG)** pipeline, the system can reason over document contents and retrieve specific data points via natural language queries, bypassing the limitations of rigid extraction templates.
+
+## Academic Context
+
+- **University**: Czestochowa University of Technology (Czestochowa, Poland)
+- **Supervisor**: Prof. Piotr Duda
 
 ## Project Overview
 
-The effective understanding of scanned documents—such as invoices in banking, medical reports in healthcare, and legal contracts—remains a significant challenge for AI. This project addresses the "Perception Gap" by comparing four distinct methods for converting visual document data into a machine-readable format for Large Language Models (LLMs).
+The primary goal of this project is to develop a robust architecture for the automatic extraction of structured information from heterogenous PDF documents. The system transitions from raw pixels to cognitive reasoning using a three-stage approach:
+
+1.  **Supporting Perception Layer**: To enable the LLM to "see" documents, we utilize various perception methods:
+    *   **OCR (Tesseract & PaddleOCR)**: Converting visual text into machine-readable strings while attempting to preserve layout.
+    *   **Vision-Language Models (VLM)**: Direct multimodal understanding of images.
+    *   **Hybrid Approach**: A novel synchronization of OCR precision with VLM spatial awareness.
+2.  **Retrieval-Augmented Generation (RAG)**: Extracted text and layout descriptions are vectorized and indexed into a FAISS database. This ensures that the LLM's answers are strictly grounded in the document's factual content.
+3.  **Cognitive Reasoning (LLM)**: The LLM acts as the final decision-maker, synthesizing the retrieved context into precise, structured answers to user questions (e.g., extracting totals from an invoice or names from a form).
 
 ## Project Structure
 
@@ -31,17 +45,19 @@ The system is built on three core pillars of modularity:
 2. **Retrieval Agnosticism**: The retrieval system operates on standardized embeddings, meaning any vector database or similarity metric can be integrated.
 3. **Cognitive Flexibility**: The final reasoning layer (LLM) is decoupled from the extraction layer, ensuring compatibility with both local and API-based models.
 
-## Evaluation Framework
+## Evaluation Benchmark (DocVQA)
 
-The system is evaluated using a dual-layer framework:
+To quantify the system's performance, we utilize the **Document Visual Question Answering (DocVQA)** benchmark. This benchmark provides a standardized dataset of document images, questions, and ground truth answers, allowing us to evaluate the system across two primary domains:
 
-### 1. Perception Quality (Accuracy)
+### 1. Benchmark Metrics (Accuracy Layer)
+These metrics measure how correctly the system extracts information compared to human-annotated ground truth.
 - **ANLS**: Average Normalized Levenshtein Similarity (Industry standard for DocVQA).
   $$ANLS = \frac{1}{N} \sum_{i=1}^{N} \max_{g \in G_i} (SC(g, P_i))$$
 - **EM / F1**: Exact Match identity and harmonic mean of Precision/Recall.
   *Units: Ratio [0-1]*
 
-### 2. Cognition & Infrastructure (Efficiency)
+### 2. Additional Performance Metrics (Efficiency Layer)
+These metrics evaluate the practical efficiency and infrastructure overhead of the perception strategies. They are critical for evaluating system performance in real-world deployment scenarios.
 - **Latency**: End-to-end inference time per document. *Unit: Seconds [s]*
 - **Throughput**: Processing rate of the pipeline. *Unit: Samples per Second [S/s]*
 - **Memory**: Peak RSS memory allocation. *Unit: Megabytes [MB]*
@@ -62,7 +78,7 @@ The system is evaluated using a dual-layer framework:
 
 ## Error Analysis
 
-Based on my research, the DocVQA pipeline's failures are categorized into four primary areas, each impacting the results differently:
+Based on our research, the information extraction pipeline's failures (validated on the DocVQA benchmark) are categorized into four primary areas:
 
 1.  **OCR Misinterpretation**: Character confusion (e.g., "0" as "O") which heavily impacts **Exact Match (EM)**.
 2.  **Layout Fragmentation**: Incorrect reading order in multi-column or complex tabular documents.
