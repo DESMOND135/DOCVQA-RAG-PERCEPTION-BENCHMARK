@@ -122,6 +122,61 @@ The experimental results reveal critical trade-offs between precision and speed 
   - **Tesseract** provides a remarkably efficient, lightweight baseline for simple layouts.
   - **PaddleOCR** demonstrates the highest cost-to-performance ratio in this specific CPU-only evaluation setup.
 
+## System Configuration & Technical Details
+
+This section describes the internal architecture and data flow of the automatic information extraction pipeline.
+
+### Pipeline Flow
+
+```mermaid
+graph LR
+    A[Document] --> B[OCR / VLM]
+    B --> C[Text Chunking]
+    C --> D[Embeddings]
+    D --> E[FAISS Retrieval]
+    E --> F[LLM Reasoning]
+    F --> G[Grounded Answer]
+```
+
+### 1. Supporting Perception Layer
+The system uses swappable modules (Tesseract, PaddleOCR, VLM, or Hybrid) to extract textual and visual data. This layer converts raw pixels into machine-readable context.
+
+### 2. Chunking Strategy
+To ensure the Large Language Model remains focused and within token limits, the extracted text is segmented using a recursive strategy:
+- **Chunk Size**: 500 characters.
+- **Overlap**: 50 characters.
+- **Purpose**: Moving windows with overlap ensure that information at the borders of segments is not contextually destroyed, maintaining continuity during retrieval.
+
+### 3. Embedding Model (Semantic Representation)
+- **Model**: `SentenceTransformers (all-MiniLM-L6-v2)`.
+- **Role**: This model maps text segments into a 384-dimensional dense vector space. Similar meanings are mapped closer together, enabling the system to understand relationships between concepts (e.g., "Total" and "Final Amount").
+
+### 4. Vector Database (FAISS)
+- **Storage**: We use **Facebook AI Similarity Search (FAISS)** as the high-performance indexing backend.
+- **Efficiency**: It allows for sub-millisecond similarity search across potentially massive document repositories by organizing embeddings into navigable mathematical structures.
+
+### 5. Retrieval & Similarity Search
+- **Method**: `Cosine Similarity`.
+- **Distinction**: Unlike traditional keyword search which looks for exact word matches, the system performs **semantic search**. It finds and retrieves the top-k most relevant chunks based on the mathematical "angle" between the user's question and the document context.
+
+### 6. Cognitive Layer (LLM)
+- **API**: `OpenRouter`.
+- **Primary Model**: `Mistral-7B-Instruct (v0.2)`.
+- **Role**: The LLM serves as the cognitive reasoning engine. It does not perform raw extraction; instead, it reads the retrieved chunks and generates a natural language answer that is strictly grounded in the provided document evidence.
+
+## Execution
+
+1. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **Environment Setup**:
+   Configure your `.env` file with any required API keys (if using non-local LLMs).
+3. **Run Benchmark**:
+   ```bash
+   python main.py
+   ```
+
 ## Limitations
 
 - **Latency**: The Dual-Stream Hybrid approach is computationally heavy, resulting in higher processing times (~14s) per document.
