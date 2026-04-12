@@ -141,6 +141,15 @@ graph LR
 ### 1. Supporting Perception Layer
 The system uses swappable modules (Tesseract, PaddleOCR, VLM, or Hybrid) to extract textual and visual data. This layer converts raw pixels into machine-readable context.
 
+#### Layout Detection
+The system employs advanced layout detection to understand the structural hierarchy of the document before extraction. This involves the probabilistic identification of various regions such as Tables, Headers, Text Blocks, and Key-Value pairs.
+
+![Layout Detection](results/diagrams/layout_detection.png)
+
+- **Purpose**: Layout detection serves as a "contextual map" for the system. It ensures that data points are correctly associated with their spatial neighbors (e.g., linking a numerical value to its row header in a complex table).
+- **Core Benefit**: By understanding document structure, the Perception Layer can maintain correct reading order and significantly reduce hallucinations in multi-column or dense tabular environments.
+- **Integration**: Within the Hybrid strategy, layout features are used to ground the LLM's reasoning in the document's physical geometry.
+
 ### 2. Chunking Strategy
 To ensure the Large Language Model remains focused and within token limits, the extracted text is segmented using a recursive strategy:
 - **Chunk Size**: 500 characters.

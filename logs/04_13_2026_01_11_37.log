@@ -1,0 +1,8 @@
+[ 2026-04-13 01:11:58,721 ] 132 faiss.loader - INFO - Loading faiss with AVX2 support.
+[ 2026-04-13 01:11:59,382 ] 134 faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+[ 2026-04-13 01:12:19,775 ] 112 datasets - INFO - TensorFlow version 2.21.0 available.
+[ 2026-04-13 01:12:28,709 ] 149 tensorflow - WARNING - From C:\Program Files\Python311\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+[ 2026-04-13 01:12:38,933 ] 27 src.ocr.paddleocr - INFO - Initialized PaddleOCR with lang: en
+[ 2026-04-13 01:12:38,935 ] 20 src.llm.openrouter_client - INFO - Initialized OpenRouterClient with model: google/gemini-flash-1.5-exp:free
+[ 2026-04-13 01:12:38,935 ] 13 src.vlm.vlm_model - INFO - Initialized VLMModel with google/gemini-flash-1.5-exp:free
