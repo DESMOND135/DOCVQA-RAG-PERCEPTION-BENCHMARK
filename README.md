@@ -122,6 +122,9 @@ The experimental results reveal critical trade-offs between precision and speed 
   - **Tesseract** provides a remarkably efficient, lightweight baseline for simple layouts.
   - **PaddleOCR** demonstrates the highest cost-to-performance ratio in this specific CPU-only evaluation setup.
 
+### Zero-Shot Evaluation Paradigm
+The system is evaluated under a strict **Zero-Shot Setting**. This means no task-specific fine-tuning was performed, and the model must rely entirely on its pre-trained reasoning and the retrieved document context. This approach proves the system's ability to **generalize** to novel document layouts (e.g., unseen invoices or multi-column reports) without human intervention.
+
 ## System Configuration & Technical Details
 
 This section describes the internal architecture and data flow of the automatic information extraction pipeline.
@@ -138,8 +141,11 @@ graph LR
     F --> G[Grounded Answer]
 ```
 
-### 1. Supporting Perception Layer
-The system uses swappable modules (Tesseract, PaddleOCR, VLM, or Hybrid) to extract textual and visual data. This layer converts raw pixels into machine-readable context.
+The system uses swappable modules to extract text. However, standalone **Vision-Language Models (VLM)** suffer from resolution downscaling, leading to decimal hallucinations in financial documents.
+
+![VLM Limitations](results/diagrams/vlm_limitations.png)
+
+*Figure: Visual representation of VLM Hallucination and Spatial Failures.*
 
 #### Layout Detection
 The system employs advanced layout detection to understand the structural hierarchy of the document before extraction. This involves the probabilistic identification of various regions such as Tables, Headers, Text Blocks, and Key-Value pairs.
