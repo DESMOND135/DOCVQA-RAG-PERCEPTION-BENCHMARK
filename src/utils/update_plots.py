@@ -38,29 +38,47 @@ ax1 = sns.barplot(data=df_melted, x="Model", y="Score", hue="Metric")
 plt.title("Benchmarking Information Extraction Accuracy", pad=20)
 plt.ylabel("Normalized Accuracy Score")
 plt.xlabel("Perception Module Strategy")
-plt.ylim(0, 1.0)
-plt.legend(title="Accuracy Metric", loc='upper left', bbox_to_anchor=(1, 1))
+plt.ylim(0, 1.2) # Extra space for annotations
+plt.legend(title="Accuracy Metric", loc='upper right')
+
+# Insights Inside Accuracy Graph
+ax1.annotate('Highest Accuracy (ANLS: 0.24)\nBest for Precision Audit', 
+             xy=(0, 0.3), xytext=(0.5, 0.8),
+             arrowprops=dict(facecolor='black', shrink=0.05, width=2),
+             fontsize=14, fontweight='bold', bbox=dict(facecolor='white', alpha=0.8))
+
+ax1.annotate('0% Exact Match failure\ndue to strict formatting', 
+             xy=(3, 0.05), xytext=(2.0, 0.15),
+             arrowprops=dict(facecolor='red', shrink=0.05, width=2),
+             fontsize=14, color='red', bbox=dict(facecolor='white', alpha=0.8))
+
 save_plot(fig1, "accuracy_comparison.png")
 
 # 2. Efficiency Comparison (Latency and Throughput)
-fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(18, 9))
+fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(20, 10))
 sns.barplot(data=df, x="Model", y="Total_Latency", ax=ax2a, palette=[academic_palette[0]])
 ax2a.set_title("Inference Latency Breakdown")
 ax2a.set_ylabel("Seconds per Document")
-ax2a.set_xlabel("Perception Strategy")
+ax2a.set_ylim(0, 70)
+
+# Insight on Latency
+ax2a.annotate('Extreme CPU Bottleneck\n(52.3 seconds)', 
+             xy=(3, 52.3), xytext=(1.5, 60),
+             arrowprops=dict(facecolor='red', shrink=0.05, width=2),
+             fontsize=14, color='red', bbox=dict(facecolor='white', alpha=0.8))
 
 sns.barplot(data=df, x="Model", y="Throughput", ax=ax2b, palette=[academic_palette[1]])
 ax2b.set_title("System Throughput Capability")
 ax2b.set_ylabel("Samples per Second")
-ax2b.set_xlabel("Perception Strategy")
+ax2b.set_ylim(0, 0.4)
+
+# Insight on Throughput
+ax2b.annotate('Fastest Real-Time Throughput\n(3.4x faster than Hybrid)', 
+             xy=(1, 0.24), xytext=(1.5, 0.35),
+             arrowprops=dict(facecolor='black', shrink=0.05, width=2),
+             fontsize=14, fontweight='bold', bbox=dict(facecolor='white', alpha=0.8))
 
 plt.suptitle("Operational Efficiency Analysis", fontsize=26, y=1.02)
-# Add manual legends for colors
-from matplotlib.lines import Line2D
-custom_lines = [Line2D([0], [0], color=academic_palette[0], lw=8),
-                Line2D([0], [0], color=academic_palette[1], lw=8)]
-ax2b.legend(custom_lines, ['Latency Metric', 'Throughput Metric'], loc='upper left', bbox_to_anchor=(1, 1))
-
 save_plot(fig2, "efficiency_comparison.png")
 
 # 3. Peak Memory Usage
@@ -68,22 +86,37 @@ fig3 = plt.figure(figsize=(10, 8))
 sns.barplot(data=df, x="Model", y="Memory_Used_MB", palette="mako")
 plt.title("Infrastructure Resource Utilization", pad=20)
 plt.ylabel("Peak RAM Footprint (MB)")
-plt.xlabel("Perception Strategy")
-# Add legend explaining bars
-plt.legend([Line2D([0], [0], color="#2d5e7a", lw=8)], ['Peak Memory (RSS)'], loc='upper left', bbox_to_anchor=(1, 1))
+plt.ylim(0, 6000)
+
+# Insight on Memory
+ax3 = plt.gca()
+ax3.annotate('Edge Ready\n(350 MB)', 
+             xy=(2, 350), xytext=(2.5, 1500),
+             arrowprops=dict(facecolor='green', shrink=0.05, width=2),
+             fontsize=14, color='green', fontweight='bold', bbox=dict(facecolor='white', alpha=0.8))
+
+ax3.annotate('Resource Intensive\nDual-Model Stack (4.6 GB)', 
+             xy=(0, 4600), xytext=(0.5, 5500),
+             arrowprops=dict(facecolor='red', shrink=0.05, width=2),
+             fontsize=14, color='red', bbox=dict(facecolor='white', alpha=0.8))
+
 save_plot(fig3, "memory_comparison.png")
 
 # 4. Database Performance
 fig4 = plt.figure(figsize=(12, 8))
-# Filter out VLM if it has 0 values to avoid clutter
 db_df = df[df['Model'] != 'VLM']
 df_melted_db = db_df.melt(id_vars="Model", value_vars=["Retrieval_Latency", "Indexing_Time"], 
                              var_name="Operation", value_name="Time (s)")
-sns.barplot(data=df_melted_db, x="Model", y="Time (s)", hue="Operation", palette="bone")
+ax4 = sns.barplot(data=df_melted_db, x="Model", y="Time (s)", hue="Operation", palette="bone")
 plt.title("Vector Database Temporal Performance", pad=20)
-plt.ylabel("Inference Time (s)")
-plt.xlabel("Strategy Using FAISS Indexing")
-plt.legend(title="Indexing Phase", loc='upper left', bbox_to_anchor=(1, 1))
+plt.ylim(0, 0.25)
+
+# Insight on Database
+ax4.annotate('Retrieval is Negligible\n(FAISS is optimized)', 
+             xy=(0, 0.05), xytext=(0.5, 0.2),
+             arrowprops=dict(facecolor='black', shrink=0.05, width=2),
+             fontsize=14, fontweight='bold', bbox=dict(facecolor='white', alpha=0.8))
+
 save_plot(fig4, "database_efficiency.png")
 
-print("Plots successfully updated with improved academic formatting.")
+print("Annotated plots successfully updated with in-graph insights.")
