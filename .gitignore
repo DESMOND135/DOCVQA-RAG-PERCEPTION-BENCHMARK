@@ -6,9 +6,26 @@ Gold_Submission/
 
 # Temporary Scripts & Artifacts
 tmp_*.py
-logs/*.log
+logs/*# IDE and System Files
+.vscode/
+.idea/
+*.swp
+*.log
+.env
 __pycache__/
 *.pyc
+
+# Academic Deliverables (Private)
+Gold_Submission*/
+thesis/
+paper/
+presentation/
+temp_math/
+*.docx
+*.pptx
+*.pdf
+.DS_Store
+Thumbs.db
 
 # Environment and Private Keys
 .env
