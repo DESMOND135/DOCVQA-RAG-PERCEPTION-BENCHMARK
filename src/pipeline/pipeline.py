@@ -56,48 +56,56 @@ class DocVQAPipeline:
             
             if self.perception_type in ["Tesseract", "PaddleOCR", "Hybrid"]:
                 # Perception stage
+                avg_confidence = 1.0
                 if self.perception_type == "Hybrid":
-                    # Extract text and description
                     try:
                         ocr_res = self.ocr.extract_text(image)
                         vlm_res = self.vlm.get_visual_description(image)
                         
                         ocr_latency = ocr_res["latency"] + vlm_res["latency"]
                         
-                        # Separate OCR and VLM content as distinct chunk sets
-                        # This prevents cross-contamination within a single chunk
-                        ocr_chunks = self.chunker.chunk_text(f"OCR_TEXT: {ocr_res['text']}")
-                        vlm_chunks = self.chunker.chunk_text(f"VLM_STRUCTURED_DATA: {vlm_res['description']}")
+                        # Structured Spatial Chunking for Hybrid
+                        ocr_chunks = self.chunker.chunk_spatially(ocr_res["detections"])
+                        vlm_chunks = self.chunker.chunk_text(f"LAYOUT_SUMMARY: {vlm_res['description']}")
                         chunks = ocr_chunks + vlm_chunks
                         
-                        if not chunks or len("".join(chunks).strip()) < 5:
-                            chunks = ["Input document text was too short or empty."]
+                        # Confidence Arbitration
+                        if ocr_res["detections"]:
+                            avg_confidence = sum([d["confidence"] for d in ocr_res["detections"]]) / len(ocr_res["detections"])
                             
-                        logger.info(f"Hybrid perception complete. OCR chunks: {len(ocr_chunks)}, VLM chunks: {len(vlm_chunks)}")
+                        logger.info(f"Hybrid spatial perception complete. Chunks: {len(chunks)}, Confidence: {avg_confidence:.2f}")
                     except Exception as e:
-                        logger.warning(f"Hybrid sub-stage failed: {str(e)}. Falling back to available data.")
+                        logger.warning(f"Hybrid sub-stage failed: {str(e)}")
                         chunks = [f"Perception Error: {str(e)}"]
 
-                else:
+                elif self.perception_type == "PaddleOCR":
+                    ocr_result = self.ocr.extract_text(image)
+                    ocr_latency = ocr_result["latency"]
+                    chunks = self.chunker.chunk_spatially(ocr_result["detections"])
+                    if ocr_result["detections"]:
+                        avg_confidence = sum([d["confidence"] for d in ocr_result["detections"]]) / len(ocr_result["detections"])
+                
+                else: # Tesseract
                     ocr_result = self.ocr.extract_text(image)
                     text = ocr_result["text"]
                     ocr_latency = ocr_result["latency"]
-                    
                     chunks = self.chunker.chunk_text(text)
-                    if not chunks or len(text.strip()) < 5: 
-                        chunks = [f"Input document text was too short or empty. Raw content: {text[:100]}"]
+                
+                if not chunks:
+                    chunks = ["No content extracted from document."]
                 
                 # RAG pipeline
                 embeddings = self.embedder.generate_embeddings(chunks)
                 indexing_time, index_size = self.retriever.build_index(chunks, embeddings)
                 
                 query_embedding = self.embedder.get_query_embedding(question)
-                
-                # Reduce noise: top_k=2 as requested for higher precision
-                top_k = 2 
-                relevant_chunks, retrieval_time = self.retriever.retrieve_relevant_chunks(query_embedding, k=top_k)
+                relevant_chunks, retrieval_time = self.retriever.retrieve_relevant_chunks(query_embedding, k=3)
                 context = "\n---\n".join(relevant_chunks)
                 
+                # Spatial Context Prompt Injection
+                if avg_confidence < 0.7:
+                    context = f"WARNING: Perception reliability is low ({avg_confidence:.2f}). Please reason carefully.\n" + context
+
                 # LLM answering
                 llm_result = self.llm.generate_answer(context, question)
                 prediction = llm_result["answer"]

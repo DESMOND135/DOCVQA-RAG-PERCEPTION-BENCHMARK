@@ -5,9 +5,23 @@ from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
 
+import matplotlib.pyplot as plt
+from matplotlib import mathtext
+
 # Academic Blue Palette
 BLUE_DEEP = RGBColor(30, 58, 138)
 WHITE = RGBColor(255, 255, 255)
+
+def render_latex_to_image(latex, out_path):
+    """Renders a LaTeX string into a high-resolution transparent PNG using matplotlib."""
+    fig = plt.figure(figsize=(10, 2))
+    text = fig.text(
+        0.5, 0.5, f"${latex}$",
+        ha='center', va='center', fontsize=50, color='#1e3a8a'
+    )
+    # Ensure background is transparent
+    fig.savefig(out_path, transparent=True, bbox_inches='tight', pad_inches=0.1, dpi=300)
+    plt.close(fig)
 
 def style_title_slide(slide, title_text, subtitle_text):
     fill = slide.background.fill; fill.solid(); fill.fore_color.rgb = BLUE_DEEP
@@ -60,8 +74,17 @@ def generate_defense_deck(md_path, pptx_path):
         for line in body_lines:
             if line.startswith('- ') or line.startswith('* '):
                 # Clean bullet text
-                clean_bullet = re.sub(r'(\*\*|\*|_|\$)', '', line[2:].strip())
+                clean_bullet = re.sub(r'(\$\$?)(.*?)(\$\$?)', r'\2', line[2:].strip())
+                clean_bullet = re.sub(r'(\*\*|\*|_)', '', clean_bullet)
                 bullets.append(clean_bullet)
+            elif '$$' in line:
+                m = re.search(r'\$\$(.*?)\$\$', line)
+                if m:
+                    latex = m.group(1).strip()
+                    os.makedirs('temp_math', exist_ok=True)
+                    math_img = os.path.join('temp_math', f'math_{i}.png')
+                    render_latex_to_image(latex, math_img)
+                    img_path = math_img
             elif '![' in line:
                 m = re.search(r'!\[.*?\]\((.*?)\)', line); 
                 if m:
@@ -88,5 +111,5 @@ def generate_defense_deck(md_path, pptx_path):
     print(f"Presentation Generated: {pptx_path}")
 
 if __name__ == "__main__":
-    os.makedirs('Gold_Submission', exist_ok=True)
-    generate_defense_deck('presentation/presentation.md', 'Gold_Submission/Presentation.pptx')
+    os.makedirs('Gold_Submission_v2_Final', exist_ok=True)
+    generate_defense_deck('presentation/presentation.md', 'Gold_Submission_v2_Final/Final_Defense_Presentation_Diamond.pptx')

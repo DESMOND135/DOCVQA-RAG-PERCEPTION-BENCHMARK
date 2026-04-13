@@ -73,21 +73,41 @@ class PaddleOCRModule:
             # Run OCR
             result = self.ocr.ocr(img_arr)
             
-            # Join all detected text lines
-            extracted_text = ""
-            for line in result:
-                if line:
-                   for res in line:
-                       extracted_text += res[1][0] + " "
+            # Extract structured data: text, bounding boxes, and confidence
+            detections = []
+            if result:
+                for line in result:
+                    if line:
+                        for res in line:
+                            bbox = res[0] # List of [x,y] points
+                            text_content = res[1][0]
+                            confidence = res[1][1]
+                            
+                            # Convert bbox to simple [xmin, ymin, xmax, ymax] normalized
+                            x_coords = [p[0] for p in bbox]
+                            y_coords = [p[1] for p in bbox]
+                            
+                            norm_bbox = [
+                                round(min(x_coords) / img.size[0], 4),
+                                round(min(y_coords) / img.size[1], 4),
+                                round(max(x_coords) / img.size[0], 4),
+                                round(max(y_coords) / img.size[1], 4)
+                            ]
+                            
+                            detections.append({
+                                "text": text_content,
+                                "bbox": norm_bbox,
+                                "confidence": float(confidence)
+                            })
             
             latency = time.time() - start_time
-            logger.info(f"PaddleOCR completed in {latency:.2f}s")
+            logger.info(f"PaddleOCR completed in {latency:.2f}s with {len(detections)} detections.")
             
-            final_text = extracted_text.strip()
-            self.__class__._cache[img_hash] = final_text
+            self.__class__._cache[img_hash] = detections
             
             return {
-                "text": final_text,
+                "detections": detections,
+                "text": " ".join([d["text"] for d in detections]),
                 "latency": latency,
                 "provider": "PaddleOCR"
             }
