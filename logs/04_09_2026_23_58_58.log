@@ -1,6 +1,0 @@
-[ 2026-04-09 23:59:14,022 ] 132 faiss.loader - INFO - Loading faiss with AVX2 support.
-[ 2026-04-09 23:59:14,692 ] 134 faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
-[ 2026-04-09 23:59:42,154 ] 149 tensorflow - WARNING - From C:\Program Files\Python311\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
-
-[ 2026-04-09 23:59:43,468 ] 112 datasets - INFO - TensorFlow version 2.21.0 available.
-[ 2026-04-09 23:59:48,979 ] 484 main - INFO - Professional research plots saved to C:\Users\Administrator\Downloads\THESIS PROJECT\results\plots

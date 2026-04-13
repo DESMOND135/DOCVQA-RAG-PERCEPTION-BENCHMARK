@@ -2,15 +2,17 @@
 thesis/
 paper/
 presentation/
+Gold_Submission/
 
-# Temporary Scripts
+# Temporary Scripts & Artifacts
 tmp_*.py
+logs/*.log
+__pycache__/
+*.pyc
 
 # Environment and Private Keys
 .env
 .gemini/
-__pycache__/
-*.pyc
 
 # Operating System Files
 .DS_Store
