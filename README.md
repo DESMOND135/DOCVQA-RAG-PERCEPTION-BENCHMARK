@@ -36,7 +36,14 @@ project/
 │   ├── ocr/        # PaddleOCR and Tesseract implementations
 │   ├── vlm/        # Vision-Language Model interfaces
 │   ├── retrieval/  # FAISS indexing and semantic search logic
-│   └── pipeline/   # Hybrid synchronization and RAG workflows
+│   ├── pipeline/   # Hybrid synchronization and RAG workflows
+│   ├── evaluation/ # Accuracy (ANLS, EM) and Efficiency metric logic
+│   ├── processing/ # Text chunking and image pre-processing
+│   ├── llm/        # Language Model connector interfaces
+│   ├── config/     # System and model configuration files
+│   ├── logging/    # Custom logging utilities
+│   ├── exception/  # project-specific error handling
+│   └── utils/      # Helper scripts and conversion utilities
 ├── results/        # Quantitative evaluation logs and performance plots
 ├── logs/           # System-level execution logs
 ├── main.py         # Primary benchmark execution script
