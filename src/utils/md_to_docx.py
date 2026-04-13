@@ -213,5 +213,5 @@ def convert_to_professional_docx(md_path, docx_path):
 
 if __name__ == "__main__":
     os.makedirs('Gold_Submission', exist_ok=True)
-    convert_to_professional_docx('thesis/thesis.md', 'Gold_Submission/Thesis_GOLD.docx')
-    convert_to_professional_docx('paper/paper.md', 'Gold_Submission/Paper_GOLD.docx')
+    convert_to_professional_docx('thesis/thesis.md', 'Gold_Submission/Thesis_Gold.docx')
+    convert_to_professional_docx('paper/paper.md', 'Gold_Submission/Paper_Gold.docx')
