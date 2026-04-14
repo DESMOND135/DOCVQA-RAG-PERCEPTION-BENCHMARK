@@ -126,35 +126,51 @@ def get_omml_for_latex(latex):
             <m:f><m:num><m:r><m:t>A ⋅ B</m:t></m:r></m:num><m:den><m:r><m:t>‖A‖ ‖B‖</m:t></m:r></m:den></m:f>
         </m:oMath>'''
 
-    # 5. Throughput Formula
-    if "T_p =" in latex or "1/L" in latex:
-        return f'''<m:oMath {m}>
-            <m:sSub><m:e><m:r><m:t>T</m:t></m:r></m:e><m:sub><m:r><m:t>p</m:t></m:r></m:sub></m:sSub>
-            <m:r><m:t> = </m:t></m:r>
-            <m:f><m:num><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>L</m:t></m:r></m:den></m:f>
-        </m:oMath>'''
+    # 6. Math Fragments for Variable Definitions (A, B, dot, norm)
+    # Note: Prioritize complex fragments (cdot, \|) over simple ones (mathbf{A},mathbf{B})
+    if "cdot" in latex:
+        return f'<m:oMath {m}><m:r><m:rPr><m:bold/></m:rPr><m:t>A</m:t></m:r><m:r><m:t> · </m:t></m:r><m:r><m:rPr><m:bold/></m:rPr><m:t>B</m:t></m:r></m:oMath>'
+    if "\|" in latex:
+        symbol = "A" if "A" in latex else "B"
+        return f'<m:oMath {m}><m:r><m:t>‖</m:t></m:r><m:r><m:rPr><m:bold/></m:rPr><m:t>{symbol}</m:t></m:r><m:r><m:t>‖</m:t></m:r></m:oMath>'
+    if "mathbf{A}" in latex:
+        return f'<m:oMath {m}><m:r><m:rPr><m:bold/></m:rPr><m:t>A</m:t></m:r></m:oMath>'
+    if "mathbf{B}" in latex:
+        return f'<m:oMath {m}><m:r><m:rPr><m:bold/></m:rPr><m:t>B</m:t></m:r></m:oMath>'
+
     return None
 
 def add_native_equation(paragraph, latex):
-    """Injects native Equation (OMML) XML. Ensures centering for textbook style."""
+    """Injects native Equation (OMML) XML."""
     xml = get_omml_for_latex(latex)
     if xml:
-        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
         el = parse_xml(xml)
         paragraph._p.append(el)
         return True
     return False
 
 def add_formatted_text(p, text):
-    # Standardize equation blocks
+    # Case 1: Standalone Equation Block
     if text.strip().startswith('$$') and text.strip().endswith('$$'):
         latex = text.strip()[2:-2].strip()
         if add_native_equation(p, latex):
             return
 
-    parts = re.split(r'(\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)', text)
+    # Case 2: Mixed Text and Inline Math ($ symbol)
+    # This ensures "bold vectors" and "norms" in the "Where" section look like math, not typed text.
+    parts = re.split(r'(\$.*?\$|\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)', text)
     for part in parts:
         if not part: continue
+        
+        # Inline Math Processor
+        if part.startswith('$') and part.endswith('$'):
+            latex = part[1:-1].strip()
+            if not add_native_equation(p, latex):
+                # Fallback to bolded/italicized if OMML fails
+                run = p.add_run(latex)
+                run.bold = True; run.italic = True
+            continue
+
         run = p.add_run()
         run.font.name = 'Times New Roman'
         run.font.size = Pt(12)
@@ -165,9 +181,7 @@ def add_formatted_text(p, text):
         elif part.startswith('*') and part.endswith('*'):
             run.text = part[1:-1]; run.italic = True
         else:
-            # Clear math markers for standard text runs
-            clean_text = re.sub(r'(\$\$?)(.*?)(\$\$?)', r'\2', part)
-            run.text = clean_text
+            run.text = part
 
 def convert_to_professional_docx(md_path, docx_path):
     print(f"Generating Diamond-Standard Document: {md_path} -> {docx_path}")

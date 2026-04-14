@@ -101,11 +101,25 @@ def generate_defense_deck(md_path, pptx_path):
         else:
             body_area.width = Inches(11.0); body_area.left = Inches(1.1); body_area.top = Inches(2.0)
 
-        # Enforce Bullet Point Limit for Presentation Readiness
-        for b in bullets[:5]:
-            p = body_area.text_frame.add_paragraph(); p.text = b; p.level = 0
-            p.font.size = Pt(28); p.font.name = 'Arial'; p.font.color.rgb = RGBColor(50, 50, 50)
-            p.space_after = Pt(18); p.alignment = PP_ALIGN.LEFT
+        # Post-process bullets for mixed math/text styling
+        for b_text in bullets[:5]:
+            p = body_area.text_frame.add_paragraph()
+            p.level = 0
+            p.space_after = Pt(18)
+            p.alignment = PP_ALIGN.LEFT
+            
+            # Split by math symbols to apply Bold + Blue styling to them
+            # We use double backslash for cdot to avoid regex escape errors
+            parts = re.split(r'([A-B\\cdot‖]+)', b_text)
+            for part in parts:
+                run = p.add_run()
+                run.text = part
+                run.font.size = Pt(28); run.font.name = 'Arial'
+                if part in ['A', 'B', '·', '‖']:
+                    run.font.bold = True
+                    run.font.color.rgb = BLUE_DEEP
+                else:
+                    run.font.color.rgb = RGBColor(50, 50, 50)
 
     prs.save(pptx_path)
     print(f"Presentation Generated: {pptx_path}")

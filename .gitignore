@@ -1,15 +1,9 @@
-# Private Academic Documents (Protected)
-Deliverable/
-thesis/
-paper/
-presentation/
+﻿# Deliverable Binaries (Protected)
+Deliverable/**/*.docx
+Deliverable/**/*.pptx
+Deliverable/**/*.pdf
 Gold_Submission/
 temp_math/
-
-# Academic Binary Files
-*.docx
-*.pptx
-*.pdf
 
 # Python & System
 __pycache__/
