@@ -119,41 +119,19 @@ def get_omml_for_latex(latex):
             <m:f><m:num><m:r><m:t>Precision ⋅ Recall</m:t></m:r></m:num><m:den><m:r><m:t>Precision + Recall</m:t></m:r></m:den></m:f>
         </m:oMath>'''
 
-    # 4. Cosine Similarity (Full Textbook Summation Version)
-    if "sim(A, B)" in latex or "sum A_i" in latex:
+    # 4. Cosine Similarity (Textbook Version)
+    if "Similarity" in latex or "sim(A, B)" in latex:
         return f'''<m:oMath {m}>
-            <m:r><m:t>sim(A, B) = </m:t></m:r>
-            <m:f>
-                <m:num>
-                    <m:nary>
-                        <m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/></m:naryPr>
-                        <m:sub><m:r><m:t>i=1</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup>
-                        <m:e><m:sSub><m:e><m:r><m:t>A</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:t>B</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub></m:e>
-                    </m:nary>
-                </m:num>
-                <m:den>
-                    <m:rad>
-                        <m:radPr><m:degHide m:val="on"/></m:radPr>
-                        <m:e>
-                            <m:nary>
-                                <m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/></m:naryPr>
-                                <m:sub><m:r><m:t>i=1</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup>
-                                <m:e><m:sSup><m:e><m:sSub><m:e><m:r><m:t>A</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup></m:e>
-                            </m:nary>
-                        </m:e>
-                    </m:rad>
-                    <m:rad>
-                        <m:radPr><m:degHide m:val="on"/></m:radPr>
-                        <m:e>
-                            <m:nary>
-                                <m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/></m:naryPr>
-                                <m:sub><m:r><m:t>i=1</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup>
-                                <m:e><m:sSup><m:e><m:sSub><m:e><m:r><m:t>B</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup></m:e>
-                            </m:nary>
-                        </m:e>
-                    </m:rad>
-                </m:den>
-            </m:f>
+            <m:r><m:t>Similarity(A, B) = </m:t></m:r>
+            <m:f><m:num><m:r><m:t>A ⋅ B</m:t></m:r></m:num><m:den><m:r><m:t>‖A‖ ‖B‖</m:t></m:r></m:den></m:f>
+        </m:oMath>'''
+
+    # 5. Throughput Formula
+    if "T_p =" in latex or "1/L" in latex:
+        return f'''<m:oMath {m}>
+            <m:sSub><m:e><m:r><m:t>T</m:t></m:r></m:e><m:sub><m:r><m:t>p</m:t></m:r></m:sub></m:sSub>
+            <m:r><m:t> = </m:t></m:r>
+            <m:f><m:num><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>L</m:t></m:r></m:den></m:f>
         </m:oMath>'''
     return None
 
@@ -336,9 +314,10 @@ def convert_to_professional_docx(md_path, docx_path):
                 alt, p_path = m.groups()
                 full_path = os.path.normpath(os.path.join(os.path.dirname(md_path), p_path))
                 if os.path.exists(full_path):
-                    doc.add_picture(full_path, width=Inches(6))
+                    # Set width to 6.5 inches for full-page professional density
+                    doc.add_picture(full_path, width=Inches(6.5))
                     caption_line = body_lines[i+1].strip().strip('*') if i + 1 < len(body_lines) and "Figure" in body_lines[i+1] else alt
-                    if "Figure" in body_lines[i+1]: i += 1
+                    if i + 1 < len(body_lines) and "Figure" in body_lines[i+1]: i += 1
                     add_caption(doc, "Figure", caption_line)
             i += 1; continue
             
@@ -351,6 +330,5 @@ def convert_to_professional_docx(md_path, docx_path):
     print(f"Professional Success: {docx_path}")
 
 if __name__ == "__main__":
-    os.makedirs('Gold_Submission_v2_Final', exist_ok=True)
-    convert_to_professional_docx('thesis/thesis.md', 'Gold_Submission_v2_Final/Thesis_Diamond_Final.docx')
-    convert_to_professional_docx('paper/paper.md', 'Gold_Submission_v2_Final/Paper_Diamond_Final.docx')
+    convert_to_professional_docx('Deliverable/thesis/source/thesis.md', 'Deliverable/thesis/thesis.docx')
+    convert_to_professional_docx('Deliverable/paper/source/paper.md', 'Deliverable/paper/paper.docx')

@@ -1,36 +1,23 @@
-# Private Academic Documents (NOT for public repository)
+# Private Academic Documents (Protected)
+Deliverable/
 thesis/
 paper/
 presentation/
 Gold_Submission/
-
-# Temporary Scripts & Artifacts
-tmp_*.py
-logs/*# IDE and System Files
-.vscode/
-.idea/
-*.swp
-*.log
-.env
-__pycache__/
-*.pyc
-
-# Academic Deliverables (Private)
-Gold_Submission*/
-thesis/
-paper/
-presentation/
 temp_math/
+
+# Academic Binary Files
 *.docx
 *.pptx
 *.pdf
-.DS_Store
-Thumbs.db
 
-# Environment and Private Keys
+# Python & System
+__pycache__/
+*.pyc
+*.log
+.vscode/
+.idea/
 .env
 .gemini/
-
-# Operating System Files
 .DS_Store
 Thumbs.db

@@ -111,5 +111,4 @@ def generate_defense_deck(md_path, pptx_path):
     print(f"Presentation Generated: {pptx_path}")
 
 if __name__ == "__main__":
-    os.makedirs('Gold_Submission_v2_Final', exist_ok=True)
-    generate_defense_deck('presentation/presentation.md', 'Gold_Submission_v2_Final/Final_Defense_Presentation_Diamond.pptx')
+    generate_defense_deck('Deliverable/presentation/source/presentation.md', 'Deliverable/presentation/presentation.pptx')
