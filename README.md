@@ -78,7 +78,6 @@ The experimental results revealed a critical trade-off between speed and accurac
 | **Tesseract** | 0.17 | 0.10 | 11.0 | 0.05 | 0.1 | 1.0 |
 | **PaddleOCR** | 0.13 | 0.00 | 52.3 | 0.05 | 0.1 | 1.0 |
 
-![Database Performance](results/plots/database_efficiency.png)
 
 ---
 
