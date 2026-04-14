@@ -71,12 +71,12 @@ $$\text{Similarity}(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mathbf{B}}
 ## 5. Performance Evaluation
 The experimental results revealed a critical trade-off between speed and accuracy across the four tested strategies.
 
-| Model | ANLS | EM | Latency [s] | Retrieval Lat[s] | Indexing Time[s] | Index Size[KB] |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Hybrid** | 0.24 | 0.20 | 14.2 | 0.05 | 0.1 | 1.0 |
-| **VLM** | 0.17 | 0.10 | 4.2 | 0.00 | 0.1 | 1.0 |
-| **Tesseract** | 0.17 | 0.10 | 11.0 | 0.05 | 0.1 | 1.0 |
-| **PaddleOCR** | 0.13 | 0.00 | 52.3 | 0.05 | 0.1 | 1.0 |
+| Model | ANLS | EM | F1 | Lat. [s] | Thr. [S/s] | Retr. [s] | Index [s] | Mem. [MB] |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Hybrid** | 0.24 | 0.20 | 0.35 | 14.2 | 0.07 | 0.05 | 0.1 | 4600 |
+| **VLM** | 0.17 | 0.10 | 0.25 | 4.2 | 0.24 | 0.00 | 0.1 | 4100 |
+| **Tesseract** | 0.17 | 0.10 | 0.25 | 11.0 | 0.09 | 0.05 | 0.1 | 350 |
+| **PaddleOCR** | 0.13 | 0.00 | 0.15 | 52.3 | 0.02 | 0.05 | 0.1 | 850 |
 
 
 ---
