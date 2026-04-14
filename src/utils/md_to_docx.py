@@ -120,7 +120,7 @@ def get_omml_for_latex(latex):
         </m:oMath>'''
 
     # 4. Cosine Similarity (Textbook Version)
-    if "Similarity" in latex or "sim(A, B)" in latex:
+    if "Similarity" in latex or "sim(" in latex:
         return f'''<m:oMath {m}>
             <m:r><m:t>Similarity(A, B) = </m:t></m:r>
             <m:f><m:num><m:r><m:t>A ⋅ B</m:t></m:r></m:num><m:den><m:r><m:t>‖A‖ ‖B‖</m:t></m:r></m:den></m:f>
