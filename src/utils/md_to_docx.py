@@ -1,9 +1,13 @@
 import os
 import re
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
+from docx.shared import Pt, Inches, RGBColor, Cm
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER, WD_PARAGRAPH_ALIGNMENT
+from docx.enum.section import WD_SECTION, WD_ORIENT
 from docx.oxml import OxmlElement, ns, parse_xml
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name, PythonLexer
+from pygments.formatters import RawTokenFormatter
 
 def create_element(name):
     return OxmlElement(name)
@@ -11,23 +15,53 @@ def create_element(name):
 def create_attribute(element, name, value):
     element.set(ns.qn(name), value)
 
-def add_field(run, field_code):
-    """Safely adds a Word field to a run, following the correct XML schema."""
+def add_highlighted_code(doc, code_text, lang='python'):
+    """Adds syntax-highlighted code to a DOCX document."""
+    p = doc.add_paragraph()
+    p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.style = 'Normal'
+    
+    try:
+        lexer = get_lexer_by_name(lang)
+    except:
+        lexer = PythonLexer()
+        
+    tokens = lexer.get_tokens(code_text)
+    
+    for ttype, value in tokens:
+        run = p.add_run(value)
+        run.font.name = 'Courier New'
+        run.font.size = Pt(10)
+        
+        # Simple color mapping based on token type
+        t_str = str(ttype)
+        if 'Keyword' in t_str: run.font.color.rgb = RGBColor.from_string('0000FF')
+        elif 'String' in t_str: run.font.color.rgb = RGBColor.from_string('008000')
+        elif 'Comment' in t_str: run.font.color.rgb = RGBColor.from_string('808080')
+        elif 'Name.Function' in t_str or 'Name.Class' in t_str: run.font.color.rgb = RGBColor.from_string('A52A2A')
+
+def add_field(run, field_type):
+    """Adds a standard Word field (PAGE, NUMPAGES, etc.) safely using raw OXML."""
     fldChar1 = create_element('w:fldChar')
     create_attribute(fldChar1, 'w:fldCharType', 'begin')
-    run._r.append(fldChar1)
     
     instrText = create_element('w:instrText')
     create_attribute(instrText, 'xml:space', 'preserve')
-    instrText.text = field_code
-    run._r.append(instrText)
+    instrText.text = fld_code = field_type
     
     fldChar2 = create_element('w:fldChar')
     create_attribute(fldChar2, 'w:fldCharType', 'separate')
-    run._r.append(fldChar2)
+    
+    t = create_element('w:t')
+    t.text = "1" # Display 1 initially
     
     fldChar3 = create_element('w:fldChar')
     create_attribute(fldChar3, 'w:fldCharType', 'end')
+    
+    run._r.append(fldChar1)
+    run._r.append(instrText)
+    run._r.append(fldChar2)
+    run._r.append(t)
     run._r.append(fldChar3)
 
 def set_toc_styles(doc):
@@ -41,30 +75,36 @@ def set_toc_styles(doc):
             tab_stops = style.paragraph_format.tab_stops
             tab_stops.add_tab_stop(right_margin_pos, WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)
 
-def add_caption(doc, label_text, raw_caption_text):
-    """Adds a professional academic caption using native Word SEQ fields for indexing."""
-    # Cleanup: Remove duplicate labels from the source markdown (e.g. "Figure 1: ")
-    # This prevents "Figure 1: Figure 1: ..."
-    clean_caption = re.sub(r'^(Figure|Table)\s*\d*[:.]?\s*', '', raw_caption_text, flags=re.IGNORECASE)
+def add_caption(doc, label_text, raw_caption_text, chapter_num="1", chapter_title=""):
+    """Adds a professional academic caption (X.Y) using native Word SEQ fields."""
+    clean_caption = re.sub(r'^(Figure|Table|Equation|Formula)\s*\d*[:.]?\s*', '', raw_caption_text, flags=re.IGNORECASE)
     
     p = doc.add_paragraph(style='Caption')
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
     
-    # Label
-    run = p.add_run(f"{label_text} ")
-    run.font.name = 'Times New Roman'
+    # Label and Chapter Number (e.g., Figure 2.)
+    run = p.add_run(f"{label_text} {chapter_num}.")
+    run.font.name = 'Arial'
     run.font.size = Pt(11)
     run.bold = True
     
-    # Native Sequential Numbering Field
+    # Native Sequential Numbering Field (within chapter)
     field_run = p.add_run()
     fldSimple = create_element('w:fldSimple')
-    create_attribute(fldSimple, 'w:instr', f' SEQ {label_text} \\* ARABIC ')
+    # Use different SEQ identifiers for figures and tables
+    seq_id = "EQUATION" if "Equation" in label_text else ("FIGURE" if "Figure" in label_text else "TABLE")
+    create_attribute(fldSimple, 'w:instr', f' SEQ {seq_id} \\* ARABIC \\s 1 ')
     field_run._r.append(fldSimple)
     
-    # Separator and Title
-    run2 = p.add_run(f". {clean_caption}")
-    run2.font.name = 'Times New Roman'
+    # Title
+    run2 = p.add_run()
+    if clean_caption:
+        run2.text += f": {clean_caption}"
+    if chapter_title:
+        run2.text += f" (Chapter {chapter_num} – {chapter_title})"
+    run2.font.name = 'Arial'
     run2.font.size = Pt(11)
     run2.bold = True
 
@@ -149,30 +189,29 @@ def add_native_equation(paragraph, latex):
         return True
     return False
 
-def add_formatted_text(p, text):
+def add_formatted_text(p, text, doc=None, chapter_num="1", chapter_title=""):
     # Case 1: Standalone Equation Block
     if text.strip().startswith('$$') and text.strip().endswith('$$'):
         latex = text.strip()[2:-2].strip()
         if add_native_equation(p, latex):
+            if doc:
+                add_caption(doc, "Equation", "", chapter_num=chapter_num, chapter_title=chapter_title)
             return
 
     # Case 2: Mixed Text and Inline Math ($ symbol)
-    # This ensures "bold vectors" and "norms" in the "Where" section look like math, not typed text.
     parts = re.split(r'(\$.*?\$|\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)', text)
     for part in parts:
         if not part: continue
         
-        # Inline Math Processor
         if part.startswith('$') and part.endswith('$'):
             latex = part[1:-1].strip()
             if not add_native_equation(p, latex):
-                # Fallback to bolded/italicized if OMML fails
                 run = p.add_run(latex)
                 run.bold = True; run.italic = True
             continue
 
         run = p.add_run()
-        run.font.name = 'Times New Roman'
+        run.font.name = 'Arial'
         run.font.size = Pt(12)
         if part.startswith('***') and part.endswith('***'):
             run.text = part[3:-3]; run.bold = True; run.italic = True
@@ -183,9 +222,56 @@ def add_formatted_text(p, text):
         else:
             run.text = part
 
+def set_academic_styles(doc):
+    """Sets Arial 12pt, 1.5 spacing, and justified alignment globally."""
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Arial'
+    font.size = Pt(12)
+    
+    paragraph_format = style.paragraph_format
+    paragraph_format.line_spacing = 1.5
+    paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    paragraph_format.space_after = Pt(0)
+    paragraph_format.space_before = Pt(0)
+
+def set_page_setup(doc):
+    """Configures A4, 3.5cm inner margin, 2.0cm others, and Odd/Even paging."""
+    section = doc.sections[0]
+    section.page_height = Cm(29.7)
+    section.page_width = Cm(21.0)
+    
+    # User requested: Inner 3.5cm, others 2.0cm
+    section.left_margin = Cm(3.5)
+    section.right_margin = Cm(2.0)
+    section.top_margin = Cm(2.0)
+    section.bottom_margin = Cm(2.0)
+    
+    # Disable odd/even to ensure a single, consistent footer and prevent duplicates
+    doc.settings.odd_and_even_pages_header_footer = False
+
+def add_academic_footer(section):
+    """Adds a single centered page number at the bottom of the page."""
+    section.footer.is_linked_to_previous = False
+
+    # Center-aligned footer
+    footer = section.footer
+    if not footer.paragraphs: footer.add_paragraph()
+    p = footer.paragraphs[0]
+    p.clear()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run()
+    run.font.name = 'Arial'
+    run.font.size = Pt(12)
+    add_field(run, "PAGE")
+
 def convert_to_professional_docx(md_path, docx_path):
     print(f"Generating Diamond-Standard Document: {md_path} -> {docx_path}")
     doc = Document()
+    set_academic_styles(doc)
+    set_page_setup(doc)
+    add_academic_footer(doc.sections[0])
+    
     force_field_update(doc)
     set_toc_styles(doc)
 
@@ -193,124 +279,130 @@ def convert_to_professional_docx(md_path, docx_path):
 
     with open(md_path, 'r', encoding='utf-8') as f: lines = f.readlines()
 
-    # Pass 1: Extract Title, Executive Summary, Abstract, and Acknowledgments
     title = next((l.lstrip('#').strip() for l in lines if l.startswith('#')), "Academic Document")
-    exec_summary = []
-    abstract_content = []
-    ack_content = []
     
-    current_section = None
-    body_lines = []
-    
-    for line in lines:
-        if "## Executive Summary" in line:
-            current_section = "exec_summary"
-            continue
-        if "## Abstract" in line or "### Abstract" in line:
-            current_section = "abstract"
-            continue
-        if "## Acknowledgments" in line:
-            current_section = "acknowledgments"
-            continue
-        if current_section and line.startswith('---'):
-            current_section = None
-            continue
-        
-        if current_section == "exec_summary":
-            exec_summary.append(line.strip())
-        elif current_section == "abstract":
-            abstract_content.append(line.strip())
-        elif current_section == "acknowledgments":
-            ack_content.append(line.strip())
-        else:
-            body_lines.append(line)
-
-    # 1. Title Page (Excluded from TOC)
+    # 1. Title Page (Unnumbered)
     doc.add_heading(title, 0)
+    doc.sections[0].footer.is_linked_to_previous = False
+    doc.add_page_break()
+    
+    # 2. Blank Page (Unnumbered)
+    doc.add_paragraph(" ")
     doc.add_page_break()
 
-    # 2. Executive Summary (Manual formatting to avoid TOC)
-    if exec_summary:
-        p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run = p.add_run("Executive Summary")
-        run.bold = True; run.font.size = Pt(14)
-        
-        for p_text in exec_summary:
-            if not p_text.strip(): continue
-            sp = doc.add_paragraph()
-            # Handle headers inside the summary
-            if p_text.startswith('###'):
-                run = sp.add_run(p_text.lstrip('#').strip())
-                run.bold = True
-            elif p_text.startswith('*'):
-                sp.style = 'List Bullet'
-                add_formatted_text(sp, p_text.lstrip('*').strip())
-            else:
-                sp.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-                add_formatted_text(sp, p_text)
-        doc.add_page_break()
+    # 3. Table of Contents Section
+    toc_section = doc.add_section(WD_SECTION.NEW_PAGE)
+    add_academic_footer(toc_section)
+    
+    # TOC Header
+    p = doc.add_heading("Table of Contents", level=1)
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
+    # Inject TOC Field
+    p_toc = doc.add_paragraph()
+    run_toc = p_toc.add_run()
+    fldChar1 = create_element('w:fldChar'); create_attribute(fldChar1, 'w:fldCharType', 'begin')
+    instrText = create_element('w:instrText'); create_attribute(instrText, 'xml:space', 'preserve')
+    instrText.text = ' TOC \\o "1-3" \\h \\z \\u '
+    fldChar2 = create_element('w:fldChar'); create_attribute(fldChar2, 'w:fldCharType', 'separate')
+    fldChar3 = create_element('w:fldChar'); create_attribute(fldChar3, 'w:fldCharType', 'end')
+    run_toc._r.append(fldChar1); run_toc._r.append(instrText); run_toc._r.append(fldChar2); run_toc._r.append(fldChar3)
+    # Front matter list of figures / tables is removed from here
+    # It will now be generated dynamically whenever their respective ## heading is encountered
 
-    # 3. Abstract (Manual formatting to avoid TOC)
-    if abstract_content:
-        p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run = p.add_run("Abstract")
-        run.bold = True; run.font.size = Pt(14)
-        
-        for p_text in abstract_content:
-            if not p_text.strip(): continue
-            ap = doc.add_paragraph()
-            ap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-            add_formatted_text(ap, p_text)
-        doc.add_page_break()
-
-    # 3. Acknowledgments (Manual formatting to avoid TOC)
-    if ack_content:
-        p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run = p.add_run("Acknowledgments")
-        run.bold = True; run.font.size = Pt(14)
-        
-        for p_text in ack_content:
-            if not p_text.strip(): continue
-            acp = doc.add_paragraph()
-            acp.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-            add_formatted_text(acp, p_text)
-        doc.add_page_break()
-
-    # 4. Tables/Figures/TOC
-    doc.add_heading("List of Figures", level=1); add_field(doc.add_paragraph().add_run(), 'TOC \\c "Figure" \\h \\z \\u')
-    doc.add_page_break()
-    doc.add_heading("List of Tables", level=1); add_field(doc.add_paragraph().add_run(), 'TOC \\c "Table" \\h \\z \\u')
-    doc.add_page_break()
-    doc.add_heading("Table of Contents", level=1); add_field(doc.add_paragraph().add_run(), 'TOC \\o "1-3" \\h \\z \\u')
-    doc.add_page_break()
-
-    add_page_number_footer(doc)
-
-    # Main Body
+    # Main Body Processing
     i = 0
-    while i < len(body_lines):
-        line = body_lines[i].strip()
-        if not line: i += 1; continue
+    current_chapter = "1"
+    current_chapter_title = ""
+    while i < len(lines):
+        line = lines[i].strip()
+        if not line or line.startswith('# ') or line == '---' or line == '***': i += 1; continue
         
-        if line.startswith('#'):
-            level = len(line) - len(line.lstrip('#'))
-            # Skip the main title in body if it was already on title page
-            if level == 1 and title in line: i += 1; continue
-            doc.add_heading(line.lstrip('#').strip(), level=min(level, 3))
-            i += 1; continue
+        # Chapter start logic (Odd Page)
+        if line.startswith('## '):
+            level = 2
+            # Roman numeral extraction for chapter numbering
+            m = re.match(r'## ([IVXLCDM]+)\.', line)
+            if m:
+                current_chapter = m.group(1)
+            else:
+                # If no roman numeral, maybe try Arabic if the intro or something
+                m_num = re.match(r'## (\d+)\.', line)
+                if m_num: current_chapter = m_num.group(1)
             
+            # Extract Chapter Name: everything after "## X. "
+            title = line.lstrip('#').strip()
+            # Determine if chapter should have number
+            is_chapter = False
+            if title.startswith('Appendix') or (title[0].isdigit() and title[1] == '.'):
+                is_chapter = True
+                current_chapter_title = re.sub(r'^(\d+\.|Appendix [A-Z]:)\s*', '', title)
+                if title.startswith('Appendix'): current_chapter = title.split(':')[0].strip()
+                else: current_chapter = title.split('.')[0].strip()
+                
+            # Formatting and spacing for chapters
+            if is_chapter:
+                new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+                add_academic_footer(new_section)
+                p = doc.add_heading(title, 1)
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            else:
+                p = doc.add_heading(title, 1)
+                if title in ["List of Figures", "List of Tables"]: 
+                    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                else: 
+                    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            
+            p.paragraph_format.space_before = Pt(24)
+            p.paragraph_format.space_after = Pt(12)
+            
+            # Dynamic generation of LOF/LOT fields
+            if title == "List of Figures":
+                p_lof = doc.add_paragraph()
+                run_lof = p_lof.add_run()
+                fldChar1 = create_element('w:fldChar'); create_attribute(fldChar1, 'w:fldCharType', 'begin')
+                instrText = create_element('w:instrText'); create_attribute(instrText, 'xml:space', 'preserve')
+                instrText.text = ' TOC \\h \\z \\t "Caption" \\c "FIGURE" '
+                fldChar2 = create_element('w:fldChar'); create_attribute(fldChar2, 'w:fldCharType', 'separate')
+                fldChar3 = create_element('w:fldChar'); create_attribute(fldChar3, 'w:fldCharType', 'end')
+                run_lof._r.append(fldChar1); run_lof._r.append(instrText); run_lof._r.append(fldChar2); run_lof._r.append(fldChar3)
+                
+            elif title == "List of Tables":
+                p_lot = doc.add_paragraph()
+                run_lot = p_lot.add_run()
+                fldChar1 = create_element('w:fldChar'); create_attribute(fldChar1, 'w:fldCharType', 'begin')
+                instrText = create_element('w:instrText'); create_attribute(instrText, 'xml:space', 'preserve')
+                instrText.text = ' TOC \\h \\z \\t "Caption" \\c "TABLE" '
+                fldChar2 = create_element('w:fldChar'); create_attribute(fldChar2, 'w:fldCharType', 'separate')
+                fldChar3 = create_element('w:fldChar'); create_attribute(fldChar3, 'w:fldCharType', 'end')
+                run_lot._r.append(fldChar1); run_lot._r.append(instrText); run_lot._r.append(fldChar2); run_lot._r.append(fldChar3)
+                
+            i += 1
+            continue
+
+        if line.startswith('### '):
+            doc.add_heading(line.lstrip('#').strip(), level=3)
+            i += 1; continue
+
+        if line.startswith('#### '):
+            # Map level 4 headers to a bold Normal style to avoid 4444 numbering
+            p = doc.add_paragraph(line.lstrip('#').strip(), style='Normal')
+            p.runs[0].bold = True
+            i += 1; continue
+
+        # Table processing
         if line.startswith('|') or line.startswith('**Table'):
             table_caption = ""
             if line.startswith('**Table'):
                 table_caption = line.strip('*').strip()
-                i += 1; line = body_lines[i].strip() if i < len(body_lines) else ""
+                i += 1; line = lines[i].strip() if i < len(lines) else ""
+            
+            # Caption ABOVE table
+            if table_caption: add_caption(doc, "Table", table_caption, chapter_num=current_chapter, chapter_title=current_chapter_title)
             
             data = []
-            while i < len(body_lines) and body_lines[i].strip().startswith('|'):
-                l = body_lines[i].strip()
+            while i < len(lines) and lines[i].strip().startswith('|'):
+                l = lines[i].strip()
                 if '---' in l: i += 1; continue
                 cols = [c.strip() for c in l.split('|') if c.strip()]
                 if cols: data.append(cols)
@@ -318,31 +410,59 @@ def convert_to_professional_docx(md_path, docx_path):
             if data:
                 table = doc.add_table(rows=len(data), cols=len(data[0])); table.style = 'Table Grid'
                 for r, rd in enumerate(data):
-                    for c, val in enumerate(rd): add_formatted_text(table.rows[r].cells[c].paragraphs[0], val)
-                if table_caption: add_caption(doc, "Table", table_caption)
+                    for c, val in enumerate(rd): add_formatted_text(table.rows[r].cells[c].paragraphs[0], val, doc=doc, chapter_num=current_chapter, chapter_title=current_chapter_title)
             continue
             
+        # Figure processing
         if line.startswith('!['):
             m = re.search(r'!\[(.*?)\]\((.*?)\)', line)
             if m:
                 alt, p_path = m.groups()
                 full_path = os.path.normpath(os.path.join(os.path.dirname(md_path), p_path))
                 if os.path.exists(full_path):
-                    # Set width to 6.5 inches for full-page professional density
-                    doc.add_picture(full_path, width=Inches(6.5))
-                    caption_line = body_lines[i+1].strip().strip('*') if i + 1 < len(body_lines) and "Figure" in body_lines[i+1] else alt
-                    if i + 1 < len(body_lines) and "Figure" in body_lines[i+1]: i += 1
-                    add_caption(doc, "Figure", caption_line)
+                    p_img = doc.add_paragraph()
+                    p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    p_img.paragraph_format.space_before = Pt(0)
+                    p_img.paragraph_format.space_after = Pt(0)
+                    run_img = p_img.add_run()
+                    run_img.add_picture(full_path, width=Inches(6.0))
+                    caption_line = lines[i+1].strip().strip('*') if i + 1 < len(lines) and "Figure" in lines[i+1] else alt
+                    if i + 1 < len(lines) and "Figure" in lines[i+1]: i += 1
+                    # Caption BELOW figure
+                    add_caption(doc, "Figure", caption_line, chapter_num=current_chapter, chapter_title=current_chapter_title)
             i += 1; continue
             
-        if line.startswith('- ') or line.startswith('* '):
-            p = doc.add_paragraph(style='List Bullet'); add_formatted_text(p, line[2:].strip()); i += 1; continue
+        # Code block processing
+        if line.startswith('```'):
+            lang = line.replace('```', '').strip() or 'python'
+            code_lines = []
+            i += 1
+            while i < len(lines) and not lines[i].strip().startswith('```'):
+                code_lines.append(lines[i])
+                i += 1
+            i += 1 # skip ending ```
             
-        p = doc.add_paragraph(); p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY; add_formatted_text(p, line); i += 1
+            # Syntax Highlighting
+            add_highlighted_code(doc, "".join(code_lines), lang=lang)
+            
+            # Check for description below
+            if i < len(lines) and lines[i].strip().startswith('**Code'):
+                code_desc = lines[i].strip().strip('*')
+                cp = doc.add_paragraph()
+                cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                run_desc = cp.add_run(code_desc)
+                run_desc.italic = True; run_desc.font.size = Pt(10)
+                i += 1
+            continue
+
+        if line.startswith('- ') or line.startswith('* '):
+            p = doc.add_paragraph(style='List Bullet'); add_formatted_text(p, line[2:].strip(), doc=doc, chapter_num=current_chapter, chapter_title=current_chapter_title); i += 1; continue
+            
+        p = doc.add_paragraph(); p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY; add_formatted_text(p, line, doc=doc, chapter_num=current_chapter, chapter_title=current_chapter_title); i += 1
 
     doc.save(docx_path)
     print(f"Professional Success: {docx_path}")
 
 if __name__ == "__main__":
-    convert_to_professional_docx('Deliverable/thesis/source/thesis.md', 'Deliverable/thesis/thesis.docx')
-    convert_to_professional_docx('Deliverable/paper/source/paper.md', 'Deliverable/paper/paper.docx')
+    convert_to_professional_docx('Final/thesis/source/thesis.md', 'Final/thesis/Thesis.docx')
+    convert_to_professional_docx('Final/paper/source/paper.md', 'Final/paper/paper.docx')

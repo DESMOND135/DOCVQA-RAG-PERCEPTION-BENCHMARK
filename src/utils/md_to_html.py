@@ -7,57 +7,124 @@ def convert_to_html(md_path, html_path):
     with open(md_path, 'r', encoding='utf-8') as f:
         md_text = f.read()
     
-    # Simple CSS for academic look
     css = """
     <style>
-        body { font-family: 'Times New Roman', Times, serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }
-        h1, h2, h3 { color: #1e3a8a; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: Consolas, monospace; }
-        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: Consolas, monospace; }
-        img { max-width: 100%; height: auto; display: block; margin: 20px auto; border: 1px solid #ddd; }
+        @page {
+            size: A4;
+            margin: 2.0cm;
+        }
+        @page :left {
+            margin-left: 2.0cm;
+            margin-right: 3.5cm;
+        }
+        @page :right {
+            margin-left: 3.5cm;
+            margin-right: 2.0cm;
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 12pt;
+            line-height: 1.5; 
+            margin: 0;
+            color: #000; 
+            text-align: justify;
+        }
+        .content {
+            padding: 0;
+            counter-reset: page 1;
+        }
+        
+        /* Chapters on ODD pages */
+        .chapter-start {
+             break-before: right;
+             page-break-before: right;
+        }
+        
+        h1 { font-size: 18pt; margin-top: 50px; text-align: center; break-before: right; }
+        h2 { font-size: 14pt; margin-top: 40px; border-bottom: 2px solid #000; padding-bottom: 10px; break-before: right; }
+        h3 { font-size: 12pt; font-weight: bold; margin-top: 30px; }
+        
+        pre, code { font-family: 'Courier New', Courier, monospace; font-size: 10pt; }
+        .code-desc { font-style: italic; font-size: 10pt; text-align: center; margin-top: 5px; }
+        
+        img { max-width: 100%; height: auto; display: block; margin: 20px auto; }
+        .fig-caption { font-size: 11pt; font-weight: bold; text-align: center; margin-top: 5px; }
+        
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: #f8fafc; color: #1e3a8a; }
-        .title-page { text-align: center; margin-bottom: 100px; padding-top: 100px; }
-        .title { font-size: 2.5em; font-weight: bold; margin-bottom: 20px; }
-        .subtitle { font-size: 1.5em; color: #666; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+        th { background: #eee; }
+        .table-caption { font-size: 11pt; font-weight: bold; margin-bottom: 5px; }
+
+        .title-page { 
+            text-align: center; 
+            padding-top: 150px; 
+            page-break-after: always;
+            break-after: always;
+        }
+        
+        /* Footer Paging Setup (Simulated for Browser/Print) */
+        @page {
+            @bottom-left {
+                content: counter(page);
+                font-family: "Times New Roman", Times, serif;
+                font-size: 12pt;
+            }
+            @bottom-right {
+                content: counter(page);
+                font-family: "Times New Roman", Times, serif;
+                font-size: 12pt;
+            }
+        }
+        
+        /* CSS for screen viewing simulating the paging */
+        .page-num-odd { text-align: right; font-family: "Times New Roman", serif; font-size: 12pt; margin-top: 20px; border-top: 1px solid #ddd; }
+        .page-num-even { text-align: left; font-family: "Times New Roman", serif; font-size: 12pt; margin-top: 20px; border-top: 1px solid #ddd; }
     </style>
     """
     
-    # Handle local image paths in HTML
-    # MD: ![alt](path) -> HTML: <img src="path" alt="alt">
-    # We need to make sure the relative paths in HTML work if the HTML is in Gold_Submission.
-    # The MD files are in thesis/ or paper/ folder. External images are usually relative to them.
+    # Standardize image paths
+    md_text = md_text.replace('../../../results/', '../results/')
+    md_text = md_text.replace('../../../data/', '../data/')
     
-    html_content = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
+    html_content = markdown.markdown(md_text, extensions=['tables', 'fenced_code', 'toc', 'attr_list'])
     
-    # Basic front matter extraction
-    title = "Academic Document"
-    match = re.search(r'^#\s+(.*)', md_text, re.MULTILINE)
-    if match:
-        title = match.group(1)
-        
+    # Inject Specific Structural classes for Chapters
+    chapter_titles = ["Introduction", "Literature Review", "Methodology", "Evaluation", "Experimental Results", "Conclusion", "References", "Table of Contents"]
+    for title_name in chapter_titles:
+        html_content = html_content.replace(f'<h2>{title_name}</h2>', f'<h2 class="chapter-start">{title_name}</h2>')
+        # Roman numerals chapters
+        html_content = re.sub(r'<h2>([IVXLCDM]+\..*?)</h2>', r'<h2 class="chapter-start">\1</h2>', html_content)
+
+    # Table/Code placement fixes (Captions)
+    # Markdown tables often have text above/below.
+    # We will wrap them in containers if needed, but for now, the CSS handle the spacing.
+
     full_html = f"""<!DOCTYPE html>
 <html>
 <head>
-    <title>{title}</title>
+    <title>Master's Thesis</title>
     {css}
 </head>
 <body>
     <div class="title-page">
-        <div class="title">{title}</div>
-        <div class="subtitle">Master's Final Submission<br>Academic Year 2025-2026</div>
+        <h1 style="break-before: avoid;">Master's Thesis</h1>
+        <p>Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents</p>
+        <br><br>
+        <p>Department of Information Technology</p>
     </div>
-    {html_content}
+    <div class="content">
+        {html_content}
+    </div>
 </body>
 </html>
 """
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(full_html)
     
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(full_html)
     print(f"HTML Success: {html_path}")
 
 if __name__ == "__main__":
-    os.makedirs('Gold_Submission', exist_ok=True)
-    convert_to_html('thesis/thesis.md', 'Gold_Submission/Thesis_Viewable.html')
-    convert_to_html('paper/paper.md', 'Gold_Submission/Paper_Viewable.html')
+    convert_to_html('deliverables/paper/thesis.md', 'deliverables/paper/Thesis_Viewable.html')
+    convert_to_html('deliverables/paper/paper.md', 'deliverables/paper/Paper_Viewable.html')

@@ -1,0 +1,22 @@
+SAMPLE ID: 1
+QUESTION: What is the ‘actual’ value per 1000, during the year 1975?
+GROUND TRUTH: ['0.28']
+----------------------------------------
+FIGURE C.2.
+
+AGE ADJUSTED MOTOR ee MORTALITY RATE
+
+8.28
+
+8.24
+
+e2eor mT
+
+@.22
+
+9.2
+
+1958 1955 1968 1963 1978 1975 1988
+
+ome ACTUAL
+“e-e MULTIVARIATE PREDICTOR

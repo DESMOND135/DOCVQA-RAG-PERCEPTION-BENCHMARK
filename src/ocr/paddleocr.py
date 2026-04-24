@@ -30,10 +30,10 @@ class PaddleOCRModule:
             raise OCRError(f"PaddleOCR setup error: {str(e)}", sys)
 
     def extract_text(self, image_input):
-        """Extract text from an image using PaddleOCR."""
+        """Extract text from an image using PaddleOCR with strict robust parsing."""
         start_time = time.time()
         try:
-            # Load and Resize for stability
+            # 1. Image preparation
             if isinstance(image_input, str):
                 img = Image.open(image_input).convert('RGB')
             elif isinstance(image_input, Image.Image):
@@ -41,76 +41,79 @@ class PaddleOCRModule:
             else:
                 img = Image.fromarray(image_input).convert('RGB')
 
-            # Dynamic resizing: prevents OOM on large DocVQA images
             max_dim = 800
             if max(img.size) > max_dim:
                 scale = max_dim / float(max(img.size))
-                new_size = (int(img.size[0] * scale), int(img.size[1] * scale))
-                img = img.resize(new_size, Image.Resampling.LANCZOS)
-                logger.info(f"Resized image for PaddleOCR stability: {new_size}")
+                img = img.resize((int(img.size[0] * scale), int(img.size[1] * scale)), Image.Resampling.LANCZOS)
 
             img_arr = np.array(img)
-
-            if hasattr(image_input, 'tobytes'):
-                img_hash = hash(image_input.tobytes())
-            elif isinstance(img_arr, np.ndarray):
-                img_hash = hash(img_arr.tobytes())
-            else:
-                img_hash = hash(str(image_input))
-                
-            if not hasattr(self.__class__, '_cache'):
-                self.__class__._cache = {}
-                
-            if img_hash in self.__class__._cache:
-                logger.info("Retrieved PaddleOCR result from cache.")
-                cached_res = self.__class__._cache[img_hash]
-                return {
-                    "text": cached_res,
-                    "latency": 0.0,
-                    "provider": "PaddleOCR (Cached)"
-                }
-
-            # Run OCR
+            
+            # 2. OCR Execution
             result = self.ocr.ocr(img_arr)
             
-            # Extract structured data: text, bounding boxes, and confidence
+            # 3. Robust Extraction (User Requested Safe Logic)
             detections = []
-            if result:
-                for line in result:
-                    if line:
-                        for res in line:
-                            bbox = res[0] # List of [x,y] points
-                            text_content = res[1][0]
-                            confidence = res[1][1]
-                            
-                            # Convert bbox to simple [xmin, ymin, xmax, ymax] normalized
+            text = ""
+            
+            # CRITICAL: Safe check for empty results to prevent IndexError on result[0]
+            if not result or len(result) == 0 or not result[0]:
+                logger.warning("[OCR WARNING] Empty or malformed PaddleOCR result")
+                return {
+                    "detections": [],
+                    "text": "",
+                    "latency": time.time() - start_time,
+                    "provider": "PaddleOCR (Empty)"
+                }
+
+            try:
+                # PaddleOCR for single image returns [[ [box, (text, conf)], ... ]]
+                # Safely access the first (only) image's results
+                raw_detections = result[0]
+                
+                # USER REQUESTED SNIPPET
+                try:
+                    text = " ".join(
+                        [str(line[1][0]) for line in raw_detections if isinstance(line, (list, tuple)) and len(line) > 1 and isinstance(line[1], (list, tuple)) and len(line[1]) > 0]
+                    )
+                except Exception:
+                    text = ""
+                    logger.warning("[OCR WARNING] Failed during text line join")
+
+                # Structured detections for spatial RAG
+                for line in raw_detections:
+                    if isinstance(line, (list, tuple)) and len(line) > 1 and line[1] and isinstance(line[1], (list, tuple)) and len(line[1]) > 1:
+                        bbox = line[0]
+                        if bbox and len(bbox) >= 1:
                             x_coords = [p[0] for p in bbox]
                             y_coords = [p[1] for p in bbox]
-                            
-                            norm_bbox = [
-                                round(min(x_coords) / img.size[0], 4),
-                                round(min(y_coords) / img.size[1], 4),
-                                round(max(x_coords) / img.size[0], 4),
-                                round(max(y_coords) / img.size[1], 4)
-                            ]
-                            
                             detections.append({
-                                "text": text_content,
-                                "bbox": norm_bbox,
-                                "confidence": float(confidence)
+                                "text": str(line[1][0]),
+                                "bbox": [
+                                    round(min(x_coords) / img.size[0], 4),
+                                    round(min(y_coords) / img.size[1], 4),
+                                    round(max(x_coords) / img.size[0], 4),
+                                    round(max(y_coords) / img.size[1], 4)
+                                ],
+                                "confidence": float(line[1][1])
                             })
+            except Exception as e:
+                logger.warning(f"[OCR WARNING] Non-fatal parsing error: {str(e)}")
             
             latency = time.time() - start_time
-            logger.info(f"PaddleOCR completed in {latency:.2f}s with {len(detections)} detections.")
-            
-            self.__class__._cache[img_hash] = detections
+            logger.info(f"PaddleOCR process complete. Valid detections: {len(detections)}. Latency: {latency:.2f}s")
             
             return {
                 "detections": detections,
-                "text": " ".join([d["text"] for d in detections]),
+                "text": text,
                 "latency": latency,
                 "provider": "PaddleOCR"
             }
+            
         except Exception as e:
-            logger.error(f"PaddleOCR process failed: {str(e)}")
-            raise OCRError(f"PaddleOCR error: {str(e)}", sys)
+            logger.error(f"Critical PaddleOCR failure: {str(e)}")
+            return {
+                "detections": [],
+                "text": "",
+                "latency": time.time() - start_time,
+                "provider": "PaddleOCR (Critical Fallback)"
+            }

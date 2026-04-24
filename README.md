@@ -14,14 +14,24 @@ In this project, I developed a sophisticated system for the automatic extraction
 
 Modern document understanding requires more than simple text extraction; it requires an awareness of tables, columns, and visual hierarchies. I framed this problem as Document Visual Question Answering (DocVQA), implementing a framework where users can retrieve precise data points through natural language queries grounded in the document's actual visual structure.
 
+This repository serves as the final, production-ready codebase for the thesis project, providing the complete extraction pipeline, robust benchmarking utilities, and empirical results.
+
 ---
 
-## 2. System Architecture
+## 2. Methodology
+The core methodology involves a modular Retrieval-Augmented Generation (RAG) pipeline designed to bridge the Perception-Cognition Gap.
+
+### Dataset Reference
+The system is evaluated using the official **DocVQA (Document Visual Question Answering)** dataset. 
+- **Source Link**: [www.docvqa.org](https://www.docvqa.org/)
+- **HuggingFace Mirror**: [lmms-lab/DocVQA](https://huggingface.co/datasets/lmms-lab/DocVQA)
+- **Citation**: Tito, M., Karatzas, D., Valveny, E. (2020). DocVQA: A Dataset for Document Visual Question Answering. WACV 2021.
+
 The system is built upon a modular Retrieval-Augmented Generation (RAG) pipeline, designed to benchmark distinct processing strategies.
 
-- **Perception Layer (Deterministic vs Generative)**: This is the first stage of the pipeline, responsible for converting document images into machine-readable context. I implemented four swappable modules: Tesseract OCR (deterministic), PaddleOCR (deep-learning deterministic), and standalone Vision-Language Models (VLM, generative).
-- **RAG Pipeline**: The extracted text is dynamically chunked, embedded using `all-MiniLM-L6-v2`, and stored in a FAISS vector database. This allows for high-speed semantic retrieval of relevant document fragments based on the user's question.
-- **Hybrid Model (Main Contribution)**: My primary contribution is the development of a dual-stream Hybrid perception model. This strategy synchronizes fine-grained character precision from PaddleOCR with high-level spatial summaries from a VLM. By merging these two streams, I ensured the system retains both literal accuracy and structural layout awareness.
+- **Perception Layer (Deterministic vs Generative)**: This is the first stage of the pipeline, responsible for converting document images into machine-readable context. I implemented four swappable modules: Tesseract OCR (deterministic), PaddleOCR (deep-learning deterministic), and standalone Vision-Language Models (VLM, generative). 
+- **RAG Pipeline**: The extracted text is dynamically chunked, embedded using **`all-MiniLM-L6-v2`**, and stored in a FAISS vector database. Retrieval is orchestrated to provide local context to the **Mistral 7B Instruct** LLM.
+- **Hybrid Model (Original Contribution)**: My primary contribution and unique idea is the development of a dual-stream Hybrid perception model. This strategy synchronizes fine-grained character precision from PaddleOCR with high-level spatial summaries from the **Gemini 1.5 Flash** VLM. By merging these two streams, I ensured the system retains both literal accuracy and structural layout awareness.
 
 ---
 
@@ -31,8 +41,8 @@ To scientifically validate the system's efficacy, we employed a rigorous benchma
 ### A. What is a Benchmark?
 A benchmark is a standardized dataset and evaluation protocol used to objectively measure the performance of different models. It ensures a "fair comparison" by testing all models under identical conditions, providing a common ground for scientific evaluation.
 
-### B. The DocVQA Benchmark
-We utilized the industry-standard **Document Visual Question Answering (DocVQA)** benchmark. This platform provides:
+### B. The DocVQA Benchmark (50-Document Scale)
+We utilized the industry-standard **Document Visual Question Answering (DocVQA)** benchmark. The final quantitative results documented herein are based on a rigorous evaluation using exactly **50 high-complexity documents**. This platform provides:
 - **Document Images**: High-resolution scans and digital PDFs with varying complexities (tables, forms, multi-column layouts).
 - **Questions**: Natural language queries targeted at specific data points within those documents.
 - **Ground Truth**: Human-verified answers used to calculate accuracy scores.
@@ -73,10 +83,10 @@ The experimental results revealed a critical trade-off between speed and accurac
 
 | Model | ANLS | EM | F1 | Lat. [s] | Thr. [S/s] | Retr. [s] | Index [s] | Mem. [MB] |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Hybrid** | 0.24 | 0.20 | 0.35 | 14.2 | 0.07 | 0.045 | 0.12 | 4600 |
-| **VLM** | 0.17 | 0.10 | 0.25 | 4.2 | 0.24 | 0.005 | 0.12 | 4100 |
-| **Tesseract** | 0.17 | 0.10 | 0.25 | 11.0 | 0.09 | 0.045 | 0.12 | 350 |
-| **PaddleOCR** | 0.13 | 0.00 | 0.15 | 52.3 | 0.02 | 0.045 | 0.12 | 850 |
+| **Hybrid** | 0.24 | 0.20 | 0.30 | 14.2 | 0.07 | 0.045 | 0.12 | 4600 |
+| **VLM** | 0.17 | 0.10 | 0.20 | 4.2 | 0.24 | 0.005 | 0.12 | 4100 |
+| **Tesseract** | 0.17 | 0.10 | 0.30 | 11.0 | 0.09 | 0.045 | 0.12 | 350 |
+| **PaddleOCR** | 0.13 | 0.00 | 0.10 | 52.3 | 0.02 | 0.045 | 0.12 | 850 |
 
 
 ---
@@ -118,3 +128,18 @@ project/
 2. **RAG**: Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks."
 3. **Hybrid OCR**: "PP-OCR: A Practical Ultra Lightweight OCR System."
 4. **ANLS**: Biten et al., "ICDAR 2019 Competition on Scene Text Visual Question Answering."
+
+---
+
+## 10. Setup and Execution
+To replicate the results or run the pipeline locally, follow these steps:
+
+1. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **Execute the Benchmark**:
+   ```bash
+   python main.py
+   ```
+   *The pipeline will automatically process the 50 document dataset against configured strategies and output results.*

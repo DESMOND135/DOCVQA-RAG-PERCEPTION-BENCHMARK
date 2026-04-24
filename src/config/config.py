@@ -12,7 +12,8 @@ CONFIG = {
     
     # Dataset settings
     "dataset_name": os.getenv("DATASET_NAME", "VLR-CVC/DocVQA-2026"),
-    "sample_size": int(os.getenv("SAMPLE_SIZE", 2 if is_fast_mode else 10)),
+    "sample_size": int(os.getenv("SAMPLE_SIZE", 2 if is_fast_mode else 50)),
+
     
     # OCR settings
     "tesseract_cmd": os.getenv("TESSERACT_CMD", r"C:\Program Files\Tesseract-OCR\tesseract.exe"),

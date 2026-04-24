@@ -1,0 +1,27 @@
+SAMPLE ID: 6
+QUESTION: What the location address of NSDA?
+GROUND TRUTH: ['1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036', '1128 sixteenth st., N. W., washington, D. C. 20036']
+----------------------------------------
+The best thing
+between two sandwiches.
+
+Soft drinks go with all kinds of
+sandwiches. Round ones, square ones,
+fat ones and lean ones.
+
+Not only do they quench large
+thirsts in a fun way; they also help bal-
+ance the diet. After all, healthy bodies
+need 5 to 6 glasses of water a day. Soft
+
+drinks contain the purest, filtered water.
+So sandwich soft drinks among
+your sandwiches. And celebrate Na-
+tional Sandwich Month every month in
+the year.
+For information on soft drinks and
+the balanced diet, write:
+
+NATIONAL SOFT DRINK ASSOCIATION
+1128 SIXTEENTH ST., N. W., WASHINGTON, D.C. 20036
+

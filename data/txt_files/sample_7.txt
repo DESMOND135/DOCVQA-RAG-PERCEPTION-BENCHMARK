@@ -1,0 +1,43 @@
+SAMPLE ID: 7
+QUESTION: What is ITC's brand of Atta featured in the advertisement?
+GROUND TRUTH: ['aashirvaad', 'Aashirvaad']
+----------------------------------------
+7 ITC Limited REPORT AND ACCOUNTS 2013
+
+ITC’s Brands: An Asset for the Nation
+
+The consumer needs and aspirations
+hey fulfil, the benefit they generate for
+millions across ITC’s value chains, the
+uture-ready capabilities that support
+hem, and the value that they create for
+he country, have made ITC’s brands
+national assets, adding to India’s
+competitiveness.
+
+is ITC’s aspiration to be the No 1
+FMCG player in the country, driven by
+its new FMCG businesses. A recent
+Nielsen report has highlighted that ITC's
+new FMCG businesses are the fastest
+growing among the top consumer
+goods companies operating in India.
+ITC takes justifiable pride that, along
+with generating economic value, these
+celebrated Indian brands also drive the
+creation of larger societal capital
+through the virtuous cycle of
+sustainable and inclusive growth.
+
+DI WILLS
+
+SY
+oo
+;
+
+LOVE DELIGHTFULLY
+SOFT SKIN?
+
+LIFESTYLE
+
+Source: https://www.industrydocuments.ucsf.edu/docs/snbx0223

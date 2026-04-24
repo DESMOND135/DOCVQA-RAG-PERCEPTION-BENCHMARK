@@ -1,19 +1,42 @@
-import os
-os.environ['TF_USE_LEGACY_KERAS'] = '1'
-import pandas as pd
-import os
 import sys
+import os
+
+# FORCE UNBUFFERED STDOUT
+os.environ['PYTHONUNBUFFERED'] = '1'
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(line_buffering=True)
+
+print("\n" + "#"*60, flush=True)
+print(">>> [SYSTEM] STARTING EVALUATION BENCHMARK: main.py", flush=True)
+print(">>> [SYSTEM] INITIALIZING CORE COMPONENTS...", flush=True)
+print("#"*60 + "\n", flush=True)
+
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
 import time
 import shutil
+
+try:
+    from src.config.config import CONFIG
+    from src.logging.logger import get_logger
+except ImportError:
+    sys.path.append(os.getcwd())
+    from src.config.config import CONFIG
+    from src.logging.logger import get_logger
+
+logger = get_logger("main_evaluation")
+logger.info("SYSTEM READY. LOADING DATA ANALYTICS LOADERS...")
+sys.stdout.flush()
+
+print(">>> [INIT] Importing heavy ML dependencies... This may take a moment...", flush=True)
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
-from src.config.config import CONFIG
-from src.logging.logger import get_logger
 from src.pipeline.pipeline import DocVQAPipeline
 from src.exception.custom_exception import DataLoadingError
 
-logger = get_logger(__name__)
+logger.info(">>> [INIT] IMPORTS COMPLETE <<<")
+
 
 def clean_results_directory():
     """Wipes the results folder to ensure a clean, reproducible run."""

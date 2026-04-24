@@ -1,0 +1,6 @@
+SAMPLE ID: 4
+QUESTION: Where is the university located ?
+GROUND TRUTH: ['san diego', 'San Diego']
+----------------------------------------
+UNIVERSITY OP CALIBORNIS, SAN DIEGO
+

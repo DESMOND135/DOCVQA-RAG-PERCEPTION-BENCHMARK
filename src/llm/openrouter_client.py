@@ -85,13 +85,18 @@ class OpenRouterClient:
             }
             
             for attempt in range(max_retries):
-                logger.info(f"Executing OpenRouter API call (attempt {attempt + 1}/{max_retries})...")
+                logger.info(f"[STAGE: LLM] Executing OpenRouter API call (attempt {attempt + 1}/{max_retries})...")
+                sys.stdout.flush()
                 response = requests.post(self.url, headers=headers, data=json.dumps(payload))
                 
                 if response.status_code == 429:
                     logger.warning(f"Rate limit hit. Waiting {retry_delay}s before retry...")
+                    sys.stdout.flush()
                     time.sleep(retry_delay)
                     continue
+                
+                if response.status_code != 200:
+                    logger.error(f"OpenRouter API Error {response.status_code}: {response.text}")
                 
                 response.raise_for_status()
                 break
@@ -106,6 +111,7 @@ class OpenRouterClient:
             
             latency = time.time() - start_time
             logger.info(f"OpenRouter generate_answer completed in {latency:.2f}s")
+            sys.stdout.flush()
             
             return {
                 "answer": answer.strip(),

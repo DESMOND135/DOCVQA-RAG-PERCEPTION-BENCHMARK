@@ -1,0 +1,19 @@
+SAMPLE ID: 30
+QUESTION: What is the page no mentioned in this document?
+GROUND TRUTH: ['31']
+----------------------------------------
+7 prs as |
+
+TACO BELL
+4. 1993 FORECAST:
+¢ Analysts forecast significantly reduced growth
+¢ Slowed Expansion
+
+* Leveled off automation efficiencies
+
+¢ As competitor's joined the price war, Taco Bell’s strong consumer base
+decreased.
+
+Source: Investor's Business Daily
+
+THS6 9EETS 31

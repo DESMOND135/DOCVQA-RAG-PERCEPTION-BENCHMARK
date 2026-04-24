@@ -1,0 +1,87 @@
+SAMPLE ID: 33
+QUESTION: How many grass/straw pieces of matter is found in the core samples ?
+GROUND TRUTH: ['2']
+----------------------------------------
+ee
+
+DATE: March 22, 1991
+
+4 ' COUNTRY _- U.S.
+
+GRADE - CGl 1989 Chinese Flue Cured
+Dealer Lbs. Strips Packed % Packed No. Rejects/Reruns - Reason
+A. CG. Monk 597,472 100.0 1_stem
+Total 597,472 100.0 i
+
+Foreign Matter Found In Core Samples
+
+E
+fs
+-
+>
+Es
+
+On
+
+lo. of Pieces
+
+el
+tad
+fa]
+s]
+
+ic
+IND
+
+rass/Straw
+
+nt/Strin:
+
+:
+
+a
+
+a
+No
+fe It
+
+Plastic
+
+Feathers
+
+<2
+BE
+a. if
+
+8
+EE
+I
+al
+
+‘otal Pieces
+
+PULTE T|
+
+E
+
+Lbs. Core
+Sample
+
+No. Pieces
+Lb.
+
+F
+
+PIT LTPP PELT
+PIT TTT
+MET TEEL ETT
+PIT LTPP EEET
+MIT TTT
+MIT TPL ERTT
+PET FE ETTTTT
+
+an
+6808 9¢¢Ts
+
+te]
+

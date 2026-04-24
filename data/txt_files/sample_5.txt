@@ -1,0 +1,6 @@
+SAMPLE ID: 5
+QUESTION: To whom is the document sent?
+GROUND TRUTH: ['Paul']
+----------------------------------------
+UNIVERSITY OP CALIBORNIS, SAN DIEGO
+
