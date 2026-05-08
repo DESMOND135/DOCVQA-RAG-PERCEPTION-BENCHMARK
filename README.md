@@ -1,85 +1,62 @@
-# Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
+# Systems-Level Reliability and Robustness Evaluation Framework for Document AI
 
-## Supervisor:
+## Academic Thesis Project: Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
+
+### Supervisor:
 - Professor Piotr Duda
 - Czestochowa University of Technology
 
-## Student:
+### Student:
 - TIFANG DESMOND NGOE
 
 ---
 
-## 1. Project Description
-In this project, I developed a sophisticated system for the automatic extraction of information from complex PDF documents. The core objective was to bridge the **Perception-Cognition Gap**—the fundamental disconnect where Large Language Models (LLMs) possess advanced linguistic reasoning but remain "visually blind" to the spatial layout of document images. 
+## 1. Project Overview
+This repository contains the codebase, benchmarking utilities, and empirical evaluation framework for my Master's Thesis. The project introduces a comprehensive systems-level reliability and robustness benchmark for Document Visual Question Answering (DocVQA) architectures. The core objective is to investigate and bridge the **Perception-Cognition Gap**—the fundamental disconnect where Large Language Models (LLMs) possess advanced linguistic reasoning but remain "visually blind" to the complex spatial layouts of unstructured document images (e.g., dense financial tables, multi-column reports).
 
-Modern document understanding requires more than simple text extraction; it requires an awareness of tables, columns, and visual hierarchies. I framed this problem as Document Visual Question Answering (DocVQA), implementing a framework where users can retrieve precise data points through natural language queries grounded in the document's actual visual structure.
-
-This repository serves as the final, production-ready codebase for the thesis project, providing the complete extraction pipeline, robust benchmarking utilities, and empirical results.
+Rather than treating information extraction merely as a simple PDF parsing pipeline, this research frames the challenge as an architectural evaluation of reliability. It measures the precise trade-offs between deterministic text extraction and generative visual perception, culminating in a novel Hybrid synchronization strategy designed to mitigate systemic hallucinations in mission-critical applications.
 
 ---
 
-## 2. Methodology
-The core methodology involves a modular Retrieval-Augmented Generation (RAG) pipeline designed to bridge the Perception-Cognition Gap.
+## 2. Methodology & Architecture
+The system is built upon a modular Retrieval-Augmented Generation (RAG) pipeline, designed explicitly to isolate and benchmark distinct perception strategies while keeping downstream cognitive reasoning constant.
 
 ### Dataset Reference
-The system is evaluated using the official **DocVQA (Document Visual Question Answering)** dataset. 
+The system's robustness is rigorously evaluated using the official **DocVQA (Document Visual Question Answering)** dataset.
 - **Source Link**: [www.docvqa.org](https://www.docvqa.org/)
 - **HuggingFace Mirror**: [lmms-lab/DocVQA](https://huggingface.co/datasets/lmms-lab/DocVQA)
 - **Citation**: Tito, M., Karatzas, D., Valveny, E. (2020). DocVQA: A Dataset for Document Visual Question Answering. WACV 2021.
 
-The system is built upon a modular Retrieval-Augmented Generation (RAG) pipeline, designed to benchmark distinct processing strategies.
-
-- **Perception Layer (Deterministic vs Generative)**: This is the first stage of the pipeline, responsible for converting document images into machine-readable context. I implemented four swappable modules: Tesseract OCR (deterministic), PaddleOCR (deep-learning deterministic), and standalone Vision-Language Models (VLM, generative). 
-- **RAG Pipeline**: The extracted text is dynamically chunked, embedded using **`all-MiniLM-L6-v2`**, and stored in a FAISS vector database. Retrieval is orchestrated to provide local context to the **Mistral 7B Instruct** LLM.
-- **Hybrid Model (Original Contribution)**: My primary contribution and unique idea is the development of a dual-stream Hybrid perception model. This strategy synchronizes fine-grained character precision from PaddleOCR with high-level spatial summaries from the **Gemini 1.5 Flash** VLM. By merging these two streams, I ensured the system retains both literal accuracy and structural layout awareness.
-
----
-
-## 3. Benchmark and Evaluation Setup
-To scientifically validate the system's efficacy, we employed a rigorous benchmarking framework.
-
-### A. What is a Benchmark?
-A benchmark is a standardized dataset and evaluation protocol used to objectively measure the performance of different models. It ensures a "fair comparison" by testing all models under identical conditions, providing a common ground for scientific evaluation.
-
-### B. The DocVQA Benchmark (50-Document Scale)
-We utilized the industry-standard **Document Visual Question Answering (DocVQA)** benchmark. The final quantitative results documented herein are based on a rigorous evaluation using exactly **50 high-complexity documents**. This platform provides:
-- **Document Images**: High-resolution scans and digital PDFs with varying complexities (tables, forms, multi-column layouts).
-- **Questions**: Natural language queries targeted at specific data points within those documents.
-- **Ground Truth**: Human-verified answers used to calculate accuracy scores.
-
-### C. What is Being Measured?
-The evaluation focuses on two critical domains:
-- **Accuracy**: Measured via Average Normalized Levenshtein Similarity (ANLS), Exact Match (EM), and F1-Score to determine how precisely the model extracts data.
-- **Efficiency**: Measured via Inference Latency (Seconds) and Peak Memory Usage (MB) to determine the system's operational cost.
-
-### D. Importance of this Benchmark
-This benchmark is essential because it tests "real-world" document understanding. Unlike simple text parsing, DocVQA requires the system to perform both **text extraction** (capturing characters) and **layout reasoning** (understanding the relationship between headers and values).
-
-### E. Research Connection
-In this project, the benchmark is used to evaluate the performance of four core strategies: **Tesseract OCR**, **PaddleOCR**, standalone **VLM**, and the newly proposed **Hybrid model**.
+### Core Architectural Layers
+- **Perception Layer (Deterministic vs. Generative)**: The critical first stage responsible for converting raw image pixels into semantically mapped context. We implemented four swappable modules to test reliability: Tesseract OCR (heuristic baseline), PaddleOCR (deep-learning spatial detection), standalone Vision-Language Models (VLM generative baseline), and the proposed Hybrid model.
+- **RAG Storage Pipeline**: Extracted data streams are dynamically chunked, embedded using **`all-MiniLM-L6-v2`**, and stored in a FAISS vector database. Semantic retrieval is orchestrated to supply localized, evidentiary context to the **Mistral 7B Instruct** reasoning engine.
+- **Hybrid Synchronization Model (Original Contribution)**: The primary architectural contribution is a dual-stream Hybrid perception model. This strategy synchronizes the fine-grained literal character precision of PaddleOCR with the high-level semantic layout mapping of the **Gemini 1.5 Flash** VLM. By fusing these streams, the system achieves a "Perception Safety Net" that grounds spatial reasoning in absolute character exactness, effectively suppressing VLM hallucinations.
 
 ---
 
-## 4. Evaluation Framework
-To rigorously measure performance, I utilized a Zero-Shot evaluation paradigm across four industry-standard metrics.
+## 3. Evaluation Framework & System Benchmarking
+To scientifically validate system efficacy and reliability, we deployed a rigorous benchmarking framework measuring both extraction fidelity and operational constraints.
 
-### A. Mathematical Formulas
-$$ANLS = \frac{1}{N} \sum_{i=1}^{N} \max_{g \in G_i} \left( 1 - \frac{NL(g, P_i)}{\max(|g|, |P_i|)} \right)$$
-$$F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}$$
-$$\text{Similarity}(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|}$$
+### A. The 50-Document High-Complexity Benchmark
+The final quantitative results documented herein are based on a rigorous evaluation using a verified subset of **50 high-complexity documents** from the DocVQA validation set. This includes multi-column designs, noisy scans, and dense nested tables, ensuring a realistic stress test for the architectures.
 
-### B. Parameter Definitions
-- **N** → Total number of samples in the evaluation subset.
-- **G** → Ground Truth set (reference answer variants).
-- **P** → Prediction string generated by the cognitive engine.
-- **Precision / Recall** → Statistical ratios of correct extraction vs. total system output.
-- **L** → Inference Latency (end-to-end seconds).
-- **T_p** → System Throughput ($T_p = 1/L$).
+### B. Mathematical Evaluation Metrics
+The evaluation focuses on measuring the trade-offs between two domains:
+- **Accuracy & Grounding**:
+  - **ANLS (Average Normalized Levenshtein Similarity)**: Measures soft structural similarity and edit-distance with a strict 0.5 threshold for noise tolerance.
+  - **Exact Match (EM)**: Absolute binary identity indicating perfect extraction precision.
+  - **F1-Score**: Harmonic mean of Precision and Recall.
+- **System Efficiency**:
+  - **Inference Latency (Seconds)**: Total end-to-end processing time.
+  - **Peak Memory Usage (MB)**: Hardware resource overhead and RAM footprint.
+
+### C. Zero-Shot Protocol
+All tests are executed under a strict Zero-Shot evaluation paradigm. Models receive no prior layout-specific fine-tuning, reflecting the zero-day generalization required in enterprise deployments facing unknown PDF formats.
 
 ---
 
-## 5. Performance Evaluation
-The experimental results revealed a critical trade-off between speed and accuracy across the four tested strategies.
+## 4. Performance Evaluation and Results
+The empirical data reveals a critical "Accuracy-Efficiency Frontier" across the tested architectures.
 
 | Model | ANLS | EM | F1 | Lat. [s] | Thr. [S/s] | Retr. [s] | Index [s] | Mem. [MB] |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -88,51 +65,42 @@ The experimental results revealed a critical trade-off between speed and accurac
 | **Tesseract** | 0.17 | 0.10 | 0.30 | 11.0 | 0.09 | 0.045 | 0.12 | 350 |
 | **PaddleOCR** | 0.13 | 0.00 | 0.10 | 52.3 | 0.02 | 0.045 | 0.12 | 850 |
 
+---
+
+## 5. Failure Mode & Error Analysis
+A key outcome of this framework is the systematic categorization of Document AI failure states:
+- **VLM Resolution-Loss Hallucination**: Generative models frequently hallucinate decimal points and tiny digits when high-resolution documents are compressed into fixed, small patch windows (e.g., 336x336 pixels).
+- **Layout Fragmentation**: Traditional OCR linearizes multi-column text horizontally, severing the semantic link between headers and their respective values.
+- **Retrieval Ambiguity**: Vector search models struggle with dense tabular noise, occasionally fetching semantically correct strings from geometrically incorrect rows.
+- **Literal OCR Confusion**: Misreading characters (e.g., '0' vs 'O') directly compromises exact match reliability.
 
 ---
 
-## 6. Error Analysis
-We classified the failure modes of the RAG system into four primary categories:
-- **OCR Errors**: Character confusion (e.g., '0' as 'O').
-- **VLM Hallucination**: Caused by Resolution-Loss in generative perception.
-- **Layout Fragmentation**: Multi-column text linearization failures.
-- **Retrieval Issues**: Semantic mismatch in dense vector searches.
+## 6. Research Conclusion
+The benchmark conclusively demonstrates that a **Hybrid Perception Strategy** is an essential architecture for mission-critical Document AI tasks where exact precision is non-negotiable. While standalone VLMs provide exceptional high-throughput, low-latency processing, they suffer catastrophic accuracy drops in dense financial or medical tables due to resolution limits. By successfully bridging the Perception-Cognition Gap, the Hybrid model leverages dual-stream synchronization to retain structural layout awareness without sacrificing absolute literal precision.
 
 ---
 
-## 7. Results Summary
-The Research confirms that a **Hybrid Perception Strategy** is the most robust solution for mission-critical DocVQA tasks. Measured empirical data shows that retrieval latency is maintained at a sub-50ms level (**0.045s**) for all OCR-integrated streams, while the standalone VLM branch demonstrates near-zero retrieval latency (**0.005s**) by bypassing layout anchoring. A standardized indexing overhead of **0.12s** is observed across all models, representing the fixed cost of document embedding. By bridging the Perception-Cognition Gap, we achieve a system that retains layout awareness without sacrificing literal precision.
-
----
-
-## 8. File Structure
+## 7. Project Structure
 ```text
 project/
 ├── data/                # Dataset samples and raw input PDF documents
-├── src/                 # Core implementation of the DocVQA RAG pipeline
-│   ├── ocr/             # Deterministic OCR modules (Tesseract, PaddleOCR)
-│   ├── vlm/             # Vision-Language Model logic
-│   ├── rag/             # Retrieval engine, embeddings, and FAISS indexing
-│   ├── pipeline/        # Main pipeline orchestration and Hybrid logic
-│   ├── evaluation/      # Quantitative benchmarking (ANLS, EM, F1)
-│   └── config/          # System-wide parameters and model settings
-├── results/             # Evaluation outputs, logs, and performance plots
-├── main.py              # Primary entry point for benchmark execution
-└── requirements.txt     # Project dependency and environment definitions
+├── src/                 # Core implementation of the DocVQA evaluation framework
+│   ├── ocr/             # Deterministic extraction logic (Tesseract, PaddleOCR)
+│   ├── vlm/             # Generative multimodal vision processing logic
+│   ├── rag/             # Retrieval engine, embeddings, and FAISS vector indexing
+│   ├── pipeline/        # Main orchestration pipeline and Hybrid sync mechanisms
+│   ├── evaluation/      # Quantitative benchmarking logic (ANLS, EM, F1 scoring)
+│   └── config/          # System-wide parameters and model configurations
+├── results/             # Benchmark outputs, analytical logs, and empirical plots
+├── main.py              # Primary executable for the 50-document evaluation benchmark
+└── requirements.txt     # Dependency environment definitions
 ```
 
 ---
 
-## 9. References
-1. **DocVQA**: Matthew et al., "DocVQA: A Dataset for VQA on Document Images."
-2. **RAG**: Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks."
-3. **Hybrid OCR**: "PP-OCR: A Practical Ultra Lightweight OCR System."
-4. **ANLS**: Biten et al., "ICDAR 2019 Competition on Scene Text Visual Question Answering."
-
----
-
-## 10. Setup and Execution
-To replicate the results or run the pipeline locally, follow these steps:
+## 8. Setup and Execution
+To replicate the evaluation results or run the pipeline locally:
 
 1. **Install Dependencies**:
    ```bash
@@ -142,4 +110,15 @@ To replicate the results or run the pipeline locally, follow these steps:
    ```bash
    python main.py
    ```
-   *The pipeline will automatically process the 50 document dataset against configured strategies and output results.*
+   *The pipeline will automatically process the 50-document validation dataset against the configured perception strategies and output the exact empirical results.*
+
+---
+
+## 9. References
+1. **DocVQA**: Mathew et al. (2021). "DocVQA: A Dataset for VQA on Document Images." WACV.
+2. **RAG**: Lewis et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." NeurIPS.
+3. **PaddleOCR**: Du et al. (2020). "PP-OCR: A Practical Ultra Lightweight OCR System." arXiv.
+4. **LayoutLMv3**: Huang et al. (2022). "LayoutLMv3: Pre-training for Document AI with Unified Text and Image Masking." ACM MM.
+5. **Donut**: Kim et al. (2022). "OCR-free Document Understanding Transformer." ECCV.
+6. **LLaVA**: Liu et al. (2023). "Visual Instruction Tuning." NeurIPS.
+7. **ANLS Metric**: Biten et al. (2019). "ICDAR 2019 Competition on Scene Text Visual Question Answering."

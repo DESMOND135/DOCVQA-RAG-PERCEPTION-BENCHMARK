@@ -125,4 +125,4 @@ def generate_defense_deck(md_path, pptx_path):
     print(f"Presentation Generated: {pptx_path}")
 
 if __name__ == "__main__":
-    generate_defense_deck('Deliverable/presentation/source/presentation.md', 'Deliverable/presentation/presentation.pptx')
+    generate_defense_deck('Final/presentation/source/presentation.md', 'Final/presentation/presentation.pptx')
