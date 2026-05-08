@@ -77,8 +77,35 @@ def get_omml_for_latex(latex):
     except:
         return None
 
-def add_native_equation(paragraph, latex):
-    return False # Simplified for stability
+def render_latex_to_image(latex, output_path, is_inline=False):
+    """Renders LaTeX to a high-resolution transparent PNG using Matplotlib."""
+    try:
+        import matplotlib.pyplot as plt
+        plt.rc('text', usetex=False)
+        plt.rc('font', family='serif', serif='Cambria')
+        
+        # Clean latex string
+        latex = latex.strip('$').strip()
+        if not latex: return False
+        if not (latex.startswith('$') and latex.endswith('$')):
+            latex = f'${latex}$'
+            
+        fig = plt.figure(figsize=(0.1, 0.1))
+        # Use Navy Blue (#003366) for the formula
+        fig.text(0, 0, latex, fontsize=16 if not is_inline else 12, color='#003366')
+        
+        renderer = fig.canvas.get_renderer()
+        bbox = fig.texts[0].get_window_extent(renderer=renderer)
+        width_in = (bbox.width + 10) / fig.dpi
+        height_in = (bbox.height + 10) / fig.dpi
+        fig.set_size_inches(width_in, height_in)
+        
+        plt.savefig(output_path, dpi=300, transparent=True, bbox_inches='tight', pad_inches=0.02)
+        plt.close(fig)
+        return True
+    except Exception as e:
+        print(f"Latex render error: {e}")
+        return False
 
 def add_caption(doc, label_text, raw_caption_text, chapter_num="1"):
     """Adds a professional academic caption (X.Y) with manual numbering for total reliability."""
@@ -102,35 +129,53 @@ def add_caption(doc, label_text, raw_caption_text, chapter_num="1"):
     
     if "Equation" in label_text:
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT; p.clear()
-        p.add_run(f"( {chapter_num}.").font.size = Pt(12)
-        r_seq = p.add_run()
-        f1 = create_element('w:fldChar'); create_attribute(f1, 'w:fldCharType', 'begin')
-        i1 = create_element('w:instrText'); i1.text = ' SEQ EQUATION \\* ARABIC \\s 1 '
-        f2 = create_element('w:fldChar'); create_attribute(f2, 'w:fldCharType', 'separate')
-        t2 = create_element('w:t'); t2.text = "1"; f3 = create_element('w:fldChar'); create_attribute(f3, 'w:fldCharType', 'end')
-        r_seq._r.append(f1); r_seq._r.append(i1); r_seq._r.append(f2); r_seq._r.append(t2); r_seq._r.append(f3)
-        p.add_run(" )").font.size = Pt(12); p.paragraph_format.space_after = Pt(12)
+        p.add_run(f"({chapter_num}.{num})").italic = True
+        return p
+    return p
 
 def add_formatted_text(p, text, doc=None, chapter_num="1"):
+    # Handle Block Math
     if text.strip().startswith('$$') and text.strip().endswith('$$'):
-        if doc: add_caption(doc, "Equation", "", chapter_num=chapter_num)
-        return
+        latex = text.strip().strip('$').strip()
+        temp_img = f"temp_math_{hash(latex)}.png"
+        if render_latex_to_image(latex, temp_img, is_inline=False):
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = p.add_run()
+            run.add_picture(temp_img)
+            try: os.remove(temp_img)
+            except: pass
+            if doc: add_caption(doc, "Equation", "", chapter_num=chapter_num)
+            return
+            
+    # Handle Inline Math and formatting
     parts = re.split(r'(\$.*?\$|\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)', text)
     for part in parts:
         if not part: continue
-        run = p.add_run()
-        run.font.name = 'Arial'; run.font.size = Pt(12)
-        if part.startswith('$') and part.endswith('$'): run.text = part[1:-1]; run.italic = True; run.bold = True
-        elif part.startswith('***') and part.endswith('***'): run.text = part[3:-3]; run.bold = True; run.italic = True
-        elif part.startswith('**') and part.endswith('**'): run.text = part[2:-2]; run.bold = True
-        elif part.startswith('*') and part.endswith('*'): run.text = part[1:-1]; run.italic = True
-        else: run.text = part
+        if part.startswith('$') and part.endswith('$'):
+            latex = part.strip('$')
+            temp_img = f"temp_math_inline_{hash(latex)}.png"
+            if render_latex_to_image(latex, temp_img, is_inline=True):
+                run = p.add_run()
+                run.add_picture(temp_img, height=Cm(0.45))
+                try: os.remove(temp_img)
+                except: pass
+            else:
+                run = p.add_run(part); run.italic = True
+        elif part.startswith('***') and part.endswith('***'):
+            p.add_run(part[3:-3]).bold = True; p.runs[-1].italic = True
+        elif part.startswith('**') and part.endswith('**'):
+            p.add_run(part[2:-2]).bold = True
+        elif part.startswith('*') and part.endswith('*'):
+            p.add_run(part[1:-1]).italic = True
+        else:
+            p.add_run(part)
 
-def set_academic_styles(doc):
+def set_academic_styles(doc, is_paper=False):
     style = doc.styles['Normal']
-    font = style.font; font.name = 'Arial'; font.size = Pt(12)
-    pf = style.paragraph_format; pf.line_spacing = 1.5; pf.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    pf.space_after = Pt(0); pf.space_before = Pt(0)
+    font = style.font; font.name = 'Cambria' if is_paper else 'Times New Roman'; font.size = Pt(12)
+    pf = style.paragraph_format; pf.line_spacing = 1.15 if is_paper else 1.5; pf.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    pf.space_after = Pt(6) if is_paper else Pt(0)
+    pf.space_before = Pt(0)
 
 def set_heading_styles(doc):
     # Rule 1: No heading should appear alone at the bottom
@@ -181,7 +226,7 @@ def convert_to_professional_docx(md_path, docx_path):
     is_paper = "paper" in docx_path.lower()
     doc = Document()
     define_caption_style(doc)
-    set_academic_styles(doc)
+    set_academic_styles(doc, is_paper=is_paper)
     set_heading_styles(doc)
     set_page_setup(doc)
     
@@ -279,6 +324,13 @@ def convert_to_professional_docx(md_path, docx_path):
             if m: current_chapter = m.group(1)
             elif "Appendix" in title: current_chapter = title.split(':')[0].replace("Appendix", "").strip()
             
+            if "Abstract" in title:
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(12); p.paragraph_format.space_after = Pt(12)
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                run = p.add_run("ABSTRACT")
+                run.bold = True; run.font.size = Pt(14)
+                i += 1; continue
             if not is_paper:
                 is_odd = any(t in title for t in ["Introduction", "Conclusion", "References", "Bibliography", "Abstract", "Table of Contents", "List of"]) or (title[0].isdigit() and "." in title[:3])
                 if is_odd:

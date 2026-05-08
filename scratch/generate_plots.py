@@ -2,7 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-# Data from Table 1
+# Professional Academic Palette
+NAVY = '#003366'
+DARK_BLUE = '#1f77b4'
+MUTED_GRAY = '#7f7f7f'
+SUCCESS_GREEN = '#2ca02c'
+ERROR_RED = '#ef4444'
+
 models = ['Hybrid', 'VLM', 'Tesseract', 'PaddleOCR']
 anls = [0.24, 0.17, 0.17, 0.13]
 f1 = [0.30, 0.20, 0.30, 0.10]
@@ -19,8 +25,8 @@ os.makedirs(out_dir, exist_ok=True)
 plt.figure(figsize=(10, 6))
 x = np.arange(len(models))
 width = 0.35
-plt.bar(x - width/2, anls, width, label='ANLS', color='#1f77b4')
-plt.bar(x + width/2, f1, width, label='F1-Score', color='#7f7f7f')
+plt.bar(x - width/2, anls, width, label='ANLS', color=NAVY)
+plt.bar(x + width/2, f1, width, label='F1-Score', color=MUTED_GRAY)
 plt.ylabel('Score')
 plt.title('Accuracy Benchmark: ANLS and F1-Score')
 plt.xticks(x, models)
@@ -31,14 +37,14 @@ plt.close()
 
 # 2. Figure 5.2: System Latency and Throughput Inversion
 fig, ax1 = plt.subplots(figsize=(10, 6))
-ax1.bar(x - width/2, latency, width, label='Latency (s)', color='#1f77b4')
-ax1.set_ylabel('Latency (seconds)', color='#1f77b4')
-ax1.tick_params(axis='y', labelcolor='#1f77b4')
+ax1.bar(x - width/2, latency, width, label='Latency (s)', color=NAVY)
+ax1.set_ylabel('Latency (seconds)', color=NAVY)
+ax1.tick_params(axis='y', labelcolor=NAVY)
 
 ax2 = ax1.twinx()
-ax2.bar(x + width/2, throughput, width, label='Throughput (S/s)', color='#ff7f0e')
-ax2.set_ylabel('Throughput (Samples/s)', color='#ff7f0e')
-ax2.tick_params(axis='y', labelcolor='#ff7f0e')
+ax2.bar(x + width/2, throughput, width, label='Throughput (S/s)', color=DARK_BLUE)
+ax2.set_ylabel('Throughput (Samples/s)', color=DARK_BLUE)
+ax2.tick_params(axis='y', labelcolor=DARK_BLUE)
 
 plt.title('Latency vs Throughput Inversion')
 ax1.set_xticks(x)
@@ -49,7 +55,7 @@ plt.close()
 
 # 3. Figure 5.3: Peak Memory Footprint
 plt.figure(figsize=(10, 6))
-colors = ['#1f77b4', '#ff7f0e', '#7f7f7f', '#2ca02c']
+colors = [NAVY, DARK_BLUE, MUTED_GRAY, SUCCESS_GREEN]
 plt.bar(models, memory, color=colors)
 plt.ylabel('Peak Memory Usage (MB)')
 plt.title('Resident Set Size (RSS) Peak Memory Usage')
@@ -59,8 +65,8 @@ plt.close()
 
 # 4. Figure 5.4: Retrieval vs Indexing Latency
 plt.figure(figsize=(10, 6))
-plt.bar(x - width/2, indexing, width, label='Indexing Overhead', color='#1f77b4')
-plt.bar(x + width/2, retrieval, width, label='Retrieval Latency', color='#ff7f0e')
+plt.bar(x - width/2, indexing, width, label='Indexing Overhead', color=NAVY)
+plt.bar(x + width/2, retrieval, width, label='Retrieval Latency', color=DARK_BLUE)
 plt.ylabel('Time (seconds)')
 plt.title('Database Efficiency: Indexing vs Retrieval Latency')
 plt.xticks(x, models)
@@ -71,7 +77,7 @@ plt.close()
 
 # 5. Figure 6.1: Accuracy Tradeoff Analysis (Scatter Plot)
 plt.figure(figsize=(10, 6))
-colors = ['#1f77b4', '#ff7f0e', '#7f7f7f', '#2ca02c']
+colors = [NAVY, DARK_BLUE, MUTED_GRAY, SUCCESS_GREEN]
 for i, model in enumerate(models):
     plt.scatter(latency[i], anls[i], s=200, label=model, color=colors[i], edgecolors='black')
     plt.text(latency[i]+1, anls[i], model, fontsize=12, fontweight='bold')
