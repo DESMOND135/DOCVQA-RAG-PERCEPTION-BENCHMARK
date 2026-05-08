@@ -29,17 +29,22 @@ def style_title_slide(slide, title_text, subtitle_text):
     fill = slide.background.fill; fill.solid(); fill.fore_color.rgb = BLUE_NAVY
     title_shape = slide.shapes.title; title_shape.text = title_text
     for p in title_shape.text_frame.paragraphs:
-        p.alignment = PP_ALIGN.CENTER; p.font.color.rgb = WHITE; p.font.bold = True; p.font.size = Pt(48)
+        p.alignment = PP_ALIGN.CENTER; p.font.color.rgb = WHITE; p.font.bold = True; p.font.size = Pt(44)
     subtitle = slide.placeholders[1]; subtitle.text = subtitle_text
     for p in subtitle.text_frame.paragraphs:
-        p.alignment = PP_ALIGN.CENTER; p.font.color.rgb = WHITE; p.font.size = Pt(28)
+        p.alignment = PP_ALIGN.CENTER; p.font.color.rgb = WHITE; p.font.size = Pt(24)
 
 def add_slide_decorations(slide, current, total):
-    """Adds branding and slide numbers."""
+    """Adds branding and slide numbers with professional Navy accent."""
     if current > 0:
+        # Progress bar at bottom
+        bar_width = (current / total) * 13.333
+        bar = slide.shapes.add_shape(6, 0, Inches(7.4), Inches(bar_width), Inches(0.1))
+        bar.fill.solid(); bar.fill.fore_color.rgb = BLUE_NAVY; bar.line.fill.background()
+        
         box = slide.shapes.add_textbox(Inches(12.5), Inches(7.0), Inches(0.8), Inches(0.4))
         p = box.text_frame.paragraphs[0]; p.text = f"{current} / {total}"
-        p.font.size = Pt(12); p.font.color.rgb = BLUE_NAVY; p.alignment = PP_ALIGN.RIGHT
+        p.font.size = Pt(10); p.font.color.rgb = BLUE_NAVY; p.alignment = PP_ALIGN.RIGHT
 
 def generate_defense_deck(md_path, pptx_path):
     print(f"Generating Presentation Deck: {md_path} -> {pptx_path}")
@@ -67,10 +72,10 @@ def generate_defense_deck(md_path, pptx_path):
         slide = prs.slides.add_slide(prs.slide_layouts[1])
         add_slide_decorations(slide, i, len(slides_raw)-1)
         
-        # Header
+        # Header - ALWAYS CENTRALIZED
         title_shape = slide.shapes.title; title_shape.text = title
         title_shape.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
-        title_shape.text_frame.paragraphs[0].font.size = Pt(36); title_shape.text_frame.paragraphs[0].font.color.rgb = BLUE_NAVY
+        title_shape.text_frame.paragraphs[0].font.size = Pt(32); title_shape.text_frame.paragraphs[0].font.color.rgb = BLUE_NAVY
         title_shape.text_frame.paragraphs[0].font.bold = True
         
         for line in body_lines:
@@ -94,20 +99,27 @@ def generate_defense_deck(md_path, pptx_path):
                     p = os.path.normpath(os.path.join(os.path.dirname(md_path), m.group(1)))
                     if os.path.exists(p): img_path = p
 
-        # Content Area
-        left_col = slide.placeholders[1]; left_col.text_frame.clear()
+        # Content Layout
+        content_area = slide.placeholders[1]; content_area.text_frame.clear()
         
         if img_path:
-            left_col.width = Inches(6.5); left_col.left = Inches(0.5); left_col.top = Inches(1.8)
-            pic = slide.shapes.add_picture(img_path, Inches(7.2), Inches(2.0))
-            # Center math if it's a standalone equation
+            # DIAGRAMS GET THEIR OWN SPACE (Centralized)
             if "temp_math" in img_path:
-                pic.left = Inches(3.5); pic.top = Inches(3.0); pic.width = Inches(6.0)
-                left_col.width = Inches(0) # Hide bullets if large math
+                # Equation: Center large
+                pic = slide.shapes.add_picture(img_path, Inches(2.0), Inches(2.5), width=Inches(9.3))
+                pic.left = int((prs.slide_width - pic.width) / 2)
             else:
-                pic.width = Inches(5.5)
+                # Diagram: Large center, no bullets if present
+                pic = slide.shapes.add_picture(img_path, Inches(1.5), Inches(1.8), width=Inches(10.3))
+                pic.left = int((prs.slide_width - pic.width) / 2)
+                if pic.height > Inches(5.0): pic.height = Inches(5.0); pic.left = int((prs.slide_width - pic.width) / 2)
+            
+            # Hide bullets if there's an image on the slide to keep it clean
+            if bullets:
+                # If there are bullets, put them below or small
+                content_area.width = Inches(12.0); content_area.left = Inches(0.6); content_area.top = Inches(6.5)
         elif table_data:
-            left_col.width = Inches(12.0); left_col.left = Inches(0.6); left_col.top = Inches(1.5)
+            content_area.width = Inches(12.0); content_area.left = Inches(0.6); content_area.top = Inches(1.5)
             rows, cols = len(table_data), len(table_data[0])
             table = slide.shapes.add_table(rows, cols, Inches(1.0), Inches(2.5), Inches(11.3), Inches(3.0)).table
             for r in range(rows):
@@ -119,20 +131,22 @@ def generate_defense_deck(md_path, pptx_path):
                     p.alignment = PP_ALIGN.CENTER
                     if r == 0: cell.fill.solid(); cell.fill.fore_color.rgb = BLUE_NAVY; p.font.color.rgb = WHITE
         else:
-            left_col.width = Inches(12.0); left_col.left = Inches(0.6); left_col.top = Inches(1.8)
+            content_area.width = Inches(11.5); content_area.left = Inches(0.9); content_area.top = Inches(1.8)
 
-        # Bullets
+        # Bullets - Refined
         for b_text in bullets:
-            p = left_col.text_frame.add_paragraph()
-            p.level = 0; p.space_after = Pt(12)
-            # Basic Bold/Italic support
+            p = content_area.text_frame.add_paragraph()
+            p.level = 0; p.space_after = Pt(14)
+            p.alignment = PP_ALIGN.CENTER if img_path else PP_ALIGN.LEFT
+            
             parts = re.split(r'(\*\*.*?\*\*|\*.*?\*)', b_text)
             for part in parts:
                 run = p.add_run()
                 if part.startswith('**'): run.text = part[2:-2]; run.font.bold = True
                 elif part.startswith('*'): run.text = part[1:-1]; run.font.italic = True
                 else: run.text = part
-                run.font.size = Pt(24); run.font.name = 'Calibri'; run.font.color.rgb = BLACK
+                run.font.size = Pt(22) if img_path else Pt(26)
+                run.font.name = 'Calibri'; run.font.color.rgb = BLACK
 
     prs.save(pptx_path)
     print(f"Presentation Generated: {pptx_path}")
