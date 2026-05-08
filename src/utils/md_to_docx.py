@@ -81,31 +81,24 @@ def add_native_equation(paragraph, latex):
     return False # Simplified for stability
 
 def add_caption(doc, label_text, raw_caption_text, chapter_num="1"):
-    """Adds a professional academic caption (X.Y) using native Word SEQ fields."""
-    # Global Rule: Remove duplicate manual labels from the caption text
+    """Adds a professional academic caption (X.Y) with manual numbering for total reliability."""
     clean_caption = re.sub(r'^(Figure|Table|Equation|Formula)\s*[\dA-Z.]*[:.]?\s*', '', raw_caption_text, flags=re.IGNORECASE)
+    
+    if not hasattr(doc, '_caption_counts'): doc._caption_counts = {}
+    key = (label_text, chapter_num)
+    doc._caption_counts[key] = doc._caption_counts.get(key, 0) + 1
+    num = doc._caption_counts[key]
     
     p = doc.add_paragraph(style='Caption')
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    # Rule 4: Add proper spacing after figures/tables
     p.paragraph_format.space_before = Pt(6)
-    p.paragraph_format.space_after = Pt(24) # Significant gap after figure/table
-    p.paragraph_format.keep_with_next = False
+    p.paragraph_format.space_after = Pt(24)
     
-    p.add_run(f"{label_text} ").bold = True
-    p.add_run(f"{chapter_num}.").bold = True
+    label_run = p.add_run(f"{label_text} {chapter_num}.{num}")
+    label_run.bold = True
     
-    run = p.add_run()
-    seq_id = "EQUATION" if "Equation" in label_text else ("FIGURE" if "Figure" in label_text else "TABLE")
-    f1 = create_element('w:fldChar'); create_attribute(f1, 'w:fldCharType', 'begin')
-    i1 = create_element('w:instrText'); i1.set(ns.qn('xml:space'), 'preserve'); i1.text = f' SEQ {seq_id} \\* ARABIC \\s 1 '
-    f2 = create_element('w:fldChar'); create_attribute(f2, 'w:fldCharType', 'separate')
-    t = create_element('w:t'); t.text = "1"
-    f3 = create_element('w:fldChar'); create_attribute(f3, 'w:fldCharType', 'end')
-    run._r.append(f1); run._r.append(i1); run._r.append(f2); run._r.append(t); run._r.append(f3)
-    run.bold = True
-    
-    if clean_caption: p.add_run(f": {clean_caption}").bold = True
+    if clean_caption:
+        p.add_run(f": {clean_caption}").bold = True
     
     if "Equation" in label_text:
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT; p.clear()

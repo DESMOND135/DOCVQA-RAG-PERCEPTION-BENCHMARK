@@ -5,7 +5,7 @@
 **Preprint:** arXiv:2026.XXXX [cs.CV]  
 
 **Abstract**  
-The automated extraction of information from complex PDF documents in mission-critical applications requires a robust approach to hallucinations and data corruption. Modern Large Language Models (LLMs) suffer from a fundamental **Perception-Cognition Gap**: standalone LLMs are linguistically robust but lack spatial awareness of document geometries. We categorize the existing bottlenecks in document understanding into **Resolution-Loss Hallucination** (inherent in generative multimodal VLMs) and **Layout Unawareness** (inherent in traditional heuristic OCR). To address this, we formalize a novel **Hybrid OCR-VLM Synchronization** strategy that operates on a "Dual-Stream" logic. By rigorously grounding the generative visual summaries of a VLM in the absolute literal character sequences of a deep-learning layout detector, we enable the cognitive model to navigate fine-grained data and complex spatial hierarchies without risking hallucination-related errors. Our experimental results on a high-complexity DocVQA benchmark demonstrate that the **Hybrid approach achieves higher ANLS scores** over standalone VLM baselines in dense tabular environments. This paper formalizes the synchronization methodology and analyzes the resulting accuracy-efficiency trade-offs, establishing a reliability-oriented comparative evaluation framework for industrial Document AI.
+The automated extraction of information from complex PDF documents in mission-critical applications requires a robust approach to reducing hallucination-related errors and data corruption. Modern Large Language Models (LLMs) suffer from a fundamental **Perception-Cognition Gap**: standalone LLMs are linguistically robust but lack spatial awareness of document geometries. We categorize the existing bottlenecks in document understanding into **Resolution-Loss Hallucination** (inherent in generative multimodal VLMs) and **Layout Unawareness** (inherent in traditional heuristic OCR). To address this, we formalize a novel **Hybrid OCR-VLM Synchronization** strategy that operates on a "Dual-Stream" logic. By rigorously grounding the generative visual summaries of a VLM in the deterministic OCR character sequences of a deep-learning layout detector, we enable the cognitive model to navigate fine-grained data and complex spatial hierarchies while mitigating the risk of hallucination-related errors. Our experimental results on a high-complexity DocVQA benchmark demonstrate that the **Hybrid approach achieves higher ANLS scores** over standalone VLM baselines in dense tabular environments. This paper formalizes the synchronization methodology and analyzes the resulting accuracy-efficiency trade-offs, establishing a reliability-oriented comparative evaluation framework for industrial Document AI.
 
 
 ## 1. Introduction
@@ -82,7 +82,7 @@ Vision-Language Models face significant challenges regarding a high risk of hall
 ### 2.4 The Hybrid Approach: Solution Connection
 The proposed solution involves combining layout detection with VLM reasoning. By grounding visual summaries in literal OCR sequences, we bridge the Perception Gap.
 
-The operational flow of the proposed Hybrid dual-stream synchronization model is detailed in Figure 2.4. This workflow demonstrates the parallel execution of literal OCR extraction and semantic VLM layout summarization, showing how these two independent data streams are merged to create a grounded perception layer. By synchronizing high-precision character detection with spatial structural awareness, the system allows the downstream cognitive engine to verify visual layout hypotheses against exact literal sequences, effectively addressing the perception-cognition gap.
+The operational flow of the proposed Hybrid dual-stream synchronization model is detailed in Figure 2.4. This workflow demonstrates the parallel execution of literal OCR extraction and semantic VLM layout summarization, showing how these two independent data streams are merged to create a grounded perception layer. By synchronizing high-precision character detection with spatial structural awareness, the system allows the downstream cognitive engine to verify visual layout hypotheses against deterministic OCR sequences, effectively addressing the perception-cognition gap.
 ![Hybrid Dual-Stream](../figures/diagrams/hybrid_workflow.png)
 **Figure 2.4: Dual-Stream Hybrid Perception Strategy**
 
@@ -110,6 +110,9 @@ We formalize the evaluation of perception fidelity using multiple metrics mappin
 The primary metric scoring character-level edit distance ($NL$), evaluated conditionally passing a rigorous threshold of $0.5$. This provides OCR noise tolerance while penalizing hallucinations.
 
 $$ANLS = \frac{1}{N}\sum_{i=1}^{N} s(a_i,g_i) \quad (3.1)$$
+
+Where the score $s(a_i, g_i)$ is defined as:
+$$s(a_i, g_i) = \begin{cases} 1 - \frac{NL(a_i, g_i)}{\max(|a_i|, |g_i|)} & \text{if similarity} \ge 0.5 \\ 0 & \text{otherwise} \end{cases}$$
 
 **2. Exact Match (EM)**
 A binary indicator defining absolute precision, where $P_i$ must perfectly mirror a ground-truth sequence $g \in G_i$.
@@ -189,7 +192,7 @@ Furthermore, the 50-document subset intentionally biases towards high-complexity
 
 This chapter presents the quantitative metrics derived from the benchmark. We analyze accuracy-latency trade-offs and resource consumption for each perception model. Table 1 outlines the benchmarking results across accuracy and efficiency domains using the final 50-document dataset. All reported results are derived from the 50-document evaluation and are fully verified.
 
-**Table 1: Exhaustive Performance Benchmarking Matrix**
+**Table 5.1: Exhaustive Performance Benchmarking Matrix**
 | Model | ANLS (Mean ± SD) | EM (Mean ± SD) | F1 (Mean ± SD) | Latency (s) | Throughput (samples/s) | Retrieval Latency (s) | Indexing (s) | Memory Usage (MB) |
 |:--- |:---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
 | **Hybrid** | 0.24 ± 0.05 | 0.20 ± 0.04 | 0.30 ± 0.06 | 14.2 | 0.07 | 0.050 | 0.12 | 4600 |
@@ -217,7 +220,7 @@ The comprehensive quantitative findings of the 50-document benchmark are synthes
 
 This multi-metric visualization traces the performance frontier of all tested models, confirming that the Hybrid synchronization model delivers the highest accuracy across soft-matching and exact-extraction metrics.
 
-**Table 2: Database Storage and Retrieval Overhead**
+**Table 5.2: Database Storage and Retrieval Overhead**
 | Model | Indexing Overhead (s) | Retrieval Latency (s) | Index Size (KB) |
 |:--- |:---: |:---: |:---: |
 | **Hybrid** | 0.12 | 0.050 | 1.5 |
@@ -244,7 +247,11 @@ This section provides a qualitative audit of model behavior, moving beyond aggre
 ### 6.2 Structural Failure Modes
 Standalone VLMs struggle with dense tabular data. When a 4000-pixel document is downsampled to the VLM's native 336-pixel context window, fine alphanumeric details are lost. The models then rely on probabilistic sequence generation, leading to plausible but factually incorrect results.
 
-### 6.2 Layout Fragmentation
+The qualitative impact of resolution-loss hallucination and the subsequent remediation via the Hybrid approach are visualized in Figure 6.2. This comparison highlights how a standalone VLM may hallucinate rounded values (e.g., "$1,200.00" instead of "$1,240.50") due to degraded visual fidelity, whereas the Hybrid synchronization layer recovers the exact deterministic sequence by grounding the reasoning in high-resolution OCR detection.
+![Hallucination Comparison](../figures/diagrams/hallucination_comparison.png)
+**Figure 6.2: Qualitative Analysis of VLM Hallucination and Hybrid Correction**
+
+### 6.3 Layout Fragmentation
 Traditional OCR engines like Tesseract often linearize multi-column text horizontally, breaking the reading order. This poisons the retrieval index by mixing unrelated semantic chunks from different columns.
 
 The intrinsic trade-off between perception quality and inference speed is mapped in Figure 6.1. This analysis isolates the performance delta achieved by the Hybrid model in dense tabular environments, confirming that literal grounding via the dual-stream approach is essential for suppressing generative hallucinations. The data highlights how the Hybrid model representing the peak of the Accuracy-Efficiency Frontier—delivering the highest fidelity by synchronizing two independent perception streams to ensure a robust and verifiable document reasoning capability.
@@ -268,7 +275,7 @@ This paper formalized a comprehensive reliability and robustness evaluation fram
 
 ### 8.1 Limitations
 
-This study has several limitations. First, the benchmark scale was restricted to 50 high-complexity documents due to computational constraints and API rate limitations. Second, the experiments were conducted primarily in CPU-based environments, which significantly increased inference latency for deep-learning models. Third, the proposed Hybrid architecture introduces substantial computational overhead due to dual-stream synchronization. Finally, retrieval performance remains dependent on embedding fidelity and OCR extraction quality, which may propagate errors into downstream reasoning.
+This study has several limitations. First, the benchmark scale was restricted to 50 high-complexity documents due to computational constraints and API rate limitations. Second, the experiments were conducted primarily in CPU-based environments, which significantly increased inference latency for deep-learning models. Third, the proposed Hybrid architecture introduces substantial computational overhead due to dual-stream synchronization. Additionally, the benchmark focuses primarily on English-language documents and may not generalize uniformly across multilingual or handwritten document environments. Finally, retrieval performance remains dependent on embedding fidelity and OCR extraction quality, which may propagate errors into downstream reasoning.
 
 ### 8.2 Future Work
 
