@@ -8,23 +8,25 @@ from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
 import matplotlib.pyplot as plt
 from matplotlib import mathtext
 
-# Academic Blue Palette
-BLUE_DEEP = RGBColor(30, 58, 138)
+# Professional Academic Palette
+BLUE_NAVY = RGBColor(0, 51, 102) # #003366
+BLUE_ARXIV = RGBColor(31, 119, 180) # #1f77b4
 WHITE = RGBColor(255, 255, 255)
+BLACK = RGBColor(0, 0, 0)
 
 def render_latex_to_image(latex, out_path):
-    """Renders a LaTeX string into a high-resolution transparent PNG using matplotlib."""
+    """Renders a LaTeX string into a high-resolution transparent PNG in BLACK."""
     fig = plt.figure(figsize=(10, 2))
+    # Academic Standard: Formulas MUST be BLACK
     text = fig.text(
         0.5, 0.5, f"${latex}$",
-        ha='center', va='center', fontsize=50, color='#1e3a8a'
+        ha='center', va='center', fontsize=50, color='#000000'
     )
-    # Ensure background is transparent
     fig.savefig(out_path, transparent=True, bbox_inches='tight', pad_inches=0.1, dpi=300)
     plt.close(fig)
 
 def style_title_slide(slide, title_text, subtitle_text):
-    fill = slide.background.fill; fill.solid(); fill.fore_color.rgb = BLUE_DEEP
+    fill = slide.background.fill; fill.solid(); fill.fore_color.rgb = BLUE_NAVY
     title_shape = slide.shapes.title; title_shape.text = title_text
     for p in title_shape.text_frame.paragraphs:
         p.alignment = PP_ALIGN.CENTER; p.font.color.rgb = WHITE; p.font.bold = True; p.font.size = Pt(48)
@@ -37,7 +39,7 @@ def add_slide_decorations(slide, current, total):
     if current > 0:
         box = slide.shapes.add_textbox(Inches(12.5), Inches(7.0), Inches(0.8), Inches(0.4))
         p = box.text_frame.paragraphs[0]; p.text = f"{current} / {total}"
-        p.font.size = Pt(12); p.font.color.rgb = BLUE_DEEP; p.alignment = PP_ALIGN.RIGHT
+        p.font.size = Pt(12); p.font.color.rgb = BLUE_NAVY; p.alignment = PP_ALIGN.RIGHT
 
 def generate_defense_deck(md_path, pptx_path):
     print(f"Generating Presentation Deck: {md_path} -> {pptx_path}")
@@ -68,7 +70,7 @@ def generate_defense_deck(md_path, pptx_path):
         # Header - Centered & Professional Blue
         title_shape = slide.shapes.title; title_shape.text = title
         title_shape.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
-        title_shape.text_frame.paragraphs[0].font.size = Pt(40); title_shape.text_frame.paragraphs[0].font.color.rgb = BLUE_DEEP
+        title_shape.text_frame.paragraphs[0].font.size = Pt(40); title_shape.text_frame.paragraphs[0].font.color.rgb = BLUE_NAVY
         title_shape.text_frame.paragraphs[0].font.bold = True
         
         for line in body_lines:
@@ -109,7 +111,6 @@ def generate_defense_deck(md_path, pptx_path):
             p.alignment = PP_ALIGN.LEFT
             
             # Split by math symbols to apply Bold + Blue styling to them
-            # We use double backslash for cdot to avoid regex escape errors
             parts = re.split(r'([A-B\\cdot‖]+)', b_text)
             for part in parts:
                 run = p.add_run()
@@ -117,9 +118,9 @@ def generate_defense_deck(md_path, pptx_path):
                 run.font.size = Pt(28); run.font.name = 'Arial'
                 if part in ['A', 'B', '·', '‖']:
                     run.font.bold = True
-                    run.font.color.rgb = BLUE_DEEP
+                    run.font.color.rgb = BLUE_NAVY
                 else:
-                    run.font.color.rgb = RGBColor(50, 50, 50)
+                    run.font.color.rgb = BLACK
 
     prs.save(pptx_path)
     print(f"Presentation Generated: {pptx_path}")

@@ -78,7 +78,7 @@ def get_omml_for_latex(latex):
         return None
 
 def render_latex_to_image(latex, output_path, is_inline=False):
-    """Renders LaTeX to a high-resolution transparent PNG using Matplotlib."""
+    """Renders LaTeX to a high-resolution transparent PNG using Matplotlib in academic BLACK."""
     try:
         import matplotlib.pyplot as plt
         plt.rc('text', usetex=False)
@@ -91,8 +91,8 @@ def render_latex_to_image(latex, output_path, is_inline=False):
             latex = f'${latex}$'
             
         fig = plt.figure(figsize=(0.1, 0.1))
-        # Use Navy Blue (#003366) for the formula
-        fig.text(0, 0, latex, fontsize=16 if not is_inline else 12, color='#003366')
+        # Equations MUST be BLACK for academic standard
+        fig.text(0, 0, latex, fontsize=16 if not is_inline else 12, color='#000000')
         
         renderer = fig.canvas.get_renderer()
         bbox = fig.texts[0].get_window_extent(renderer=renderer)
@@ -334,6 +334,15 @@ def convert_to_professional_docx(md_path, docx_path):
                 run = p.add_run("ABSTRACT")
                 run.bold = True; run.font.size = Pt(14)
                 i += 1; continue
+                
+            if is_paper and any(t in title for t in ["Introduction", "Related Work", "Methodology", "Results", "Discussion"]):
+                # Transition to two-column layout for paper body
+                section = doc.add_section(WD_SECTION.CONTINUOUS)
+                sectPr = section._sectPr
+                cols = sectPr.xpath('./w:cols')[0]
+                cols.set(ns.qn('w:num'), '2')
+                cols.set(ns.qn('w:space'), '720') # ~0.5 inch gap
+            
             if not is_paper:
                 is_odd = any(t in title for t in ["Introduction", "Conclusion", "References", "Bibliography", "Abstract", "Table of Contents", "List of"]) or (title[0].isdigit() and "." in title[:3])
                 if is_odd:
@@ -363,22 +372,19 @@ def convert_to_professional_docx(md_path, docx_path):
             alt = re.findall(r'!\[(.*?)\]', line)[0]
             m = re.search(r'\((.*?)\)', line)
             if m:
-                raw_path = m.group(1)
-                # Resolve path relative to the markdown file
-                path = os.path.normpath(os.path.join(os.path.dirname(md_path), raw_path))
-                if os.path.exists(path):
-                    p_img = doc.add_paragraph()
-                    p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                    p_img.paragraph_format.keep_with_next = True
-                    run = p_img.add_run()
-                    # Scale image for columns if it's a paper
-                    width_cm = 15 if not is_paper else 8
-                    run.add_picture(path, width=Cm(width_cm))
+                img_path = os.path.normpath(os.path.join(os.path.dirname(md_path), m.group(1)))
+                if os.path.exists(img_path):
+                    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.keep_with_next = True
+                    run = p.add_run()
                     cap = alt
                     if i+1 < len(lines) and "Figure" in lines[i+1]:
                         cap = lines[i+1].strip().strip('*')
                         i += 1
-                    add_caption(doc, "Figure", cap, current_chapter)
+                    # Image scaling for paper (columns) vs thesis (full page)
+                    width = Inches(3.25) if is_paper else Inches(6.0)
+                    try: run.add_picture(img_path, width=width)
+                    except Exception as e: p.add_run(f"\n[Image Error: {img_path}]")
+                    add_caption(doc, "Figure", cap, chapter_num=current_chapter)
             i += 1; continue
         if line.startswith('```'):
             i += 1; code = ""
