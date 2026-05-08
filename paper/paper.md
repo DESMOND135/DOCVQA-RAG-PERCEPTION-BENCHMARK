@@ -116,7 +116,7 @@ The Normalized Levenshtein distance ($NL$) is calculated as:
 $$NL(a_i,g_i)=\frac{LD(a_i,g_i)}{\max(|a_i|,|g_i|)}$$
 
 Where the thresholded similarity score $s(a_i, g_i)$ is defined as:
-$$s(a_i, g_i) = \begin{cases} 1 - NL(a_i,g_i) & \text{if } NL(a_i,g_i) < 0.5 \\ 0 & \text{otherwise} \end{cases}$$
+$$s(a_i, g_i) = (1 - NL(a_i, g_i)) \text{ if } NL(a_i, g_i) < 0.5 \text{ else } 0$$
 
 **2. Exact Match (EM)**
 A binary indicator defining absolute precision, where $P_i$ must perfectly mirror a ground-truth sequence $g \in G_i$.

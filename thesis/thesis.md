@@ -163,7 +163,7 @@ The Normalized Levenshtein distance ($NL$) is defined as:
 $$NL(a_i,g_i)=\frac{LD(a_i,g_i)}{\max(|a_i|,|g_i|)}$$
 
 Where the thresholded similarity score $s(a_i, g_i)$ is:
-$$s(a_i,g_i)=\begin{cases}1-NL(a_i,g_i), & \text{if } NL(a_i,g_i)<0.5\\0, & \text{otherwise}\end{cases}$$
+$$s(a_i,g_i) = (1-NL(a_i,g_i)) \text{ if } NL(a_i,g_i) < 0.5 \text{ else } 0$$
 
 Where $s(a_i, g_i)$ is defined by the score at a threshold ($T=0.5$):
 $$s(a_i, g_i) = \max(0, 1 - NL(a_i, g_i)) \text{ if } 1 - NL(a_i, g_i) \geq 0.5 \text{ else } 0$$

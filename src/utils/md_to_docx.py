@@ -137,6 +137,7 @@ def add_formatted_text(p, text, doc=None, chapter_num="1"):
     # Handle Block Math
     if text.strip().startswith('$$') and text.strip().endswith('$$'):
         latex = text.strip().strip('$').strip()
+        # Matplotlib cases fix: use a simpler multiline format if cases fail
         temp_img = f"temp_math_{hash(latex)}.png"
         if render_latex_to_image(latex, temp_img, is_inline=False):
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -147,8 +148,9 @@ def add_formatted_text(p, text, doc=None, chapter_num="1"):
             if doc: add_caption(doc, "Equation", "", chapter_num=chapter_num)
             return
             
-    # Handle Inline Math and formatting
-    parts = re.split(r'(\$.*?\$|\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)', text)
+    # Handle Inline Math (Look for math symbols to avoid currency like $100)
+    # Regex: Look for $ followed by characters that include math symbols (+, -, \, _, ^, etc.)
+    parts = re.split(r'(\$(?:[^$]*[\\+\\-\\_\\^\\=][^$]*)\$|\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)', text)
     for part in parts:
         if not part: continue
         if part.startswith('$') and part.endswith('$'):
@@ -160,6 +162,7 @@ def add_formatted_text(p, text, doc=None, chapter_num="1"):
                 try: os.remove(temp_img)
                 except: pass
             else:
+                # Fallback to italic text for currency or failed renders
                 run = p.add_run(part); run.italic = True
         elif part.startswith('***') and part.endswith('***'):
             p.add_run(part[3:-3]).bold = True; p.runs[-1].italic = True
