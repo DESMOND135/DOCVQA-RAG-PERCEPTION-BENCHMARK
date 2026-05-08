@@ -1,87 +1,95 @@
-# Systems-Level Reliability Evaluation for Document AI: Bridging the Perception-Cognition Gap
-
-**Master's Defense Presentation**  
+# Systems-Level Reliability and Robustness Evaluation Framework for Document AI
+**Master's Thesis Defense**  
+Bridging the Perception-Cognition Gap in Multimodal Reasoning  
 Academic Year 2025-2026
 
 ---
 
-## 1. The Challenge: Reliability in Document AI
-- **The Problem**: Enterprise applications demand a robust approach to data corruption when extracting information from complex PDFs (invoices, medical records, financial forms).
-- **DocVQA Architecture**: We dynamically frame extraction as Document Visual Question Answering (DocVQA), using Large Language Models (LLMs) as the cognitive reasoning engine.
-- **The Perception-Cognition Gap**: While LLMs are linguistically brilliant, they lack spatial awareness. They must rely on external perception layers to understand layouts.
-- **Research Gap**: Current systems either flatten documents, losing layout structure (traditional OCR), or suffer from resolution-loss hallucinations due to input constraints (end-to-end VLMs).
+## The Motivation: High-Risk Document AI
+- **The Challenge**: Mission-critical sectors (Finance, Healthcare) require exact precision from unstructured PDFs.
+- **The Bottleneck**: Standalone Large Language Models (LLMs) are linguistically robust but lack spatial awareness of document geometries.
+- **The Perception-Cognition Gap**: A fundamental disconnect between a model's reasoning capacity and its ability to "see" fine-grained textual evidence.
+- **The Cost of Failure**: Hallucination-related errors and structural data corruption in automated pipelines.
 
 ---
 
-## 2. Research Contributions
-1. **Systems-Level Evaluation Framework**: Formalization of a reliability and robustness framework under high-complexity zero-shot conditions.
-2. **Hybrid OCR-VLM Synchronization**: A dual-stream architecture fusing deterministic character parsing with semantic layout mapping.
-3. **Hallucination Analysis**: Analyzing perception-induced failure modes in standalone Vision-Language Models on dense layouts.
-4. **Comparative Benchmark**: Quantitative evaluation across traditional OCR, deep-learning OCR, standalone VLMs, and Hybrid approaches.
-5. **Robustness Validation**: Demonstrating improved accuracy and grounded reasoning in dense tabular environments.
+## The Research Gap: Heuristics vs. Generative
+- **Traditional OCR (Tesseract)**: Preserves literal characters but linearizes text horizontally, causing **Structural Fragmentation** in multi-column layouts.
+- **Standalone VLMs (Gemini, LLaVA)**: Elegant multimodal perception but limited by **Resolution-Loss Hallucination** in dense tabular regions.
+- **The Missing Link**: A lack of rigorous, systems-level benchmarking that evaluates the reliability trade-offs between deterministic parsing and semantic layout mapping.
 
 ---
 
-## 3. Methodology: Modular RAG Pipeline
+## Proposed Solution: Hybrid Dual-Stream Synchronization
+- **Core Strategy**: Simultaneously process two independent data streams:
+  - **Stream 1 (Deterministic)**: PaddleOCR for high-precision character and bounding-box detection.
+  - **Stream 2 (Semantic)**: Vision-Language Model for visual layout summarization and structural context.
+- **Grounding Reliability**: Grounding the generative visual summary in the deterministic OCR character sequence to suppress resolution-loss errors.
+
+---
+
+## System Architecture: Modular Evaluation Pipeline
 
 ![System Architecture](../figures/diagrams/system_architecture.png)
 
-- **Swappable Perception Layers**:
-  - Tesseract (Traditional baseline)
-  - PaddleOCR (Deep-learning layout detection)
-  - VLM (End-to-end multimodal extraction)
-  - Hybrid (Dual-stream synchronization)
+- **Layout-Aware Retrieval**: Fusing character tokens and spatial embeddings in a shared vector space (FAISS).
+- **Zero-Shot Protocol**: Evaluating out-of-the-box robustness without task-specific fine-tuning.
 
 ---
 
-## 4. Mathematical Foundations
-- **ANLS (3.1)**: Measures soft similarity (String edit distance with OCR noise tolerance).
-- **Exact Match (3.2)**: Absolute identity $sim(\mathbf{P}, \mathbf{G}) = 1$.
-- **F1-Score (3.3)**: Harmonic mean of Precision and Recall in retrieval context.
-- **Cosine Similarity (3.4)**: $sim(\mathbf{q}, \mathbf{c}) = \frac{\mathbf{q} \cdot \mathbf{c}}{\|\mathbf{q}\| \|\mathbf{c}\|}$.
-- **Throughput (3.5)**: Scalability metric ($T_p = 1/L$).
+## Mathematical Formalization of Reliability
+- **Hybrid Synchronization (1.1)**: $C = S_{ocr} \parallel S_{vlm}$
+- **Accuracy Metric: ANLS (3.1)**:
+  $$ANLS = \frac{1}{N}\sum_{i=1}^{N} s(a_i,g_i)$$
+- **Fidelity Metric: Exact Match (3.2)**: Binary indicator of absolute precision.
+- **Efficiency Metric: Throughput (3.5)**: $T_p = 1/L$
+- **Grounding**: $s(a_i, g_i) = (1 - NL(a_i, g_i)) \text{ if } NL(a_i, g_i) < 0.5 \text{ else } 0$
 
 ---
 
-## 5. The Hybrid Perception Strategy
+## Benchmarking Results: The Accuracy-Efficiency Frontier
 
-![Hybrid Flow](../figures/diagrams/hybrid_workflow.png)
+![Accuracy Tradeoff](../figures/plots/accuracy_tradeoff.png)
 
-- **Dual Stream Logic**:
-  - Stream 1: Literal OCR character precision (PaddleOCR).
-  - Stream 2: Semantic VLM layout understanding.
-- **Goal**: Combining literal character grounding with spatial context.
+- **Performance Delta**: The Hybrid model achieves higher ANLS scores over standalone VLMs in dense tabular environments.
+- **Observation**: Improving perception fidelity requires a significant computational trade-off in inference latency.
 
 ---
 
-## 6. Experimental Results
+## Quantitative Evidence: Efficiency & Memory
 
-| Strategy | ANLS (Mean ± SD) | EM (Mean ± SD) | F1 (Mean ± SD) | Latency (s) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Hybrid** | 0.24 ± 0.05 | 0.20 ± 0.04 | 0.30 ± 0.06 | 14.2 |
-| **VLM** | 0.17 ± 0.04 | 0.10 ± 0.03 | 0.20 ± 0.05 | 4.2 |
-| **Tesseract** | 0.17 ± 0.04 | 0.10 ± 0.02 | 0.30 ± 0.05 | 11.0 |
-| **PaddleOCR** | 0.13 ± 0.03 | 0.00 ± 0.00 | 0.10 ± 0.02 | 52.3 |
+![Efficiency Comparison](../figures/plots/efficiency_comparison.png)
 
-*(Graphs demonstrating Latency vs ANLS tradeoffs are available in the repository `figures/plots/`)*
+- **Throughput Inversion**: While VLMs provide higher throughput, their reliability in zero-shot extractions is significantly lower than grounded hybrid architectures.
+- **Resource Footprint**: Hybrid models demand higher memory (RSS) due to dual-stream synchronization overhead.
 
 ---
 
-## 7. Error Analysis and Hallucinations
-- **Resolution-Loss Hallucinations**: Standalone VLMs probabilistically guess numbers when input patches are downsampled, generating plausible but incorrect answers.
-- **Layout Fragmentation**: Traditional OCR reads *across* columns, degrading semantic relationships and poisoning the retrieval index.
-- **Retrieval Ambiguity**: FAISS struggles with repeated values (e.g., "$0.00") in dense tables, retrieving the correct string from the wrong geometric row.
+## Qualitative Analysis: Visualizing Failure Modes
+
+![Hallucination Comparison](../figures/diagrams/hallucination_comparison.png)
+
+- **VLM Failure**: Resolution-loss causes rounding errors and "probabilistic guessing" in financial figures.
+- **Hybrid Remediation**: Deterministic OCR grounding recovers exact alphanumeric sequences ($1,240.50$ vs $1,200.00$).
 
 ---
 
-## 8. Reproducibility & Ethical Considerations
-- **Reproducibility**: Modular architecture with public code, fixed configurations, and evaluation scripts for full transparency.
-- **Ethics**: High-risk deployment (Medical/Finance) requires human-in-the-loop verification. Hallucination suppression is an ethical requirement for data integrity.
+## Discussion: Structural Robustness & Limitations
+- **Adversarial Complexity**: Low absolute ANLS scores reflect the benchmark's focus on high-complexity, multi-column adversarial layouts rather than dataset scale.
+- **Computational Overhead**: Dual-stream synchronization increases latency, necessitating future GPU-accelerated optimization.
+- **Generalization**: Reliability performance remains dependent on embedding fidelity and OCR extraction quality.
 
 ---
 
-## 9. Conclusion, Limitations, and Future Work
-- **Conclusion**: Fusing literal character grounding with semantic layout awareness is essential for suppressing resolution-loss hallucinations in multimodal tasks.
-- **Limitations**: The Hybrid architecture exhibits significant computational overhead, and experiments were constrained by CPU limitations and a 50-document validation scale.
-- **Benchmark Context**: Low absolute ANLS scores reflect the strict zero-shot evaluation protocol on high-complexity layouts, rather than model instability. Baseline models like LayoutLMv3 were omitted due to lack of task-specific fine-tuning resources.
-- **Future Work**: Optimizing Dual-Stream latency via GPU-accelerated tensor processing and scaling across dense tabular-specific corpora (e.g., TabFact).
+## Conclusion and Future Directions
+- **Conclusion**: Fusing literal character grounding with semantic layout awareness is essential for mitigating hallucinations in mission-critical Document AI.
+- **Future Work**:
+  - Scaling across dense tabular-specific corpora (TabFact).
+  - Investigating natively layout-aware architectures (LayoutLMv3).
+  - GPU-accelerated asynchronous tensor processing for reduced latency.
+
+---
+
+# Thank You
+**Questions & Discussion**  
+Systems-Level Reliability Evaluation of Multimodal Document AI

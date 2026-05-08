@@ -53,7 +53,7 @@ def generate_defense_deck(md_path, pptx_path):
         lines = [l.strip() for l in slide_md.split('\n') if l.strip()]
         if not lines: continue
         
-        title, bullets, img_path = "Document Section", [], None
+        title, bullets, img_path, table_data = "Document Section", [], None, []
         if lines[0].startswith('#'):
             title = lines[0].lstrip('#').strip(); body_lines = lines[1:]
         else:
@@ -67,18 +67,19 @@ def generate_defense_deck(md_path, pptx_path):
         slide = prs.slides.add_slide(prs.slide_layouts[1])
         add_slide_decorations(slide, i, len(slides_raw)-1)
         
-        # Header - Centered & Professional Blue
+        # Header
         title_shape = slide.shapes.title; title_shape.text = title
         title_shape.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
-        title_shape.text_frame.paragraphs[0].font.size = Pt(40); title_shape.text_frame.paragraphs[0].font.color.rgb = BLUE_NAVY
+        title_shape.text_frame.paragraphs[0].font.size = Pt(36); title_shape.text_frame.paragraphs[0].font.color.rgb = BLUE_NAVY
         title_shape.text_frame.paragraphs[0].font.bold = True
         
         for line in body_lines:
             if line.startswith('- ') or line.startswith('* '):
-                # Clean bullet text
-                clean_bullet = re.sub(r'(\$\$?)(.*?)(\$\$?)', r'\2', line[2:].strip())
-                clean_bullet = re.sub(r'(\*\*|\*|_)', '', clean_bullet)
-                bullets.append(clean_bullet)
+                bullets.append(line[2:].strip())
+            elif line.startswith('|'):
+                if '---' not in line:
+                    cols = [c.strip() for c in line.split('|') if c.strip()]
+                    if cols: table_data.append(cols)
             elif '$$' in line:
                 m = re.search(r'\$\$(.*?)\$\$', line)
                 if m:
@@ -93,34 +94,45 @@ def generate_defense_deck(md_path, pptx_path):
                     p = os.path.normpath(os.path.join(os.path.dirname(md_path), m.group(1)))
                     if os.path.exists(p): img_path = p
 
-        # Layout Logic: Optimized for readability
-        body_area = slide.placeholders[1]; body_area.text_frame.clear()
-        body_area.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+        # Content Area
+        left_col = slide.placeholders[1]; left_col.text_frame.clear()
         
         if img_path:
-            body_area.width = Inches(6.0); body_area.left = Inches(0.5); body_area.top = Inches(1.8)
-            slide.shapes.add_picture(img_path, Inches(7.0), Inches(1.8), width=Inches(5.8))
+            left_col.width = Inches(6.5); left_col.left = Inches(0.5); left_col.top = Inches(1.8)
+            pic = slide.shapes.add_picture(img_path, Inches(7.2), Inches(2.0))
+            # Center math if it's a standalone equation
+            if "temp_math" in img_path:
+                pic.left = Inches(3.5); pic.top = Inches(3.0); pic.width = Inches(6.0)
+                left_col.width = Inches(0) # Hide bullets if large math
+            else:
+                pic.width = Inches(5.5)
+        elif table_data:
+            left_col.width = Inches(12.0); left_col.left = Inches(0.6); left_col.top = Inches(1.5)
+            rows, cols = len(table_data), len(table_data[0])
+            table = slide.shapes.add_table(rows, cols, Inches(1.0), Inches(2.5), Inches(11.3), Inches(3.0)).table
+            for r in range(rows):
+                for c in range(cols):
+                    cell = table.cell(r, c)
+                    cell.text = table_data[r][c]
+                    p = cell.text_frame.paragraphs[0]
+                    p.font.size = Pt(18); p.font.bold = (r == 0)
+                    p.alignment = PP_ALIGN.CENTER
+                    if r == 0: cell.fill.solid(); cell.fill.fore_color.rgb = BLUE_NAVY; p.font.color.rgb = WHITE
         else:
-            body_area.width = Inches(11.0); body_area.left = Inches(1.1); body_area.top = Inches(2.0)
+            left_col.width = Inches(12.0); left_col.left = Inches(0.6); left_col.top = Inches(1.8)
 
-        # Post-process bullets for mixed math/text styling
-        for b_text in bullets[:5]:
-            p = body_area.text_frame.add_paragraph()
-            p.level = 0
-            p.space_after = Pt(18)
-            p.alignment = PP_ALIGN.LEFT
-            
-            # Split by math symbols to apply Bold + Blue styling to them
-            parts = re.split(r'([A-B\\cdot‖]+)', b_text)
+        # Bullets
+        for b_text in bullets:
+            p = left_col.text_frame.add_paragraph()
+            p.level = 0; p.space_after = Pt(12)
+            # Basic Bold/Italic support
+            parts = re.split(r'(\*\*.*?\*\*|\*.*?\*)', b_text)
             for part in parts:
                 run = p.add_run()
-                run.text = part
-                run.font.size = Pt(28); run.font.name = 'Arial'
-                if part in ['A', 'B', '·', '‖']:
-                    run.font.bold = True
-                    run.font.color.rgb = BLUE_NAVY
-                else:
-                    run.font.color.rgb = BLACK
+                if part.startswith('**'): run.text = part[2:-2]; run.font.bold = True
+                elif part.startswith('*'): run.text = part[1:-1]; run.font.italic = True
+                else: run.text = part
+                run.font.size = Pt(24); run.font.name = 'Calibri'; run.font.color.rgb = BLACK
 
     prs.save(pptx_path)
     print(f"Presentation Generated: {pptx_path}")
