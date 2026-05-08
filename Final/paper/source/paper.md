@@ -6,7 +6,7 @@
 
 
 **Abstract**
-The automated extraction of information from complex PDF documents in mission-critical applications requires a zero-tolerance approach to hallucinations and data corruption. Modern Large Language Models (LLMs) suffer from a fundamental **Perception-Cognition Gap**: standalone LLMs are linguistically robust but lack spatial awareness of document geometries. We categorize the existing bottlenecks in document understanding into **Resolution-Loss Hallucination** (inherent in generative multimodal VLMs) and **Layout Unawareness** (inherent in traditional heuristic OCR). To address this, we formalize a novel **Hybrid OCR-VLM Synchronization** strategy that operates on a "Dual-Stream" logic. By rigorously grounding the generative visual summaries of a VLM in the absolute literal character sequences of a deep-learning layout detector, we enable the cognitive model to navigate fine-grained data and complex spatial hierarchies without risking hallucination. Our experimental results on a high-complexity DocVQA benchmark demonstrate that the **Hybrid approach improves Average Normalized Levenshtein Similarity (ANLS) by 41%** over standalone VLM baselines in dense tabular environments. This paper formalizes the synchronization methodology and analyzes the resulting accuracy-efficiency trade-offs, establishing a robust evaluation framework for industrial Document AI.
+The automated extraction of information from complex PDF documents in mission-critical applications requires a robust approach to hallucinations and data corruption. Modern Large Language Models (LLMs) suffer from a fundamental **Perception-Cognition Gap**: standalone LLMs are linguistically robust but lack spatial awareness of document geometries. We categorize the existing bottlenecks in document understanding into **Resolution-Loss Hallucination** (inherent in generative multimodal VLMs) and **Layout Unawareness** (inherent in traditional heuristic OCR). To address this, we formalize a novel **Hybrid OCR-VLM Synchronization** strategy that operates on a "Dual-Stream" logic. By rigorously grounding the generative visual summaries of a VLM in the absolute literal character sequences of a deep-learning layout detector, we enable the cognitive model to navigate fine-grained data and complex spatial hierarchies without risking hallucination-related errors. Our experimental results on a high-complexity DocVQA benchmark demonstrate that the **Hybrid approach achieves higher ANLS scores** over standalone VLM baselines in dense tabular environments. This paper formalizes the synchronization methodology and analyzes the resulting accuracy-efficiency trade-offs, establishing a reliability-oriented comparative evaluation framework for industrial Document AI.
 
 
 ## 1. Introduction
@@ -14,11 +14,21 @@ The automated extraction of information from highly structured, unstructured, or
 
 A Large Language Model (LLM) acts as the central cognitive engine. Working within a Retrieval-Augmented Generation (RAG) architecture, the LLM receives the user's query alongside relevant contextual text segments retrieved from the PDF, utilizing its advanced reasoning capabilities to synthesize a grounded answer. However, because standard LLMs lack inherent spatial awareness, the underlying PDF must first be processed through a perception layer. This paper directly addresses the "Perception-Cognition Gap" by evaluating the systems-level reliability of distinct processing paradigms: heuristic OCR, multimodal VLMs, and our proposed Hybrid strategy.
 
-### 1.1 Research Gap and Contributions
-The literature lacks a unified evaluation framework that quantitatively addresses the trade-off between literal character precision and structural layout awareness. This research presents a systems-level reliability and robustness evaluation framework for multimodal document reasoning. The primary contributions of this paper are:
-1. **Systems-Level Evaluation Framework:** The development of a modular RAG pipeline designed explicitly to benchmark perception reliability and hallucination behavior.
-2. **Empirical Trade-off Analysis:** A quantitative evaluation of accuracy-efficiency trade-offs between heuristic OCR, deep-learning OCR, and generative VLMs on a high-complexity document subset.
-3. **Hybrid Perception Synchronization:** The formalization of a dual-stream perception strategy that fuses deterministic character parsing with semantic layout mapping to reduce resolution-loss hallucinations.
+### 1.1 Research Gap
+
+Existing OCR-based systems preserve literal textual precision but frequently fail to maintain spatial document structure in complex layouts. Conversely, modern Vision-Language Models preserve high-level visual semantics but remain vulnerable to resolution-loss hallucinations and lack deterministic grounding for exact-match extraction tasks. While prior work has explored layout-aware transformers and multimodal document understanding, limited research has systematically evaluated the reliability trade-offs between OCR, VLM, and synchronized Hybrid architectures under high-complexity zero-shot conditions.
+
+This work addresses this gap by proposing a modular evaluation framework and a dual-stream synchronization strategy designed to improve robustness in mission-critical document reasoning systems.
+
+### 1.2 Research Contributions
+
+The primary contributions of this work are summarized as follows:
+
+1. We formalize a systems-level reliability and robustness evaluation framework for Document AI under high-complexity zero-shot conditions.
+2. We propose a Hybrid OCR-VLM synchronization architecture that combines deterministic OCR grounding with semantic visual reasoning.
+3. We analyze perception-induced hallucination failure modes in standalone Vision-Language Models operating on dense document layouts.
+4. We provide a comparative benchmark across OCR, deep-learning OCR, standalone VLM, and Hybrid strategies using DocVQA-based evaluation metrics.
+5. We demonstrate that synchronized multimodal grounding improves robustness in dense tabular environments compared to standalone generative perception systems.
 
 The global document reasoning pipeline is orchestrated across multiple independent layers as detailed in Figure 1.1. By decoupling perception from cognition, the system provides a robust framework for benchmarking diverse extraction strategies independently.
 ![Global Architecture](../../../results/diagrams/system_architecture.png)
@@ -31,7 +41,7 @@ This global map illustrates the synchronization between the perception, storage,
 
 The shift towards multimodal Document AI has been driven by the need to natively process spatial geometries. Early breakthroughs like LayoutLM [5], LayoutLMv2 [6], and LayoutLMv3 [7] demonstrated that injecting 2D bounding box coordinates directly into the transformer attention mechanism improves performance on Visually Rich Document Understanding (VRDU). Other models, such as DocFormer [9], integrated visual and textual features synergistically. 
 
-While layout-aware transformers like LayoutLMv3 and DocFormer present state-of-the-art results on supervised benchmarks, they are intentionally excluded from the experimental evaluation in this paper. These architectures require extensive task-specific supervised fine-tuning and lack the zero-shot generative instruction-following capabilities required by the dynamic RAG pipeline designed for this benchmark.
+LayoutLMv3 and DocFormer were analyzed theoretically in the literature review but were not benchmarked experimentally due to infrastructure limitations and the absence of task-specific fine-tuning resources.
 
 More recently, OCR-free architectures like Donut [8] and layout-aware language models like DocLLM [10] have attempted to bypass bounding boxes entirely. To bridge this gap for arbitrary, zero-shot Question Answering, Large Vision-Language Models (VLMs) such as LLaVA [11, 12], BLIP-2 [21], and Gemini [22] utilize massive Vision Transformers (ViT) [20] aligned with LLMs via instruction tuning. However, as we establish in this section, these models introduce critical failure modes when deployed in high-precision environments.
 
@@ -44,7 +54,7 @@ Traditional OCR utilizes heuristic-based layout analysis paired with a Long Shor
 Traditional OCR engines perform literal extraction but suffer from a fundamental lack of semantic awareness. Because they operate exclusively at the character level, they are unable to interpret the conceptual relationships between distinct values, labels, or contextual elements on a page. Consequently, while they provide high syntactic precision for isolated strings, they remain "blind" to the structural hierarchies and semantic dependencies that define complex documents.
 
 ### 2.2 Deep Learning OCR (PaddleOCR)
-PaddleOCR utilizes an advanced dual-component deep learning architecture to maintain high spatial awareness. It actively uses **DBNet** to rapidly detect text regions in the image, and combines it with **SVTR** to natively recognize characters from those detected regions. Because it successfully maps visual bounds, it effortlessly handles complex layouts and ultimately works far better than traditional OCR on densely structured documents.
+PaddleOCR utilizes an advanced dual-component deep learning architecture to maintain high spatial awareness. It actively uses **DBNet** to rapidly detect text regions in the image, and combines it with **SVTR** to natively recognize characters from those detected regions. Because it successfully maps visual bounds, it effectively handles complex layouts and demonstrates improved performance over traditional OCR on densely structured documents.
 
 The internal mechanics of the PaddleOCR multi-stage architecture and its document structure logic are presented in Figure 2.1 and Figure 2.2. These diagrams visualize the deep learning pipeline where DBNet is utilized to strictly isolate physical text boundaries and detect structural hierarchies—such as multi-column layouts and dense tabular grids—while the SVTR component transcribes the recognized characters within those detected regions. This integrated approach ensures that the perception layer maintains both textual fidelity and spatial context, preventing the structural fragmentation that often occurs in traditional heuristic-based extraction engines.
 ![PaddleOCR Architecture](../../../results/diagrams/paddleocr_academic.png)
@@ -56,7 +66,7 @@ The internal mechanics of the PaddleOCR multi-stage architecture and its documen
 These visualizations detail the internal deep learning orchestration of the perception layer, showing how DBNet stabilizes physical region detection while SVTR transcribes characters to maintain both visual and textual fidelity.
 
 **PaddleOCR Limitations:**
-Despite its advanced layout mapping capabilities, PaddleOCR is constrained by several operational bottlenecks. The architecture requires significantly higher computational resources, specifically in terms of RAM and VRAM, when compared to lightweight heuristic engines. This results in slower inference speeds and substantial latency penalties when executing on CPU-based infrastructure. Additionally, the system is highly sensitive to image resolution scaling, where minor blurring can lead to catastrophic text detection failures. These factors, combined with occasional formatting inconsistencies in nested tables, mean that the engine still lacks the full semantic context required for autonomous reasoning.
+Despite its advanced layout mapping capabilities, PaddleOCR is constrained by several operational bottlenecks. The architecture requires significantly higher computational resources, specifically in terms of RAM and VRAM, when compared to lightweight heuristic engines. This results in slower inference speeds and substantial latency penalties when executing on CPU-based infrastructure. Additionally, the system is highly sensitive to image resolution scaling, where minor blurring can lead to significant text detection failures. These factors, combined with occasional formatting inconsistencies in nested tables, mean that the engine still lacks the full semantic context required for autonomous reasoning.
 
 ### 2.3 Vision-Language Models (VLM) and Hallucination
 Standalone VLMs (e.g., Gemini Flash [22], LLaVA [11]) attempt to natively "see" document structures. However, they are strictly constrained by the **Resolution Bottleneck** and are prone to severe **Hallucinations** [13]. Recent studies on object hallucination (e.g., POPE [14]) confirm that these models struggle to ground their reasoning when input fidelity drops.
@@ -68,7 +78,7 @@ The fundamental resolution bottlenecks inherent in standalone multimodal Vision-
 This illustration map highlights the resolution-loss bottleneck where high-fidelity document images are downsampled into small context windows, leading to the distortion of fine alphanumeric details.
 
 **VLM Limitations:**
-Vision-Language Models face significant challenges regarding a high risk of hallucination [13] when visual cues are ambiguous or degraded. Most critically, the inherent need to downsample high-resolution documents to small, fixed input sizes (e.g., 336x336 pixels) leads to a permanent loss of visual fidelity. This resolution bottleneck obliterates fine alphanumeric details, forcing the model to rely on probabilistic generation rather than deterministic extraction.
+Vision-Language Models face significant challenges regarding a high risk of hallucination [13] when visual cues are ambiguous or degraded. Most critically, the inherent need to downsample high-resolution documents to small, fixed input sizes (e.g., 336x336 pixels) leads to a permanent loss of visual fidelity. This resolution bottleneck degrades fine alphanumeric details, forcing the model to rely on probabilistic generation rather than deterministic extraction.
 
 ### 2.4 The Hybrid Approach: Solution Connection
 The proposed solution involves combining layout detection with VLM reasoning. By grounding visual summaries in literal OCR sequences, we bridge the Perception Gap.
@@ -82,7 +92,6 @@ This schematic illustrates the parallel execution of OCR and VLM data streams, s
 ## 3. Methodology
 
 We propose a Hybrid Perception layer that operates on a "Dual-Stream" synchronization logic to overcome the limitations of both pure-OCR and pure-VLM approaches. This section details the mathematical and architectural foundations of the system, including the preprocessing pipeline and the vector synchronization mechanism.
-We propose a Hybrid Perception layer that operates on a "Dual-Stream" synchronization logic to overcome the limitations of both pure-OCR and pure-VLM approaches.
 
 The system processes the document image through three parallel tracks consisting of OCR parsing, visual layout summarization, and shared vector indexing. PaddleOCR is utilized to extract exact literal character sequences, while a Vision-Language Model generates a complementary semantic summary of the visual layout. Both data streams are subsequently encoded into a shared embedding space and stored in FAISS to enable layout-aware retrieval.
 
@@ -118,7 +127,7 @@ To retrieve accurate context, the system follows a strict three-phase sequence:
 
 - **Embedding**: The system converts incoming text into dense mathematical numerical vectors. Text chunks with similar meanings are mapped proportionally closer together.
 - **Indexing**: The process of structurally storing these vectors in FAISS. This connects the semantic embedding directly to the database search architecture.
-- **Retrieval**: The engine algorithmically searches the stored index to find vectors mathematically similar to the user's questioned embedding.
+- **Retrieval**: The engine algorithmically searches the stored index to find vectors mathematically similar to the user's query embedding.
 
 The conceptual progression of the Retrieval-Augmented Generation system—from initial mathematical embedding to high-speed similarity search in FAISS—is visualized in Figure 3.1. This diagram traces the systematic data lifecycle where document segments are vectorized and indexed, allowing the user's natural language questions to act as a catalyst for retrieving semantically relevant context. This process ensures that the Large Language Model operates on a focused and evidentiary localized context window, maximizing the accuracy and traceability of the final generated answer.
 ![Semantic Embedding Workflow](../../../results/diagrams/rag_workflow_academic.png)
@@ -157,8 +166,11 @@ The structural complexity and layout heterogeneity of the evaluation corpus are 
 This sample matrix demonstrates the structural heterogeneity of the evaluation corpus, showcasing the diverse layout types that the system must navigate during zero-shot inference.
 
 ### 4.1 Benchmark Dataset and Protocol Justification
-The perception strategies were evaluated using a strict Zero-Shot protocol, meaning that the models received no prior training or layout-specific fine-tuning before the 50-document benchmark. This strictly tests the models' out-of-the-box generalization capabilities, mirroring real-world enterprise deployments that encounter novel document layouts daily. 
-Furthermore, the 50-document subset intentionally biases towards high-complexity, dense tabular data and multi-column formats. The benchmark was executed on CPU-bound infrastructure without dedicated GPU acceleration, accurately reflecting the resource constraints of many administrative servers and explicitly measuring the latency penalties of deep-learning perception layers in unaccelerated environments.
+
+The relatively low absolute ANLS and Exact Match scores reflect the difficulty of the evaluation protocol rather than model instability. The benchmark was intentionally constrained to high-complexity document layouts under a strict zero-shot setting without task-specific fine-tuning. Furthermore, all experiments were conducted under CPU-limited inference conditions using dense tabular and multi-column documents selected specifically to stress-test perception robustness.
+
+The perception strategies were evaluated using a strict Zero-Shot protocol, meaning that the models received no prior training or layout-specific fine-tuning before the 50-document benchmark. This tests the models' out-of-the-box generalization capabilities, mirroring enterprise deployments that encounter novel document layouts daily. 
+Furthermore, the 50-document subset intentionally biases towards high-complexity, dense tabular data and multi-column formats. The benchmark was executed on CPU-bound infrastructure without dedicated GPU acceleration, accurately reflecting the resource constraints of many administrative servers and measuring the latency penalties of deep-learning perception layers in unaccelerated environments.
 
 ## 5. Results
 
@@ -229,13 +241,17 @@ The intrinsic trade-off between perception quality and inference speed is mapped
 This analysis isolates the accuracy delta of the dual-stream model in dense environments, confirming that literal grounding is essential for suppressing hallucinations in multimodal document understanding.
 As seen in Table 1 and the following visualizations, a clear trade-off curve emerges: the Hybrid model represents the peak of the "Accuracy-Efficiency Frontier"—delivering the highest fidelity but at a 14.2s latency cost ($L$). Empirical analysis confirms that while indexing remains a fixed overhead of **0.12s**, the retrieval latency for the Hybrid and OCR models is maintained at a precise **0.050s**, ensuring scalable semantic search across high-density document corpora. Standalone VLMs ($L = 4.2s$) represent the "High-Throughput" extreme but ultimately fail on Exact Match ($EM$) due to Resolution-Loss Hallucination, completely avoiding the FAISS vector space with a **0.000s**
 
-## 8. Conclusion and Limitations
+## 8. Conclusion
 
-This paper formalized a comprehensive reliability and robustness evaluation framework for Document AI, demonstrating that the "Perception-Cognition Gap" is the primary driver of systemic failures in DocVQA architectures. By actively grounding generative multimodal reasoning in deterministic deep-learning OCR sequences, we established a Hybrid perception strategy that suppresses resolution-loss hallucinations, delivering a 41% accuracy improvement in highly complex, dense tabular environments. 
+This paper formalized a comprehensive reliability and robustness evaluation framework for Document AI, demonstrating that the "Perception-Cognition Gap" is the primary driver of systemic failures in DocVQA architectures. By actively grounding generative multimodal reasoning in deterministic deep-learning OCR sequences, we established a Hybrid perception strategy that suppresses resolution-loss hallucinations, delivering a significant accuracy improvement in highly complex, dense tabular environments.
 
-**Limitations:** Despite these improvements, the Hybrid architecture exhibits significant computational overhead. Executing two intense neural networks in parallel on CPU-bound infrastructure resulted in an average inference latency of 14.2 seconds, heavily restricting its viability in high-throughput real-time applications. Furthermore, the experimental scale was constrained to a high-complexity subset of 50 documents due to API rate limits. 
+### 8.1 Limitations
 
-Future work will focus on latency optimization via GPU-accelerated asynchronous tensor processing and scaling the Hybrid pipeline across more extensive, dense tabular-specific corpora to push Document AI closer to total reliability.
+This study has several limitations. First, the benchmark scale was restricted to 50 high-complexity documents due to computational constraints and API rate limitations. Second, the experiments were conducted primarily in CPU-based environments, which significantly increased inference latency for deep-learning models. Third, the proposed Hybrid architecture introduces substantial computational overhead due to dual-stream synchronization. Finally, retrieval performance remains dependent on embedding fidelity and OCR extraction quality, which may propagate errors into downstream reasoning.
+
+### 8.2 Future Work
+
+Future work will focus on latency optimization via GPU-accelerated asynchronous tensor processing and scaling the Hybrid pipeline across more extensive, dense tabular-specific corpora to push Document AI closer to total reliability. Additionally, the investigation of natively layout-aware multimodal architectures such as LayoutLMv3, which inherently incorporate geometric bounding boxes into transformer embeddings, represents a promising path for future research.
 
 ## References
 

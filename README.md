@@ -14,7 +14,15 @@
 ## 1. Project Overview
 This repository contains the codebase, benchmarking utilities, and empirical evaluation framework for my Master's Thesis. The project introduces a comprehensive systems-level reliability and robustness benchmark for Document Visual Question Answering (DocVQA) architectures. The core objective is to investigate and bridge the **Perception-Cognition Gap**—the fundamental disconnect where Large Language Models (LLMs) possess advanced linguistic reasoning but remain "visually blind" to the complex spatial layouts of unstructured document images (e.g., dense financial tables, multi-column reports).
 
-Rather than treating information extraction merely as a simple PDF parsing pipeline, this research frames the challenge as an architectural evaluation of reliability. It measures the precise trade-offs between deterministic text extraction and generative visual perception, culminating in a novel Hybrid synchronization strategy designed to mitigate systemic hallucinations in mission-critical applications.
+### Research Gap
+Existing OCR-based systems preserve literal textual precision but frequently fail to maintain spatial document structure in complex layouts. Conversely, modern Vision-Language Models preserve high-level visual semantics but remain vulnerable to resolution-loss hallucinations and lack deterministic grounding for exact-match extraction tasks. Limited research has systematically evaluated the reliability trade-offs between OCR, VLM, and synchronized Hybrid architectures under high-complexity zero-shot conditions.
+
+### Contributions
+1. We formalize a systems-level reliability and robustness evaluation framework for Document AI under high-complexity zero-shot conditions.
+2. We propose a Hybrid OCR-VLM synchronization architecture that combines deterministic OCR grounding with semantic visual reasoning.
+3. We analyze perception-induced hallucination failure modes in standalone Vision-Language Models operating on dense document layouts.
+4. We provide a comparative benchmark across OCR, deep-learning OCR, standalone VLM, and Hybrid strategies using DocVQA-based evaluation metrics.
+5. We demonstrate that synchronized multimodal grounding improves robustness in dense tabular environments compared to standalone generative perception systems.
 
 ---
 
@@ -80,9 +88,14 @@ A key outcome of this framework is the systematic categorization of Document AI 
 ---
 
 ## 6. Research Conclusion and Limitations
-The benchmark conclusively demonstrates that a **Hybrid Perception Strategy** is an essential architecture for mission-critical Document AI tasks where exact precision is non-negotiable. While standalone VLMs provide exceptional high-throughput, low-latency processing, they suffer catastrophic accuracy drops in dense financial or medical tables due to resolution limits. By successfully bridging the Perception-Cognition Gap, the Hybrid model leverages dual-stream synchronization to retain structural layout awareness without sacrificing absolute literal precision.
+The benchmark conclusively demonstrates that a **Hybrid Perception Strategy** is an essential architecture for mission-critical Document AI tasks where exact precision is non-negotiable. While standalone VLMs provide exceptional high-throughput, low-latency processing, they suffer significant accuracy drops in dense financial or medical tables due to resolution limits. By successfully bridging the Perception-Cognition Gap, the Hybrid model leverages dual-stream synchronization to retain structural layout awareness without sacrificing absolute literal precision.
 
-**Limitations**: The Hybrid approach requires executing two resource-intensive neural networks simultaneously. In CPU-bound environments, this leads to an average inference latency of 14.2 seconds, limiting real-time application deployment. Future work aims to optimize this via GPU-accelerated asynchronous processing.
+**Limitations**: 
+1. **Computational Overhead**: The Hybrid approach requires executing two resource-intensive neural networks simultaneously. In CPU-bound environments, this leads to an average inference latency of 14.2 seconds, limiting high-throughput real-time application deployment.
+2. **Benchmark Constraints**: The evaluation scale was constrained to a high-complexity subset of 50 documents due to API rate limits and computational overhead.
+3. **Exclusion of Supervised Baselines**: Layout-aware transformers (e.g., LayoutLMv3) were excluded from experimental benchmarking due to the absence of task-specific fine-tuning resources, focusing solely on zero-shot inference.
+
+Future work aims to optimize latency via GPU-accelerated asynchronous processing and scale the evaluation across larger corpora.
 
 ---
 
