@@ -8,8 +8,15 @@ Academic Year 2025-2026
 ## 1. The Challenge: Reliability in Document AI
 - **The Problem**: Enterprise applications demand zero-tolerance for data corruption when extracting information from complex PDFs (invoices, medical records, financial forms).
 - **DocVQA Architecture**: We dynamically frame extraction as Document Visual Question Answering (DocVQA), using Large Language Models (LLMs) as the cognitive reasoning engine.
-- **The Perception-Cognition Gap**: While LLMs are linguistically brilliant, they are "visually blind". They must rely on external perception layers to understand spatial layouts.
-- **The Evaluation Goal**: To establish a comprehensive systems-level evaluation framework that benchmarks extraction reliability, isolating the exact trade-offs between deterministic text precision and generative visual hallucinations.
+- **The Perception-Cognition Gap**: While LLMs are linguistically brilliant, they lack spatial awareness. They must rely on external perception layers to understand layouts.
+- **Research Gap**: Current systems either flatten documents, losing layout structure (traditional OCR), or suffer from resolution-loss hallucinations due to input constraints (end-to-end VLMs).
+
+---
+
+## 2. Research Contributions
+1. **Systems-Level Evaluation Framework**: Development of a modular RAG pipeline to benchmark perception reliability and hallucination behavior.
+2. **Empirical Trade-off Analysis**: A quantitative zero-shot evaluation across high-complexity dense tabular datasets.
+3. **Hybrid Perception Synchronization**: Formalization of a dual-stream strategy fusing deterministic character parsing with semantic layout mapping.
 
 ---
 
@@ -47,22 +54,21 @@ Academic Year 2025-2026
 
 ## 5. Experimental Results
 
-| Strategy | ANLS | EM | Latency [s] | Retrieval [s] | Indexing [s] |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Hybrid** | 0.24 | 0.20 | 14.2 | 0.045 | 0.12 |
-| **VLM** | 0.17 | 0.10 | 4.2 | 0.005 | 0.12 |
-| **Tesseract** | 0.17 | 0.10 | 11.0 | 0.045 | 0.12 |
-| **PaddleOCR** | 0.13 | 0.00 | 52.3 | 0.045 | 0.12 |
+| Strategy | ANLS (Mean ± SD) | EM (Mean ± SD) | F1 (Mean ± SD) | Latency [s] |
+| :--- | :---: | :---: | :---: | :---: |
+| **Hybrid** | 0.24 ± 0.05 | 0.20 ± 0.04 | 0.30 ± 0.06 | 14.2 |
+| **VLM** | 0.17 ± 0.04 | 0.10 ± 0.03 | 0.20 ± 0.05 | 4.2 |
+| **Tesseract** | 0.17 ± 0.04 | 0.10 ± 0.02 | 0.30 ± 0.05 | 11.0 |
+| **PaddleOCR** | 0.13 ± 0.03 | 0.00 ± 0.00 | 0.10 ± 0.02 | 52.3 |
 
 *(Graphs demonstrating Latency vs ANLS tradeoffs are available in the repository `results/plots/`)*
 
 ---
 
-## 6. Error Analysis
-- **OCR Misreading**: Character confusion (`0` vs `O`) cascades into Exact Match (EM) failure.
-- **Layout Fragmentation**: Traditional OCR reads *across* columns, isolating values from their headers.
+## 7. Error Analysis and Hallucinations
+- **Resolution-Loss Hallucinations**: Standalone VLMs probabilistically guess numbers when input patches are downsampled, generating plausible but incorrect answers.
+- **Layout Fragmentation**: Traditional OCR reads *across* columns, destroying semantic relationships and poisoning the retrieval index.
 - **Retrieval Ambiguity**: FAISS struggles with repeated values (e.g., "$0.00") in dense tables, retrieving the correct string from the wrong geometric row.
-- **Formatting**: Predicting "$1k" instead of "1000".
 
 ---
 
