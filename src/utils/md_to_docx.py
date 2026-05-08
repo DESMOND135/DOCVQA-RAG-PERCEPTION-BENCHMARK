@@ -171,31 +171,123 @@ def add_academic_footer(section, has_numbering=True):
         run = p.add_run(); run.font.name = 'Times New Roman'; run.font.size = Pt(12)
         add_field(run, "PAGE")
 
+def set_column_layout(section, num_columns=2):
+    """Sets the number of columns for a section."""
+    sectPr = section._sectPr
+    cols = sectPr.xpath('./w:cols')
+    if not cols:
+        cols = OxmlElement('w:cols')
+        sectPr.append(cols)
+    else:
+        cols = cols[0]
+    cols.set(ns.qn('w:num'), str(num_columns))
+    cols.set(ns.qn('w:space'), '720') # 0.5 inch space between columns
+
 def convert_to_professional_docx(md_path, docx_path):
     print(f"Applying Global Corrections to: {docx_path}")
-    doc = Document(); define_caption_style(doc); set_academic_styles(doc); set_heading_styles(doc); set_page_setup(doc)
-    add_academic_footer(doc.sections[0], has_numbering=False); force_field_update(doc); set_toc_styles(doc)
+    is_paper = "paper" in docx_path.lower()
+    doc = Document()
+    define_caption_style(doc)
+    set_academic_styles(doc)
+    set_heading_styles(doc)
+    set_page_setup(doc)
+    
+    if not is_paper:
+        add_academic_footer(doc.sections[0], has_numbering=False)
+        force_field_update(doc)
+        set_toc_styles(doc)
+    
     if not os.path.exists(md_path): return
     with open(md_path, 'r', encoding='utf-8') as f: lines = f.readlines()
-    current_chapter = "1"; title_line = next((l.lstrip('#').strip() for l in lines if l.startswith('#')), "Document")
-    subtitle_line = next((l.strip('*').strip() for l in lines if l.strip().startswith('**')), "")
-    tp = doc.add_heading(title_line, 0); tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    if subtitle_line:
-        sp = doc.add_paragraph(subtitle_line, style='Subtitle'); sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        for r in sp.runs: r.font.size = Pt(14); r.bold = True
-    doc.add_page_break(); doc.add_section(WD_SECTION.NEW_PAGE); add_academic_footer(doc.sections[-1], has_numbering=False)
-    i = 0
+    
+    current_chapter = "1"
+    
+    # Paper Specific Header Logic
+    if is_paper:
+        # Title
+        title_line = next((l.lstrip('#').strip() for l in lines if l.startswith('# ')), "Document")
+        tp = doc.add_heading(title_line, 0)
+        tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # Authors & Affiliations
+        author_info = []
+        abstract_lines = []
+        in_abstract = False
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith('**Author:**') or line.startswith('**Affiliation:**') or line.startswith('**Preprint:**'):
+                author_info.append(line)
+                i += 1
+                continue
+            if line.startswith('**Abstract**'):
+                in_abstract = True
+                i += 1
+                continue
+            if in_abstract:
+                if line.startswith('##'):
+                    in_abstract = False
+                    break
+                if line: abstract_lines.append(line)
+            i += 1
+            if not in_abstract and i > 20: break # Safety break
+            
+        # Add Authors
+        if author_info:
+            ap = doc.add_paragraph()
+            ap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            for info in author_info:
+                run = ap.add_run(info.replace('**', '') + "\n")
+                run.font.size = Pt(11)
+        
+        # Add Abstract
+        if abstract_lines:
+            ab_head = doc.add_paragraph()
+            ab_head.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = ab_head.add_run("Abstract")
+            run.bold = True
+            run.font.size = Pt(12)
+            
+            ab_body = doc.add_paragraph(" ".join(abstract_lines))
+            ab_body.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            ab_body.paragraph_format.left_indent = Inches(0.5)
+            ab_body.paragraph_format.right_indent = Inches(0.5)
+            ab_body.paragraph_format.line_spacing = 1.0
+            for run in ab_body.runs: run.font.size = Pt(10); run.italic = True
+            
+        # Switch to 2 columns for the rest
+        new_section = doc.add_section(WD_SECTION.CONTINUOUS)
+        set_column_layout(new_section, 2)
+        # Reset margins for paper columns
+        new_section.left_margin = Cm(2.0)
+        new_section.right_margin = Cm(2.0)
+        
+        # Start processing from after abstract
+        i = 0
+        while i < len(lines) and not lines[i].startswith('## 1. Introduction'): i += 1
+    else:
+        # Thesis Header Logic
+        title_line = next((l.lstrip('#').strip() for l in lines if l.startswith('#')), "Document")
+        subtitle_line = next((l.strip('*').strip() for l in lines if l.strip().startswith('**')), "")
+        tp = doc.add_heading(title_line, 0); tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if subtitle_line:
+            sp = doc.add_paragraph(subtitle_line, style='Subtitle'); sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            for r in sp.runs: r.font.size = Pt(14); r.bold = True
+        doc.add_page_break(); doc.add_section(WD_SECTION.NEW_PAGE); add_academic_footer(doc.sections[-1], has_numbering=False)
+        i = 0
+
     while i < len(lines):
         line = lines[i].strip()
         if not line or line == '---' or line == '***': i += 1; continue
         if line.startswith('## '):
             title = line.lstrip('#').strip()
-            is_odd = any(t in title for t in ["Introduction", "Conclusion", "References", "Bibliography", "Abstract", "Table of Contents", "List of"]) or (title[0].isdigit() and "." in title[:3])
-            if is_odd:
-                doc.add_section(WD_SECTION.ODD_PAGE); add_academic_footer(doc.sections[-1], has_numbering=True)
-                m = re.match(r'^(\d+)\.', title)
-                if m: current_chapter = m.group(1)
-                elif "Appendix" in title: current_chapter = title.split(':')[0].replace("Appendix", "").strip()
+            if not is_paper:
+                is_odd = any(t in title for t in ["Introduction", "Conclusion", "References", "Bibliography", "Abstract", "Table of Contents", "List of"]) or (title[0].isdigit() and "." in title[:3])
+                if is_odd:
+                    doc.add_section(WD_SECTION.ODD_PAGE); add_academic_footer(doc.sections[-1], has_numbering=True)
+                    m = re.match(r'^(\d+)\.', title)
+                    if m: current_chapter = m.group(1)
+                    elif "Appendix" in title: current_chapter = title.split(':')[0].replace("Appendix", "").strip()
             doc.add_heading(title, 1); i += 1; continue
         if line.startswith('### '): doc.add_heading(line.lstrip('#').strip(), level=2); i += 1; continue
         if line.startswith('#### '): p = doc.add_paragraph(); p.add_run(line.lstrip('#').strip()).bold = True; i += 1; continue
@@ -229,7 +321,9 @@ def convert_to_professional_docx(md_path, docx_path):
                     p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     p_img.paragraph_format.keep_with_next = True
                     run = p_img.add_run()
-                    run.add_picture(path, width=Cm(15))
+                    # Scale image for columns if it's a paper
+                    width_cm = 15 if not is_paper else 8
+                    run.add_picture(path, width=Cm(width_cm))
                     cap = alt
                     if i+1 < len(lines) and "Figure" in lines[i+1]:
                         cap = lines[i+1].strip().strip('*')

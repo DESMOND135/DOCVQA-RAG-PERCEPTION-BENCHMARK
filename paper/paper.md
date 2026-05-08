@@ -1,11 +1,10 @@
 # Systems-Level Reliability and Robustness Evaluation Framework for Document AI
 
-**Author:** [Your Name]
-**Affiliation:** Czestochowa University of Technology
-**Preprint:** arXiv:2026.XXXX [cs.CV]
+**Author:** [Your Name]  
+**Affiliation:** Faculty of Mechanical Engineering and Computer Science, Czestochowa University of Technology  
+**Preprint:** arXiv:2026.XXXX [cs.CV]  
 
-
-**Abstract**
+**Abstract**  
 The automated extraction of information from complex PDF documents in mission-critical applications requires a robust approach to hallucinations and data corruption. Modern Large Language Models (LLMs) suffer from a fundamental **Perception-Cognition Gap**: standalone LLMs are linguistically robust but lack spatial awareness of document geometries. We categorize the existing bottlenecks in document understanding into **Resolution-Loss Hallucination** (inherent in generative multimodal VLMs) and **Layout Unawareness** (inherent in traditional heuristic OCR). To address this, we formalize a novel **Hybrid OCR-VLM Synchronization** strategy that operates on a "Dual-Stream" logic. By rigorously grounding the generative visual summaries of a VLM in the absolute literal character sequences of a deep-learning layout detector, we enable the cognitive model to navigate fine-grained data and complex spatial hierarchies without risking hallucination-related errors. Our experimental results on a high-complexity DocVQA benchmark demonstrate that the **Hybrid approach achieves higher ANLS scores** over standalone VLM baselines in dense tabular environments. This paper formalizes the synchronization methodology and analyzes the resulting accuracy-efficiency trade-offs, establishing a reliability-oriented comparative evaluation framework for industrial Document AI.
 
 
