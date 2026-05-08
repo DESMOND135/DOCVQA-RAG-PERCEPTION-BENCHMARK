@@ -274,13 +274,15 @@ def convert_to_professional_docx(md_path, docx_path):
         if not line or line == '---' or line == '***': i += 1; continue
         if line.startswith('## '):
             title = line.lstrip('#').strip()
+            # Always update chapter number if it starts with digit
+            m = re.match(r'^(\d+)\.', title)
+            if m: current_chapter = m.group(1)
+            elif "Appendix" in title: current_chapter = title.split(':')[0].replace("Appendix", "").strip()
+            
             if not is_paper:
                 is_odd = any(t in title for t in ["Introduction", "Conclusion", "References", "Bibliography", "Abstract", "Table of Contents", "List of"]) or (title[0].isdigit() and "." in title[:3])
                 if is_odd:
                     doc.add_section(WD_SECTION.ODD_PAGE); add_academic_footer(doc.sections[-1], has_numbering=True)
-                    m = re.match(r'^(\d+)\.', title)
-                    if m: current_chapter = m.group(1)
-                    elif "Appendix" in title: current_chapter = title.split(':')[0].replace("Appendix", "").strip()
             doc.add_heading(title, 1); i += 1; continue
         if line.startswith('### '): doc.add_heading(line.lstrip('#').strip(), level=2); i += 1; continue
         if line.startswith('#### '): p = doc.add_paragraph(); p.add_run(line.lstrip('#').strip()).bold = True; i += 1; continue

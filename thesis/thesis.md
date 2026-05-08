@@ -159,8 +159,11 @@ ANLS is the standard metric for DocVQA. It measures the edit distance between th
 
 $$ANLS = \frac{1}{N}\sum_{i=1}^{N} s(a_i,g_i) \quad (3.1)$$
 
-Where the score $s(a_i, g_i)$ is defined as:
-$$s(a_i, g_i) = \begin{cases} 1 - \frac{NL(a_i, g_i)}{\max(|a_i|, |g_i|)} & \text{if similarity} \ge 0.5 \\ 0 & \text{otherwise} \end{cases}$$
+The Normalized Levenshtein distance ($NL$) is defined as:
+$$NL(a_i,g_i)=\frac{LD(a_i,g_i)}{\max(|a_i|,|g_i|)}$$
+
+Where the thresholded similarity score $s(a_i, g_i)$ is:
+$$s(a_i,g_i)=\begin{cases}1-NL(a_i,g_i), & \text{if } NL(a_i,g_i)<0.5\\0, & \text{otherwise}\end{cases}$$
 
 Where $s(a_i, g_i)$ is defined by the score at a threshold ($T=0.5$):
 $$s(a_i, g_i) = \max(0, 1 - NL(a_i, g_i)) \text{ if } 1 - NL(a_i, g_i) \geq 0.5 \text{ else } 0$$
@@ -263,7 +266,7 @@ The system integrates several distinct machine learning models into a unified or
 ### 4.3 The Hybrid Perception Strategy
 The Hybrid model is the primary contribution of this thesis. It operates on a "Dual-Stream Synchronization" principle.
 
-The internal synchronization mechanism of the Hybrid perception model is shown in Figure 4.2. This diagram illustrates the parallel execution of deterministic OCR extraction and semantic VLM summarization, demonstrating how these two independent data streams are merged to create a "Perception Safety Net." This architectural approach allows the cognitive model to verify visual layout hypotheses against deterministic OCR sequences, effectively reducing hallucination-related errors by bridging the gap between structural document understanding and character-level deterministic accuracy.
+The internal synchronization mechanism of the Hybrid perception model is shown in Figure 4.2. This diagram illustrates the parallel execution of deterministic OCR extraction and semantic VLM summarization, demonstrating how these two independent data streams are merged to create a "Perception Safety Net." This architectural approach allows the cognitive model to verify visual layout hypotheses against deterministic OCR sequences, effectively mitigating the perception-cognition gap while reducing structural fragmentation.
 ![Hybrid Dual-Stream Sync](../figures/diagrams/hybrid_workflow.png)
 **Figure 4.2: Dual-Stream Synchronization Principle**
 
@@ -519,7 +522,7 @@ This final chapter summarizes the research findings, addressing the initial reli
 This research successfully establishes a systems-level evaluation framework, confirming that perception fidelity is the most fragile component of the DocVQA pipeline. Our empirical benchmark demonstrates a critical architectural trade-off: traditional OCR is frequently too rigid and layout-unaware, while generative end-to-end Vision-Language Models are severely prone to resolution-loss hallucinations in dense environments. Ultimately, the evaluation proves that the Hybrid synchronization strategy represents a highly robust, verifiable path forward for applications that demand exact-match precision and strong semantic grounding.
 
 ### 8.2 Limitations
-This study has several limitations. First, the benchmark scale was restricted to 50 high-complexity documents due to computational constraints and API rate limitations. Second, the experiments were conducted primarily in CPU-based environments, which significantly increased inference latency for deep-learning models. Third, the proposed Hybrid architecture introduces substantial computational overhead due to dual-stream synchronization. Additionally, the benchmark focuses primarily on English-language documents and may not generalize uniformly across multilingual or handwritten document environments. Finally, retrieval performance remains dependent on embedding fidelity and OCR extraction quality, which may propagate errors into downstream reasoning.
+This study has several limitations. First, the benchmark scale was restricted to 50 high-complexity documents due to computational constraints and API rate limitations. Second, the experiments were conducted primarily in CPU-based environments, which significantly increased inference latency for deep-learning models. Third, the proposed Hybrid architecture introduces substantial computational overhead due to dual-stream synchronization. Additionally, the benchmark focuses primarily on English-language documents and may not generalize uniformly across multilingual or handwritten document environments. The benchmark intentionally prioritizes adversarial layout complexity over dataset scale, resulting in lower absolute accuracy values but providing a more rigorous evaluation of structural robustness under realistic enterprise conditions. Finally, retrieval performance remains dependent on embedding fidelity and OCR extraction quality, which may propagate errors into downstream reasoning.
 
 ### 8.3 Contribution and Future Work
 This research contributes a comprehensive DocVQA robustness benchmark and formalizes a novel dual-stream synchronization strategy that successfully bridges the perception-cognition gap. Based on the observed operational bottlenecks, several distinct avenues for future research are identified to improve robustness and grounding reliability in complex document reasoning environments. Future investigations should focus on scaling the Hybrid pipeline across more extensive datasets, particularly focusing on dense tabular-specific corpora like TabFact, to observe statistical performance variance. Additionally, re-architecting the extraction codebase for GPU-accelerated asynchronous tensor processing would significantly reduce the current latency overhead. Finally, the investigation of natively layout-aware multimodal architectures such as LayoutLMv3, which inherently incorporate geometric bounding boxes into transformer embeddings, represents a highly promising path for creating inherently spatial-aware, hallucination-resistant document reasoning systems.
