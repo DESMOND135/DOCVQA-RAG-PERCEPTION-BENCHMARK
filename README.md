@@ -12,7 +12,7 @@
 ---
 
 ## 1. Project Overview
-This repository contains the codebase, benchmarking utilities, and empirical evaluation framework for my Master's Thesis. The project introduces a comprehensive systems-level reliability and robustness benchmark for Document Visual Question Answering (DocVQA) architectures. The core objective is to investigate and bridge the **Perception-Cognition Gap**—the fundamental disconnect where Large Language Models (LLMs) possess advanced linguistic reasoning but remain "visually blind" to the complex spatial layouts of unstructured document images (e.g., dense financial tables, multi-column reports).
+This repository contains the codebase, benchmarking utilities, and empirical evaluation framework for my Master's Thesis. The project introduces a comprehensive systems-level reliability and robustness benchmark for Document Visual Question Answering (DocVQA) architectures. The core objective is to investigate and bridge the **Perception-Cognition Gap**—the fundamental disconnect where Large Language Models (LLMs) possess advanced linguistic reasoning but remain "limited in structural understanding" to the complex spatial layouts of unstructured document images (e.g., dense financial tables, multi-column reports).
 
 ### Research Gap
 Existing OCR-based systems preserve literal textual precision but frequently fail to maintain spatial document structure in complex layouts. Conversely, modern Vision-Language Models preserve high-level visual semantics but remain vulnerable to resolution-loss hallucinations and lack deterministic grounding for exact-match extraction tasks. Limited research has systematically evaluated the reliability trade-offs between OCR, VLM, and synchronized Hybrid architectures under high-complexity zero-shot conditions.
@@ -67,14 +67,14 @@ All tests are executed under a strict Zero-Shot evaluation paradigm. Models rece
 The empirical data reveals a critical "Accuracy-Efficiency Frontier" across the tested architectures.
 
 **Table 1: Exhaustive Performance Benchmarking Matrix**
-| Model | ANLS (Mean ± SD) | EM (Mean ± SD) | F1 (Mean ± SD) | Lat. [s] | Thr. [S/s] | Retr. [s] | Index [s] | Mem. [MB] |
+| Model | ANLS (Mean ± SD) | EM (Mean ± SD) | F1 (Mean ± SD) | Latency (s) | Throughput (samples/s) | Retrieval Latency (s) | Indexing (s) | Memory Usage (MB) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Hybrid** | 0.24 ± 0.05 | 0.20 ± 0.04 | 0.30 ± 0.06 | 14.2 | 0.07 | 0.045 | 0.12 | 4600 |
 | **VLM** | 0.17 ± 0.04 | 0.10 ± 0.03 | 0.20 ± 0.05 | 4.2 | 0.24 | 0.005 | 0.12 | 4100 |
 | **Tesseract** | 0.17 ± 0.04 | 0.10 ± 0.02 | 0.30 ± 0.05 | 11.0 | 0.09 | 0.045 | 0.12 | 350 |
 | **PaddleOCR** | 0.13 ± 0.03 | 0.00 ± 0.00 | 0.10 ± 0.02 | 52.3 | 0.02 | 0.045 | 0.12 | 850 |
 
-*Note: Variance and Standard Deviation bounds are mathematically estimated based on structural distribution patterns across the 50-document validation set.*
+*Note: Approximate variability estimates are provided for comparative interpretation and were not derived from repeated experimental trials.*
 
 ---
 
@@ -95,6 +95,14 @@ The benchmark conclusively demonstrates that a **Hybrid Perception Strategy** is
 2. **Benchmark Constraints**: The evaluation scale was constrained to a high-complexity subset of 50 documents due to API rate limits and computational overhead.
 3. **Exclusion of Supervised Baselines**: Layout-aware transformers (e.g., LayoutLMv3) were excluded from experimental benchmarking due to the absence of task-specific fine-tuning resources, focusing solely on zero-shot inference.
 
+## 7. Discussion and Reliability
+
+### 7.1 Reproducibility
+All experiments were executed using fixed pipeline configurations, identical retrieval parameters, and consistent embedding settings across all benchmark runs. The modular architecture enables independent replacement of OCR, embedding, and reasoning modules without altering the downstream evaluation framework.
+
+### 7.2 Ethical Considerations
+This work focuses on improving reliability and hallucination reduction in automated document reasoning systems. However, the proposed architecture should not be deployed autonomously in high-risk environments such as healthcare, finance, or legal decision-making without human verification. Additionally, appropriate safeguards are required when processing documents containing sensitive personal or financial information.
+
 Future work aims to optimize latency via GPU-accelerated asynchronous processing and scale the evaluation across larger corpora.
 
 ---
@@ -102,15 +110,16 @@ Future work aims to optimize latency via GPU-accelerated asynchronous processing
 ## 7. Project Structure
 ```text
 project/
-├── data/                # Dataset samples and raw input PDF documents
-├── src/                 # Core implementation of the DocVQA evaluation framework
-│   ├── ocr/             # Deterministic extraction logic (Tesseract, PaddleOCR)
-│   ├── vlm/             # Generative multimodal vision processing logic
-│   ├── rag/             # Retrieval engine, embeddings, and FAISS vector indexing
-│   ├── pipeline/        # Main orchestration pipeline and Hybrid sync mechanisms
-│   ├── evaluation/      # Quantitative benchmarking logic (ANLS, EM, F1 scoring)
-│   └── config/          # System-wide parameters and model configurations
-├── results/             # Benchmark outputs, analytical logs, and empirical plots
+├── paper/               # LaTeX/Markdown source for the research paper
+├── thesis/              # LaTeX/Markdown source for the Master's Thesis
+├── presentation/        # Defense presentation slides
+├── src/                 # Core utility logic
+├── evaluation/          # Quantitative benchmarking logic (ANLS, EM, F1 scoring)
+├── ocr_modules/         # Swappable OCR interfaces (Tesseract, PaddleOCR)
+├── retrieval/           # RAG synchronization and vector search logic
+├── benchmark_results/   # Raw outputs and evaluation logs
+├── figures/             # Consolidated plots, diagrams, and visualizations
+├── appendices/          # Supplementary documentation
 ├── main.py              # Primary executable for the 50-document evaluation benchmark
 └── requirements.txt     # Dependency environment definitions
 ```

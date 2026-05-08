@@ -218,13 +218,23 @@ def convert_to_professional_docx(md_path, docx_path):
                         if r < len(data) - 1: cp.paragraph_format.keep_with_next = True
             continue
         if line.startswith('!['):
-            alt = re.findall(r'!\[(.*?)\]', line)[0]; path = re.findall(r'\((.*?)\)', line)[0].replace('../../../', '')
-            if os.path.exists(path):
-                p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER; p_img.paragraph_format.keep_with_next = True
-                run = p_img.add_run(); run.add_picture(path, width=Cm(15))
-                cap = alt
-                if i+1 < len(lines) and "Figure" in lines[i+1]: cap = lines[i+1].strip().strip('*'); i += 1
-                add_caption(doc, "Figure", cap, current_chapter)
+            alt = re.findall(r'!\[(.*?)\]', line)[0]
+            m = re.search(r'\((.*?)\)', line)
+            if m:
+                raw_path = m.group(1)
+                # Resolve path relative to the markdown file
+                path = os.path.normpath(os.path.join(os.path.dirname(md_path), raw_path))
+                if os.path.exists(path):
+                    p_img = doc.add_paragraph()
+                    p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    p_img.paragraph_format.keep_with_next = True
+                    run = p_img.add_run()
+                    run.add_picture(path, width=Cm(15))
+                    cap = alt
+                    if i+1 < len(lines) and "Figure" in lines[i+1]:
+                        cap = lines[i+1].strip().strip('*')
+                        i += 1
+                    add_caption(doc, "Figure", cap, current_chapter)
             i += 1; continue
         if line.startswith('```'):
             i += 1; code = ""
@@ -242,5 +252,5 @@ def convert_to_professional_docx(md_path, docx_path):
     doc.save(docx_path); print(f"Success: {docx_path}")
 
 if __name__ == "__main__":
-    convert_to_professional_docx('Final/thesis/source/thesis.md', 'Final/thesis/Thesis.docx')
-    convert_to_professional_docx('Final/paper/source/paper.md', 'Final/paper/paper.docx')
+    convert_to_professional_docx('thesis/thesis.md', 'thesis/Thesis.docx')
+    convert_to_professional_docx('paper/paper.md', 'paper/paper.docx')

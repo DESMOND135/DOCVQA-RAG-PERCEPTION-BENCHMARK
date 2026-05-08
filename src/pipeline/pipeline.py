@@ -4,14 +4,14 @@ import os
 import psutil
 from src.config.config import CONFIG
 from src.logging.logger import get_logger
-from src.ocr.tesseract import TesseractOCR
-from src.ocr.paddleocr import PaddleOCRModule
+from ocr_modules.tesseract import TesseractOCR
+from ocr_modules.paddleocr import PaddleOCRModule
 from src.vlm.vlm_model import VLMModel
 from src.processing.chunking import TextChunker
 from src.processing.embedding import EmbeddingService
-from src.retrieval.retriever import DocumentRetriever
+from retrieval.retriever import DocumentRetriever
 from src.llm.openrouter_client import OpenRouterClient
-from src.evaluation.metrics import MetricsEvaluator
+from evaluation.metrics import MetricsEvaluator
 from src.utils.exceptions import safe_pipeline_stage
 
 logger = get_logger(__name__)
