@@ -2,150 +2,271 @@
 
 ## Academic Thesis Project: Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
 
-### Supervisor:
-- Professor Piotr Duda
-- Czestochowa University of Technology
-
-### Student:
-- TIFANG DESMOND NGOE
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Framework](https://img.shields.io/badge/Framework-RAG%20--%20DocVQA-orange.svg)](https://github.com/DESMOND135/DOCVQA-RAG-PERCEPTION-BENCHMARK)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Academic Submission](https://img.shields.io/badge/Academic-Submission--Ready-purple.svg)](#)
 
 ---
 
 ## 1. Project Overview
-This repository contains the codebase, benchmarking utilities, and empirical evaluation framework for my Master's Thesis. The project introduces a comprehensive systems-level reliability and robustness benchmark for Document Visual Question Answering (DocVQA) architectures. The core objective is to investigate and bridge the **Perception-Cognition Gap**—the fundamental disconnect where Large Language Models (LLMs) possess advanced linguistic reasoning but remain "limited in structural understanding" to the complex spatial layouts of unstructured document images (e.g., dense financial tables, multi-column reports).
 
-### Research Gap
-Existing OCR-based systems preserve literal textual precision but frequently fail to maintain spatial document structure in complex layouts. Conversely, modern Vision-Language Models preserve high-level visual semantics but remain vulnerable to resolution-loss hallucinations and lack deterministic grounding for exact-match extraction tasks. Limited research has systematically evaluated the reliability trade-offs between OCR, VLM, and synchronized Hybrid architectures under high-complexity zero-shot conditions.
+This repository contains the complete codebase, evaluation suite, and reproducibility package for my Master's Thesis under the supervisor **Prof. Piotr Duda** at **Czestochowa University of Technology**. 
 
-### Contributions
-1. We formalize a systems-level reliability and robustness evaluation framework for Document AI under high-complexity zero-shot conditions.
-2. We propose a Hybrid OCR-VLM synchronization architecture that combines deterministic OCR grounding with semantic visual reasoning.
-3. We analyze perception-induced hallucination failure modes in standalone Vision-Language Models operating on dense document layouts.
-4. We provide a comparative benchmark across OCR, deep-learning OCR, standalone VLM, and Hybrid strategies using DocVQA-based evaluation metrics.
-5. We demonstrate that synchronized multimodal grounding improves robustness in dense tabular environments compared to standalone generative perception systems.
+### The Perception-Cognition Gap
+Modern enterprise environments are inundated with dense, unstructured visual documents—ranging from financial ledgers and medical lab results to heterogeneous insurance claims. In these high-stakes, regulatory-bound domains, automated text extraction demands absolute precision. 
 
----
+While Large Language Models (LLMs) demonstrate sophisticated cognitive reasoning, they suffer from a **Perception-Cognition Gap**: they lack native spatial awareness of document geometries. Conversely, standalone Vision-Language Models (VLMs) preserve visual layout relationships but are prone to **Resolution-Loss Hallucinations** when high-resolution document images are aggressively downsampled to fit fixed transformer patch windows (e.g., 336x336 pixels), leading to catastrophic errors in decimal places, numbers, and stylized characters.
 
-## 2. Methodology & Architecture
-The system is built upon a modular Retrieval-Augmented Generation (RAG) pipeline, designed explicitly to isolate and benchmark distinct perception strategies while keeping downstream cognitive reasoning constant.
-
-### Dataset Reference
-The system's robustness is rigorously evaluated using the official **DocVQA (Document Visual Question Answering)** dataset.
-- **Source Link**: [www.docvqa.org](https://www.docvqa.org/)
-- **HuggingFace Mirror**: [lmms-lab/DocVQA](https://huggingface.co/datasets/lmms-lab/DocVQA)
-- **Citation**: Tito, M., Karatzas, D., Valveny, E. (2020). DocVQA: A Dataset for Document Visual Question Answering. WACV 2021.
-
-### Core Architectural Layers
-- **Perception Layer (Deterministic vs. Generative)**: The critical first stage responsible for converting raw image pixels into semantically mapped context. We implemented four swappable modules to test reliability: Tesseract OCR (heuristic baseline), PaddleOCR (deep-learning spatial detection), standalone Vision-Language Models (VLM generative baseline), and the proposed Hybrid model.
-- **RAG Storage Pipeline**: Extracted data streams are dynamically chunked, embedded using **`all-MiniLM-L6-v2`**, and stored in a FAISS vector database. Semantic retrieval is orchestrated to supply localized, evidentiary context to the **Mistral 7B Instruct** reasoning engine.
-- **Hybrid Synchronization Model (Original Contribution)**: The primary architectural contribution is a dual-stream Hybrid perception model. This strategy synchronizes the fine-grained literal character precision of PaddleOCR with the high-level semantic layout mapping of the **Gemini 1.5 Flash** VLM. By fusing these streams, the system achieves a "Perception Safety Net" that grounds spatial reasoning in absolute character exactness, effectively suppressing VLM hallucinations.
+### Key Contributions
+This project introduces a modular, systems-level benchmarking framework designed to isolate and evaluate distinct document perception paradigms. Specifically, it:
+1. **Establishes a Systems-Level Benchmark**: Performs a head-to-head evaluation of four perception strategies—Traditional heuristic OCR (**Tesseract**), Deep-Learning spatial detection OCR (**PaddleOCR**), Standalone VLM (**Gemini 1.5 Flash**), and our proposed **Hybrid Dual-Stream Architecture**—under zero-shot enterprise conditions.
+2. **Introduces Hybrid OCR-VLM Synchronization**: Formalizes an original dual-stream synchronization pipeline that binds the precise, deterministic character-level bounding boxes of deep-learning OCR with the high-level semantic visual summaries of a VLM, creating a verifiable "Perception Safety Net" that suppresses hallucinations.
+3. **Rigorous Robustness Profiling**: Evaluates extraction accuracy and operational efficiency (inference latency, memory footprint, and retrieval speed) against a verified, highly complex subset of 50 multi-column and dense tabular documents from the **DocVQA** corpus.
 
 ---
 
-## 3. Evaluation Framework & System Benchmarking
-To scientifically validate system efficacy and reliability, we deployed a rigorous benchmarking framework measuring both extraction fidelity and operational constraints.
+## 2. Architecture & Pipeline
 
-### A. The 50-Document High-Complexity Benchmark
-The final quantitative results documented herein are based on a rigorous evaluation using a verified subset of **50 high-complexity documents** from the DocVQA validation set. This includes multi-column designs, noisy scans, and dense nested tables, ensuring a realistic stress test for the architectures.
+The system is built upon a modular **Retrieval-Augmented Generation (RAG)** architecture. This structure decouples the *perception layer* (extracting raw layout tokens) from the *cognitive reasoning layer* (synthesizing answers), keeping downstream LLM parameters constant to ensure scientific fairness during benchmarking.
 
-### B. Mathematical Evaluation Metrics
-The evaluation focuses on measuring the trade-offs between two domains:
-- **Accuracy & Grounding**:
-  - **ANLS (Average Normalized Levenshtein Similarity)**: Measures soft structural similarity and edit-distance with a strict 0.5 threshold for noise tolerance.
-  - **Exact Match (EM)**: Absolute binary identity indicating perfect extraction precision.
-  - **F1-Score**: Harmonic mean of Precision and Recall.
-- **System Efficiency**:
-  - **Inference Latency (Seconds)**: Total end-to-end processing time.
-  - **Peak Memory Usage (MB)**: Hardware resource overhead and RAM footprint.
+```mermaid
+graph TD
+    A[Raw Document Image] --> B[Preprocessing Pipeline]
+    B --> C[Perception Layer]
+    
+    subgraph "Preprocessing Layer"
+        B1[Hough-Space Skew Correction] --> B2[Gaussian Denoising]
+        B2 --> B3[High-Contrast Binarization]
+    end
+    
+    subgraph "Perception Layer Options"
+        C1[Tesseract Heuristic OCR]
+        C2[PaddleOCR DBNet + SVTR]
+        C3[VLM Gemini-1.5 Standalone]
+        C4[Hybrid Dual-Stream Synch]
+    end
+    
+    C --> C1 & C2 & C3 & C4
+    
+    C1 & C2 & C3 & C4 --> D[Recursive Character Chunking]
+    D --> E[Semantic Embeddings: all-MiniLM-L6-v2]
+    E --> F[FAISS Vector Index: IndexFlatL2]
+    G[User Relational Query] --> H[Semantic Retrieval: top-k nearest neighbors]
+    F --> H
+    H --> I[Grounded Prompt Injection]
+    I --> J[Cognitive Engine: Mistral 7B Instruct]
+    J --> K[Final Answer Synthesis]
+```
 
-### C. Zero-Shot Protocol
-All tests are executed under a strict Zero-Shot evaluation paradigm. Models receive no prior layout-specific fine-tuning, reflecting the zero-day generalization required in enterprise deployments facing unknown PDF formats.
-
----
-
-## 4. Performance Evaluation and Results
-The empirical data reveals a critical "Accuracy-Efficiency Frontier" across the tested architectures.
-
-**Table 1: Exhaustive Performance Benchmarking Matrix**
-| Model | ANLS (Mean ± SD) | EM (Mean ± SD) | F1 (Mean ± SD) | Latency (s) | Throughput (samples/s) | Retrieval Latency (s) | Indexing (s) | Memory Usage (MB) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Hybrid** | 0.24 ± 0.05 | 0.20 ± 0.04 | 0.30 ± 0.06 | 14.2 | 0.07 | 0.045 | 0.12 | 4600 |
-| **VLM** | 0.17 ± 0.04 | 0.10 ± 0.03 | 0.20 ± 0.05 | 4.2 | 0.24 | 0.005 | 0.12 | 4100 |
-| **Tesseract** | 0.17 ± 0.04 | 0.10 ± 0.02 | 0.30 ± 0.05 | 11.0 | 0.09 | 0.045 | 0.12 | 350 |
-| **PaddleOCR** | 0.13 ± 0.03 | 0.00 ± 0.00 | 0.10 ± 0.02 | 52.3 | 0.02 | 0.045 | 0.12 | 850 |
-
-*Note: Approximate variability estimates are provided for comparative interpretation and were not derived from repeated experimental trials.*
-
----
-
-## 5. Failure Mode & Error Analysis
-A key outcome of this framework is the systematic categorization of Document AI failure states:
-- **VLM Resolution-Loss Hallucination**: Generative models frequently hallucinate decimal points and tiny digits when high-resolution documents are compressed into fixed, small patch windows (e.g., 336x336 pixels).
-- **Layout Fragmentation**: Traditional OCR linearizes multi-column text horizontally, severing the semantic link between headers and their respective values.
-- **Retrieval Ambiguity**: Vector search models struggle with dense tabular noise, occasionally fetching semantically correct strings from geometrically incorrect rows.
-- **Literal OCR Confusion**: Misreading characters (e.g., '0' vs 'O') directly compromises exact match reliability.
+### End-to-End Execution Flow
+1. **Preprocessing Pipeline**: Raw document images undergo four-stage geometric and visual normalization: **Hough-space linear analysis** for straightening skew tilt, gaussian denoising, smoothing, and high-contrast binarization to stabilize neural reading grids.
+2. **Perception Processing**: The selected perception engine processes the binarized image to retrieve extracted text. In the **Hybrid Synchronization** model, PaddleOCR (Deterministic Stream) and Gemini 1.5 Flash (Generative Stream) execute in parallel. Bounding boxes are synchronized with semantic structural blocks to preserve structural tabular boundaries and column breaks.
+3. **Storage & Embedding**: The generated context is segmented recursively using a 500-character window with a 50-character overlap to avoid semantic boundary fragmentation. Chunks are embedded into dense 384-dimensional vector spaces using `all-MiniLM-L6-v2`.
+4. **Vector Database & Retrieval**: Chunks are indexed in a high-speed **FAISS** index (`IndexFlatL2`). Upon receiving a natural language query, the system performs a cosine similarity search to retrieve the top $k=5$ closest evidentiary fragments.
+5. **Grounded Synthesis**: Evidentiary fragments are injected into a strictly constrained grounded prompt template. The **Mistral 7B Instruct** cognitive model parses these fragments to synthesize the final verified response, returning a deterministic "Not found" rather than guessing if the evidence is absent.
 
 ---
 
-## 6. Research Conclusion and Limitations
-The benchmark conclusively demonstrates that a **Hybrid Perception Strategy** is an essential architecture for mission-critical Document AI tasks where exact precision is non-negotiable. While standalone VLMs provide exceptional high-throughput, low-latency processing, they suffer significant accuracy drops in dense financial or medical tables due to resolution limits. By successfully bridging the Perception-Cognition Gap, the Hybrid model leverages dual-stream synchronization to retain structural layout awareness without sacrificing absolute literal precision.
+## 3. Repository Structure
 
-**Limitations**: 
-1. **Computational Overhead**: The Hybrid approach requires executing two resource-intensive neural networks simultaneously. In CPU-bound environments, this leads to an average inference latency of 14.2 seconds, limiting high-throughput real-time application deployment.
-2. **Benchmark Constraints**: The evaluation scale was constrained to a high-complexity subset of 50 documents due to API rate limits and computational overhead.
-3. **Exclusion of Supervised Baselines**: Layout-aware transformers (e.g., LayoutLMv3) were excluded from experimental benchmarking due to the absence of task-specific fine-tuning resources, focusing solely on zero-shot inference.
+This repository follows a strict, highly modular structure aligned with software engineering best practices:
 
-## 7. Discussion and Reliability
-
-### 7.1 Reproducibility
-All experiments were executed using fixed pipeline configurations, identical retrieval parameters, and consistent embedding settings across all benchmark runs. The modular architecture enables independent replacement of OCR, embedding, and reasoning modules without altering the downstream evaluation framework.
-
-### 7.2 Ethical Considerations
-This work focuses on improving reliability and hallucination reduction in automated document reasoning systems. However, the proposed architecture should not be deployed autonomously in high-risk environments such as healthcare, finance, or legal decision-making without human verification. Additionally, appropriate safeguards are required when processing documents containing sensitive personal or financial information.
-
-Future work aims to optimize latency via GPU-accelerated asynchronous processing and scale the evaluation across larger corpora.
-
----
-
-## 7. Project Structure
 ```text
-project/
-├── paper/               # LaTeX/Markdown source for the research paper
-├── thesis/              # LaTeX/Markdown source for the Master's Thesis
-├── presentation/        # Defense presentation slides
-├── src/                 # Core utility logic
-├── evaluation/          # Quantitative benchmarking logic (ANLS, EM, F1 scoring)
-├── ocr_modules/         # Swappable OCR interfaces (Tesseract, PaddleOCR)
-├── retrieval/           # RAG synchronization and vector search logic
-├── benchmark_results/   # Raw outputs and evaluation logs
-├── figures/             # Consolidated plots, diagrams, and visualizations
-├── appendices/          # Supplementary documentation
-├── main.py              # Primary executable for the 50-document evaluation benchmark
-└── requirements.txt     # Dependency environment definitions
+.
+├── benchmark_results/     # Quantitative benchmarking outputs (results.csv, detailed reports)
+├── data/                  # Standardized input data
+│   ├── source_images/     # High-resolution benchmark document images (DocVQA subset)
+│   ├── txt_files/         # Evidentiary ground-truth references
+│   └── METADATA.md        # Detailed dataset catalog and description
+├── evaluation/            # Core scoring logic
+│   └── metrics.py         # Mathematical scoring scripts (ANLS, EM, F1 scoring)
+├── figures/               # Consolidated visual assets used in thesis/paper
+│   ├── diagrams/          # High-resolution system architecture and flow diagrams
+│   └── plots/             # Python-generated evaluation metric plots
+├── ocr_modules/           # Swappable OCR implementations
+│   ├── paddleocr.py       # Deep-learning PaddleOCR SVTR/DBNet wrapper
+│   └── tesseract.py       # Baseline heuristic Tesseract OCR wrapper
+├── retrieval/             # Retrieval-Augmented Generation (RAG) components
+│   └── retriever.py       # Vector storage, chunking, and FAISS indexing logic
+├── src/                   # Core application source code
+│   ├── config/            # Centralized system configurations and API coordinates
+│   ├── exception/         # Custom exception framework for robust error handling
+│   ├── llm/               # Cognitive LLM client wrappers (OpenRouter/Local API)
+│   ├── logging/           # High-fidelity system logger with file rotating
+│   ├── pipeline/          # Decoupled processing pipelines
+│   ├── processing/        # Character chunking and mathematical embedding steps
+│   ├── utils/             # Document compilers and helper scripts (md_to_docx, md_to_pptx)
+│   └── vlm/               # Generative Vision-Language Model wrappers
+├── THESIS/                # Academic deliverables
+│   ├── Paper Folder/      # Research paper source (paper_SOURCE.md) and compiled artifact (paper.docx)
+│   ├── Thesis Folder/     # Master's Thesis source (thesis.md) and compiled artifact (Thesis.docx)
+│   └── presentation/      # Defense presentation slides (presentation.md, presentation.pptx)
+├── app.py                 # Interactive Streamlit demonstration web application
+├── main.py                # Main benchmark execution and evaluation script
+├── requirements.txt       # Unified environment dependency manifest
+└── README.md              # Project documentation (this file)
 ```
 
 ---
 
-## 8. Setup and Execution
-To replicate the evaluation results or run the pipeline locally:
+## 4. Experimental Environment / System Configuration
 
-1. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. **Execute the Benchmark**:
-   ```bash
-   python main.py
-   ```
-   *The pipeline will automatically process the 50-document validation dataset against the configured perception strategies and output the exact empirical results.*
+To ensure absolute reproducibility, hardware architecture parameters, software runtimes, and deep-learning engine versions were held constant across all comparative experimental trials.
+
+| Component                   | Configuration                       |
+| --------------------------- | ----------------------------------- |
+| OCR Engine                  | PaddleOCR (PP-OCRv3) / Tesseract    |
+| Embedding Model             | all-MiniLM-L6-v2 (384-dim)          |
+| Vector Database             | FAISS (IndexFlatL2)                 |
+| Vision-Language Model (VLM) | Gemini 1.5 Flash                    |
+| Cognitive LLM               | Mistral 7B Instruct                 |
+| Hardware                    | Intel Core i7, 16GB RAM (CPU-bound) |
+| Operating System            | Windows 11                          |
+| Programming Language        | Python 3.x                          |
+
+---
+
+## 5. Benchmark Methodology & Evaluation Metrics
+
+### Dataset Characteristics & Question Design
+The evaluation suite comprises a verified subset of **50 high-complexity documents** extracted from the official **DocVQA validation dataset**. This sub-corpus is intentionally biased toward highly complex structures:
+- **Nested Tables**: Financial ledgers, multi-row invoices, and commercial balance sheets.
+- **Multi-Column Forms**: Academic papers, dense government forms, and medical reports.
+- **Visual Distortions**: Skewed digital scans, noise grains, low-contrast backgrounds, and handwritten details.
+
+Each document is paired with complex relational and semantic questions (e.g., *“What is the subtotal for the second item listed under Hardware?”*). The ground truth consists of constrained exact string matches, removing the risk of generative verbosity bias in scores.
+
+### Evaluation Metrics
+We measure the models across three mathematical accuracy vectors and four operational efficiency metrics:
+
+1. **ANLS (Average Normalized Levenshtein Similarity)**:
+   The primary scoring metric for visual document extraction. It calculates the edit-distance between the predicted answer string $a_i$ and the ground truth $g_i$, normalized by the maximum length of either string. To allow for OCR character noise tolerance, a threshold $T=0.5$ is enforced:
+   $$ANLS = \frac{1}{N}\sum_{i=1}^{N} \max(0, 1 - NL(a_i, g_i)) \quad \text{if } 1 - NL(a_i, g_i) \geq 0.5 \quad \text{else } 0$$
+   Where $NL(a_i, g_i)$ is the normalized Levenshtein distance.
+   
+2. **Exact Match (EM)**:
+   A strict binary identity metric ($1$ if predicted answer matches ground truth exactly, otherwise $0$).
+   
+3. **F1-Score**:
+   The harmonic mean of token-level Precision ($Pr$) and Recall ($Re$):
+   $$F1 = 2 \cdot \frac{Pr \cdot Re}{Pr + Re}$$
+
+4. **Operational Efficiency Vectors**:
+   - **Inference Latency ($L$)**: End-to-end execution time per query (seconds).
+   - **System Throughput ($T_p$)**: Number of queries processed per second ($1/L$).
+   - **Peak Memory Usage**: Resident Set Size (RSS) allocated by the models (MB).
+   - **Database Speed**: Measuring FAISS Vector Indexing Offset vs. Retrieval Latency.
+
+---
+
+## 6. Performance Evaluation and Results
+
+The empirical results generated by the 50-document evaluation benchmark are summarized in the table below:
+
+**Table 1: Exhaustive Performance Benchmarking Matrix**
+| Model | ANLS | EM | F1 | Latency (s) | Throughput (S/s) | RAM (MB) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Hybrid** | **0.24** | **0.20** | **0.30** | 14.20 | 0.07 | 4600 |
+| **VLM** | 0.17 | 0.10 | 0.20 | 4.20 | 0.24 | 4100 |
+| **Tesseract** | 0.17 | 0.10 | 0.30 | 11.00 | 0.09 | 350 |
+| **PaddleOCR** | 0.13 | 0.00 | 0.10 | 52.30 | 0.02 | 850 |
+
+### Key Empirical Findings
+- **The Grounding Multiplier**: The Hybrid synchronization pipeline achieves an **ANLS of 0.24**, which represents a **41% relative improvement** over the standalone VLM baseline (0.17).
+- **Hallucination Suppression**: The Hybrid model achieves a **100% improvement in Exact Match (EM)** over standalone VLM (0.20 vs 0.10). By grounding the cognitive model's responses in deterministic OCR coordinates, the system successfully suppresses resolution-loss hallucinations on fine-grained numbers.
+- **The Efficiency Frontier**: While the Hybrid model delivers peak extraction quality, it does so at a latency cost (14.2s per query), driven by parallel neural executions in a CPU-bound environment. Conversely, standalone VLM offers the fastest execution (4.2s) but suffers from high hallucination risks.
+
+---
+
+## 7. Setup and Local Execution
+
+### Prerequisites
+Ensure your local machine satisfies the following hardware and software dependencies:
+- **Operating System**: Windows 10/11, macOS, or Linux.
+- **Python**: Version `3.8`, `3.9`, `3.10`, or `3.11`.
+- **System RAM**: Minimum 8GB (16GB recommended for running local models).
+- **OCR System Dependencies**:
+  - **Tesseract**: Must be installed on the system path. 
+    - *Windows*: Download from [UB-Mannheim](https://github.com/UB-Mannheim/tesseract/wiki).
+    - *Ubuntu*: `sudo apt-get install tesseract-ocr`
+    - *macOS*: `brew install tesseract`
+
+### 1. Clone and Navigate
+```bash
+git clone https://github.com/DESMOND135/DOCVQA-RAG-PERCEPTION-BENCHMARK.git
+cd DOCVQA-RAG-PERCEPTION-BENCHMARK
+```
+
+### 2. Environment Setup & Installation
+It is highly recommended to use a virtual environment:
+```bash
+# Create environment
+python -m venv venv
+
+# Activate environment
+# On Windows (CMD/PowerShell):
+.\venv\Scripts\activate
+# On Linux/macOS:
+source venv/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
+```
+
+### 3. API Configuration
+If you plan to benchmark VLM (Gemini) or cognitive layers (Mistral) using API endpoints, configure your API credentials in your environment variables or directly inside the config file (`src/config/config.py`):
+```bash
+# Set OpenRouter or Gemini credentials
+export OPENROUTER_API_KEY="your-api-key-here"
+export GEMINI_API_KEY="your-gemini-key-here"
+```
+
+### 4. Running the Evaluation Benchmark
+To run the end-to-end 50-document evaluation benchmark suite locally:
+```bash
+python main.py
+```
+Upon execution, the script will:
+1. Ingest raw document images from `data/source_images/`.
+2. Process them using Tesseract, PaddleOCR, Standalone VLM, and Hybrid configurations.
+3. Index and retrieve context using FAISS.
+4. Synthesize answers via the cognitive model.
+5. Calculate ANLS, EM, and F1-scores, saving raw outputs to `benchmark_results/results.csv`.
+
+### 5. Running the Interactive Demo Web App
+To run the visual, user-facing Streamlit application locally:
+```bash
+streamlit run app.py
+```
+This launches a browser portal where you can upload custom document images, ask relational questions, swap perception models, and visually trace retrieval chunks in real-time.
+
+---
+
+## 8. Reproducibility & Research Integrity
+
+### Strict Isolation Protocol
+To guarantee empirical reproducibility and prevent data leakage:
+- **Zero-Shot Paradigm**: No training or parameter fine-tuning is performed on the DocVQA corpus, testing out-of-the-box generalization.
+- **Constant Downstream Parameters**: All comparative runs utilize the exact same embedder (`all-MiniLM-L6-v2`), distance index (`IndexFlatL2`), and cognitive engine parameters (temperature set to `0.0` to eliminate generative randomness).
+
+### Codebase Compilation
+You can compile the academic LaTeX/Markdown sources into formal documents (`.docx`) using our native python compilers located in `src/utils/`:
+```bash
+# To regenerate the formal academic paper:
+python src/utils/md_to_docx.py --paper
+
+# To regenerate the master's thesis document:
+python src/utils/md_to_docx.py --thesis
+```
 
 ---
 
 ## 9. References
-1. **DocVQA**: Mathew et al. (2021). "DocVQA: A Dataset for VQA on Document Images." WACV.
-2. **RAG**: Lewis et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." NeurIPS.
-3. **PaddleOCR**: Du et al. (2020). "PP-OCR: A Practical Ultra Lightweight OCR System." arXiv.
-4. **LayoutLMv3**: Huang et al. (2022). "LayoutLMv3: Pre-training for Document AI with Unified Text and Image Masking." ACM MM.
-5. **Donut**: Kim et al. (2022). "OCR-free Document Understanding Transformer." ECCV.
-6. **LLaVA**: Liu et al. (2023). "Visual Instruction Tuning." NeurIPS.
-7. **ANLS Metric**: Biten et al. (2019). "ICDAR 2019 Competition on Scene Text Visual Question Answering."
+1. **DocVQA**: Mathew, M., Karatzas, D., & Valveny, E. (2021). "DocVQA: A Dataset for VQA on Document Images." *Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)*.
+2. **Retrieval-Augmented Generation**: Lewis, P., et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *Advances in Neural Information Processing Systems (NeurIPS)*.
+3. **PaddleOCR**: Du, Y., et al. (2020). "PP-OCR: A Practical Ultra Lightweight OCR System." *arXiv preprint arXiv:2009.09941*.
+4. **Sentence-BERT (all-MiniLM-L6-v2)**: Reimers, N., & Gurevych, I. (2019). "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks." *Proceedings of the Conference on Empirical Methods in Natural Language Processing (EMNLP)*.
+5. **FAISS**: Johnson, J., Douze, M., & Jégou, H. (2019). "Billion-scale similarity search with GPUs." *IEEE Transactions on Big Data*.
+6. **Levenshtein Metric (ANLS)**: Biten, A. F., et al. (2019). "ICDAR 2019 Competition on Scene Text Visual Question Answering." *International Conference on Document Analysis and Recognition (ICDAR)*.
+7. **Mistral-7B**: Jiang, A. Q., et al. (2023). "Mistral 7B." *arXiv preprint arXiv:2310.06825*.
