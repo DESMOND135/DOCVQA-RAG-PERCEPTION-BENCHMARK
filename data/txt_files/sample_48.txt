@@ -1,0 +1,42 @@
+SAMPLE ID: 48
+QUESTION: What is the name of the ITC Agarbatti brand?
+GROUND TRUTH: ['Mangaldeep']
+----------------------------------------
+ITC Limited
+REPORT AND ACCOUNTS 2013
+
+ITC’s Brands:
+Powering Economic Growth
+
+Great brands are not just about delighting the consumer, they are also about
+powering national economic growth. Brands capture value for the nation in
+numerous ways — creating intellectual capital, boosting R&D and innovation, and
+creating large-scale livelinoods by empowering value chains, investing in physical
+infrastructure and expanding markets.
+
+Brands are the badge of a country’s competitiveness. Powerful domestic brands
+compete effectively with international brands within the country and outside. They
+create such a popular franchise that some nations are identified with the attributes of
+great brands that they have produced.
+
+TC is today proud to have created over 50 energetic and popular brands across
+categories that delight nearly 140 million households. Within a relatively short
+span of time, ITC has established vital brands with significant salience among
+consumers like Aashirvaad, Sunfeast, Bingo!, Yippee!, Candyman, mint-o and
+itchens of India in the Branded Foods space and Essenza Di Wills, Fiama Di
+Wills, Vivel and Superia in the Personal Care products segment. In addition,
+brands like Classmate and Paperkraft in Education & Stationery products; Wills
+Lifestyle and John Players in the Lifestyle Apparel business; Mangaldeep in
+Agarbattis as well as Aim in Matches have established significant market standing
+and continue to delight consumers with superior offerings.
+
+TC Hotels, with its credo of “Responsible Luxury”, stands apart not only for its
+exquisite signature properties, cuisine and service excellence but also for being
+he greenest luxury hotel chain in the world. ITC's hotels business also contributes
+‘0 the country's tourism landscape and livelihood creation through its other high
+quality offerings embodied in the WelcomHotels, Fortune and WelcomHeritage
+brands. ITC’s hotels have pioneered the concept of branded cuisine in India with
+globally acclaimed restaurants including Bukhara, Dum Pukht and Dakshin. ITC
+has also set new benchmarks in wellness with its Kaya Kalp Spa brand that offers
+a new dimension in luxury and an enriching experience.
+

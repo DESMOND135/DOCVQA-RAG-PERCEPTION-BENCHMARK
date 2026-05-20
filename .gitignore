@@ -1,0 +1,26 @@
+Deliverable/
+Gold_Submission/
+temp_math/
+
+# Python & System
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.vscode/
+.idea/
+.env
+.gemini/
+.DS_Store
+Thumbs.db
+
+# MS Word Temporary Lock Files
+~$*.docx
+~$*
+
+# Temporary/Scratch Scripts
+fix_captions.py
+rebuild_dataset.py
+rewrite.py
+src/utils/cleanup_academic_text.py
