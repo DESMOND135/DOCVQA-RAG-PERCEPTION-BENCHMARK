@@ -86,13 +86,18 @@ Academic Year 2025-2026
 ## Evaluation Metrics
 - **ANLS (Accuracy)**: Average Normalized Levenshtein Similarity (0.5 threshold) for soft spelling matching.
   $$ANLS = \frac{1}{N}\sum_{i=1}^{N} s(a_i,g_i) \quad (3.1)$$
-- **Exact Match (EM)**: Requires absolute, character-for-character alphanumeric agreement.
+  - **$N$**: Total evaluation corpus size (total query count; here $N = 50$).
+  - **$g_i$ (Ground Truth)**: Authoritative target answer for query $i$ (authoritative reference).
+  - **$a_i$ (Predicted Answer)**: Generative system prediction for query $i$ (model output).
+  - **$s(a_i, g_i)$ (Similarity)**: Normalized edit-distance similarity. If similarity is $<0.5$, score is $0$ to strictly penalize formatting mismatches and hallucinations.
+- **Exact Match (EM)**: Requires absolute binary character-for-character identity.
   $$EM = \mathbf{1}(a_i = g_i) \quad (3.2)$$
-- **F1-Score**: Harmonic mean of token-level precision and recall measuring text overlap.
+- **F1-Score**: Harmonic mean of token-level Precision ($P$) and Recall ($R$).
   $$F1 = 2 \cdot \frac{P \cdot R}{P + R} \quad (3.3)$$
-- **Latency (L) & Throughput (Tp)**: End-to-end inference speed and system capacity.
+- **Latency ($L_i$) & Throughput ($T_p$)**: Operational speed and capacity metrics.
   $$T_p = \frac{N}{\sum L_i} \quad (3.5)$$
-- **RAM RSS & Search Efficiency**: Peak physical memory overhead and FAISS index query speed.
+  - **$L_i$**: Latency (seconds) to process query $i$ through both perception and cognitive streams.
+  - **$T_p$ (Throughput)**: Overall system processing rate in samples per second.
 
 ---
 
@@ -155,10 +160,12 @@ Academic Year 2025-2026
 
 ---
 
-## Future Work
-- **GPU Acceleration**: Deploying asynchronous parallel execution to reduce dual-stream latency below 2 seconds.
-- **Natively Layout-Aware LLMs**: Investigating integration with natively layout-aware multimodal architectures (e.g. LayoutLMv3).
-- **Tabular Extraction**: Enhancing cellular alignment for complex nested structures.
+## Future Work: Multi-Agent System
+- **Agentic Pipeline Evolution**: Transitioning from a rigid pipeline to a cooperative multi-agent network.
+- **Layout Detection Agent**: Responsible for spatial column splits, tabular boundary parsing, and geometric structure.
+- **Text Detection & OCR Agent**: Specialized in high-fidelity character recognition, raw transcription, and bounding box coordinates.
+- **Image & Visual Perception Agent**: Dedicated to understanding non-textual primitives, charts, figures, and embedded artwork.
+- **Coordinator & Routing Agent**: Orchestrating agent dialogue, resolving data conflicts, and synthesizing unified factual contexts.
 
 ---
 
