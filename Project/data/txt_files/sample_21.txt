@@ -1,0 +1,98 @@
+SAMPLE ID: 21
+QUESTION: What is the name of the company?
+GROUND TRUTH: ['cigfil limited', 'CIGFIL LIMITED']
+----------------------------------------
+.
+
+.
+
+“CIGFIL LIMITED, CHENNAI
+
+Schedules annexed to and forming part of Balance Sheet as at 31.03.2004
+
+3) Acetate Filament Yarn/Fibre
+Current Year
+Previous year
+
+4) Acetate Tow
+Current Year
+Previous year
+
+5) Poly Propelene
+Current Year
+Previous year
+
+D) Opening and Closing Stock of goods produced :
+
+1) Opening Stock :
+a) Cigarette Filter Rods
+Current Year
+Previous year
+
+b) Poly Propelene Woven Fabrics/Sacks
+Current Year
+Previous year
+
+2) Closing Stock :
+a) Cigarette Filter Rods
+Current Year
+Previous year
+
+b) Poly Propelene Woven Fabrics/Sacks.
+
+Current Year
+Previous year
+
+Kgs Rs. In lakhs
+25,471 | 37.55
+(12,431) (27.67)
+
+Kgs Rs. In lakhs
+661,328 | 1,262.58
+(725,722) (1519.97)
+
+MTs Rs. Inlakhs
+102.550 | 46.88
+(235.949) (106.84)
+
+inMNR__Rs. In lakhs
+64.232
+(18.7652) (13.56)
+in Kgs Rs. In lakhs
+NIL
+NIL NIL
+inMNR__Rs. In lakhs
+31.5594 23.97
+(64.232) (51.46)
+in Kgs ___Rs. In lakhs
+| 3220S | 3.23
+2863.5 [| 2.87
+
+E) Value of imported/indigenous raw materials, stores & spare parts and components
+
+consumed :
+
+1) Raw Materials :
+Imported :
+Current Year
+Previous year
+
+Indigenous :
+Current Year
+Previous year
+
+Percentage
+
+79.23% |
+(82.85%)
+
+20.77%
+(17.15%)
+
+Rs. In lakhs
+
+1,304.95
+(1596.85)
+
+342.04
+(330.44)

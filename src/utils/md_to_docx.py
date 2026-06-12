@@ -220,9 +220,15 @@ def add_caption(doc, label_text, raw_caption_text, chapter_num="1"):
     
     # Auto-add source for figures to satisfy user requirements
     if label_text == "Figure" and clean_caption:
-        is_adapted = any(x in clean_caption.lower() for x in ["paddleocr", "layout detection", "vlm projection", "tesseract", "donut", "vit", "dataset complexity", "primitives"])
-        if is_adapted:
-            clean_caption += " (Source: Sourced from online / literature specification)"
+        lower_cap = clean_caption.lower()
+        if "paddleocr" in lower_cap or "layout detection" in lower_cap:
+            clean_caption += " (Source: Adapted from [4])"
+        elif "tesseract" in lower_cap:
+            clean_caption += " (Source: Adapted from [16])"
+        elif "vlm" in lower_cap or "donut" in lower_cap or "vit" in lower_cap or "primitives" in lower_cap:
+            clean_caption += " (Source: Adapted from [31])"
+        elif "dataset complexity" in lower_cap or "samples" in lower_cap:
+            clean_caption += " (Source: Adapted from [22])"
         else:
             clean_caption += " (Source: Own elaboration)"
             
@@ -516,7 +522,7 @@ def convert_to_professional_docx(md_path, docx_path):
         
         # Skip the title and metadata lines to start parsing directly at the Abstract
         i = 0
-        while i < len(lines) and not lines[i].strip().startswith('## Abstract'):
+        while i < len(lines) and not (lines[i].strip().startswith('## Abstract') or lines[i].strip().startswith('## CHAPTER 1')):
             i += 1
 
     while i < len(lines):
@@ -659,12 +665,12 @@ if __name__ == "__main__":
     parser.add_argument('--thesis', action='store_true')
     args = parser.parse_args()
     if args.paper:
-        convert_to_professional_docx('THESIS/Paper Folder/paper_SOURCE.md', 'THESIS/Paper Folder/paper.docx')
+        convert_to_professional_docx('MAIN/Paper Folder/paper_SOURCE.md', 'MAIN/Paper Folder/paper.docx')
     elif args.thesis:
-        convert_to_professional_docx('THESIS/Thesis Folder/thesis.md', 'THESIS/Thesis Folder/Thesis.docx')
+        convert_to_professional_docx('MAIN/Thesis Folder/thesis.md', 'MAIN/Thesis Folder/Thesis.docx')
     else:
         # Compile both or default to thesis if present
-        if os.path.exists('THESIS/Thesis Folder/thesis.md'):
-            convert_to_professional_docx('THESIS/Thesis Folder/thesis.md', 'THESIS/Thesis Folder/Thesis.docx')
+        if os.path.exists('MAIN/Thesis Folder/thesis.md'):
+            convert_to_professional_docx('MAIN/Thesis Folder/thesis.md', 'MAIN/Thesis Folder/Thesis.docx')
         else:
-            convert_to_professional_docx('THESIS/Paper Folder/paper_SOURCE.md', 'THESIS/Paper Folder/paper.docx')
+            convert_to_professional_docx('MAIN/Paper Folder/paper_SOURCE.md', 'MAIN/Paper Folder/paper.docx')

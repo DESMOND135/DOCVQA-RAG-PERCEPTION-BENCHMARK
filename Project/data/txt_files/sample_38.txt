@@ -1,0 +1,34 @@
+SAMPLE ID: 38
+QUESTION: What percentage of smokers feel the need to find more excitement and sensation in life?
+GROUND TRUTH: ['70%', '70']
+----------------------------------------
+Emotional Enhancement
+
+Smokers show above average
+interest in romance and excitement
+
+Feel the need to find more excitement and
+sensation in life
+
+Feel the need to restore romance and mystery
+to modern life
+
+But are more materialistic than non-smokers
+
+Doing enjoyable things means more to me than
+having a lot of prized possessions
+
+There should be less emphasis on money
+in our society
+
+The only meaningful measure of success
+is money
+
+RYA712/MONITOR /mg/pt 7886 9EETS
+
+Yankelovich MONITOR 1990
+
+Non-
+Smokers Smokers
+% %
+

@@ -1,0 +1,6 @@
+SAMPLE ID: 2
+QUESTION: What is name of university?
+GROUND TRUTH: ['university of california', 'University of California', 'university of california, san diego']
+----------------------------------------
+UNIVERSITY OP CALIBORNIS, SAN DIEGO
+

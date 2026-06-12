@@ -321,73 +321,131 @@ def generate_defense_deck(md_path, pptx_path):
                     slide.shapes.add_picture(math_path, left, top, width=w, height=h)
 
         elif img_path and bullets:
-            # Bullet Explanations (Left) + Diagram (Right) Split Layout
-            bullets_left = Inches(0.5)
-            bullets_width = Inches(5.8)
-            bullets_top = Inches(1.4)
-            bullets_height = Inches(5.4)
-            
-            txBox = slide.shapes.add_textbox(bullets_left, bullets_top, bullets_width, bullets_height)
-            tf = txBox.text_frame
-            tf.word_wrap = True
-            
-            for b_index, b_text in enumerate(bullets):
-                p = tf.add_paragraph() if b_index > 0 else tf.paragraphs[0]
-                p.space_after = Pt(18) # Widen vertical spacing between bullets
-                p.level = 0
-                p.line_spacing = 1.2 # Line spacing for premium readability
+            if "Core of Intelligence" in title or "Data at the Core" in title:
+                # Top-and-Bottom Stacked Layout for Widescreen Widespan Infographics
+                text_left = Inches(0.8)
+                text_width = Inches(11.733)
+                text_top = Inches(1.3)
+                text_height = Inches(1.2)
                 
-                parts = re.split(r'(\*\*.*?\*\*|\*.*?\*)', b_text)
-                for part in parts:
-                    run = p.add_run()
-                    if part.startswith('**'): run.text = part[2:-2]; run.font.bold = True
-                    elif part.startswith('*'): run.text = part[1:-1]; run.font.italic = True
-                    else: run.text = part
-                    run.font.size = Pt(19) # Larger body font size
-                    run.font.name = 'Calibri'
-                    run.font.color.rgb = BLACK
-            
-            # Widen visual columns and balance spatial occupancy
-            rem_left = bullets_left + bullets_width + Inches(0.3)
-            rem_width = prs.slide_width - rem_left - Inches(0.5)
-            
-            # Substantially enlarged maximum frame to utilize margins and balance better
-            img_max_w = Inches(6.2)
-            img_max_h = Inches(5.4)
-            if img_caption:
-                img_max_h = Inches(4.7)
+                txBox = slide.shapes.add_textbox(text_left, text_top, text_width, text_height)
+                tf = txBox.text_frame
+                tf.word_wrap = True
                 
-            orig_w, orig_h = get_image_dimensions(img_path)
-            aspect = orig_w / orig_h
-            
-            w = img_max_w
-            h = w / aspect
-            if h > img_max_h:
-                h = img_max_h
-                w = h * aspect
+                for b_index, b_text in enumerate(bullets):
+                    p = tf.add_paragraph() if b_index > 0 else tf.paragraphs[0]
+                    p.space_after = Pt(4)
+                    p.level = 0
+                    p.line_spacing = 1.1
+                    p.alignment = PP_ALIGN.CENTER
+                    
+                    parts = re.split(r'(\*\*.*?\*\*|\*.*?\*)', b_text)
+                    for part in parts:
+                        run = p.add_run()
+                        if part.startswith('**'): run.text = part[2:-2]; run.font.bold = True
+                        elif part.startswith('*'): run.text = part[1:-1]; run.font.italic = True
+                        else: run.text = part
+                        run.font.size = Pt(15) # Centered top callout font size
+                        run.font.name = 'Calibri'
+                        run.font.color.rgb = BLACK
                 
-            img_left = rem_left + (rem_width - w) / 2
-            img_top = Inches(1.4) # Aligned at the very top of content area to match text block
-            
-            slide.shapes.add_picture(img_path, img_left, img_top, width=w, height=h)
-            
-            if img_caption:
-                captionBox = slide.shapes.add_textbox(img_left, img_top + h + Inches(0.1), w, Inches(0.4))
-                cp = captionBox.text_frame.paragraphs[0]
-                cp.text = img_caption
-                cp.font.size = Pt(12)
-                cp.font.name = 'Calibri'
-                cp.font.bold = True
-                cp.font.color.rgb = BLUE_NAVY
-                cp.alignment = PP_ALIGN.CENTER
+                # Widen and maximize landscape diagram size
+                img_max_w = Inches(11.733)
+                img_max_h = Inches(4.3)
+                if img_caption:
+                    img_max_h = Inches(3.9)
+                    
+                orig_w, orig_h = get_image_dimensions(img_path)
+                aspect = orig_w / orig_h
+                
+                w = img_max_w
+                h = w / aspect
+                if h > img_max_h:
+                    h = img_max_h
+                    w = h * aspect
+                    
+                img_left = (prs.slide_width - w) / 2
+                img_top = Inches(2.5) + (img_max_h - h) / 2
+                
+                slide.shapes.add_picture(img_path, img_left, img_top, width=w, height=h)
+                
+                if img_caption:
+                    captionBox = slide.shapes.add_textbox(img_left, img_top + h + Inches(0.02), w, Inches(0.3))
+                    cp = captionBox.text_frame.paragraphs[0]
+                    cp.text = img_caption
+                    cp.font.size = Pt(11)
+                    cp.font.name = 'Calibri'
+                    cp.font.bold = True
+                    cp.font.color.rgb = BLUE_NAVY
+                    cp.alignment = PP_ALIGN.CENTER
+            else:
+                # Bullet Explanations (Left) + Diagram (Right) Split Layout
+                bullets_left = Inches(0.5)
+                bullets_width = Inches(5.8)
+                bullets_top = Inches(1.4)
+                bullets_height = Inches(5.4)
+                
+                txBox = slide.shapes.add_textbox(bullets_left, bullets_top, bullets_width, bullets_height)
+                tf = txBox.text_frame
+                tf.word_wrap = True
+                
+                for b_index, b_text in enumerate(bullets):
+                    p = tf.add_paragraph() if b_index > 0 else tf.paragraphs[0]
+                    p.space_after = Pt(18) # Widen vertical spacing between bullets
+                    p.level = 0
+                    p.line_spacing = 1.2 # Line spacing for premium readability
+                    
+                    parts = re.split(r'(\*\*.*?\*\*|\*.*?\*)', b_text)
+                    for part in parts:
+                        run = p.add_run()
+                        if part.startswith('**'): run.text = part[2:-2]; run.font.bold = True
+                        elif part.startswith('*'): run.text = part[1:-1]; run.font.italic = True
+                        else: run.text = part
+                        run.font.size = Pt(19) # Larger body font size
+                        run.font.name = 'Calibri'
+                        run.font.color.rgb = BLACK
+                
+                # Widen visual columns and balance spatial occupancy
+                rem_left = bullets_left + bullets_width + Inches(0.3)
+                rem_width = prs.slide_width - rem_left - Inches(0.5)
+                
+                # Substantially enlarged maximum frame to utilize margins and balance better
+                img_max_w = Inches(6.2)
+                img_max_h = Inches(5.4)
+                if img_caption:
+                    img_max_h = Inches(4.7)
+                    
+                orig_w, orig_h = get_image_dimensions(img_path)
+                aspect = orig_w / orig_h
+                
+                w = img_max_w
+                h = w / aspect
+                if h > img_max_h:
+                    h = img_max_h
+                    w = h * aspect
+                    
+                img_left = rem_left + (rem_width - w) / 2
+                img_top = Inches(1.4) # Aligned at the very top of content area to match text block
+                
+                slide.shapes.add_picture(img_path, img_left, img_top, width=w, height=h)
+                
+                if img_caption:
+                    captionBox = slide.shapes.add_textbox(img_left, img_top + h + Inches(0.1), w, Inches(0.4))
+                    cp = captionBox.text_frame.paragraphs[0]
+                    cp.text = img_caption
+                    cp.font.size = Pt(12)
+                    cp.font.name = 'Calibri'
+                    cp.font.bold = True
+                    cp.font.color.rgb = BLUE_NAVY
+                    cp.alignment = PP_ALIGN.CENTER
 
         elif img_path or math_images:
             # Centered Layout for Single Image/Equation (No Bullets)
             single_path = img_path if img_path else math_images[0]
-            img_max_w = Inches(12.0) # Enlarged to fill slide dimensions perfectly
-            img_max_h = Inches(5.4)
+            img_max_w = Inches(12.5) # Enlarged to fill slide dimensions perfectly
+            img_max_h = Inches(5.9) # Substantially increased to let landscape images scale up
             if img_caption:
-                img_max_h = Inches(4.7)
+                img_max_h = Inches(5.5) # Optimized to leave exact space for caption and title
                 
             orig_w, orig_h = get_image_dimensions(single_path)
             aspect = orig_w / orig_h
@@ -399,15 +457,15 @@ def generate_defense_deck(md_path, pptx_path):
                 w = h * aspect
                 
             img_left = (prs.slide_width - w) / 2
-            img_top = Inches(1.4) + (img_max_h - h) / 2
+            img_top = Inches(1.2) + (img_max_h - h) / 2
             
             slide.shapes.add_picture(single_path, img_left, img_top, width=w, height=h)
             
             if img_caption:
-                captionBox = slide.shapes.add_textbox(img_left, img_top + h + Inches(0.1), w, Inches(0.4))
+                captionBox = slide.shapes.add_textbox(img_left, img_top + h + Inches(0.05), w, Inches(0.35))
                 cp = captionBox.text_frame.paragraphs[0]
                 cp.text = img_caption
-                cp.font.size = Pt(12)
+                cp.font.size = Pt(11)
                 cp.font.name = 'Calibri'
                 cp.font.bold = True
                 cp.font.color.rgb = BLUE_NAVY
@@ -445,8 +503,8 @@ def generate_defense_deck(md_path, pptx_path):
 
 if __name__ == "__main__":
     # Robust path resolution
-    md_path = 'THESIS/presentation/presentation.md'
-    pptx_path = 'THESIS/presentation/presentation.pptx'
+    md_path = 'MAIN/presentation/presentation.md'
+    pptx_path = 'MAIN/presentation/presentation.pptx'
     if not os.path.exists(md_path):
         # Fallback if run from THESIS directory directly
         md_path = 'presentation/presentation.md'

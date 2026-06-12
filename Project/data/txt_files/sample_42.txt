@@ -1,0 +1,35 @@
+SAMPLE ID: 42
+QUESTION: What is the title of the document ?
+GROUND TRUTH: ['The Environment']
+----------------------------------------
+The Environment
+
+= Willingness to take consumer action remains strong
+
+Yankelovich MONITOR 1990
+
+Non-
+Smokers Smokers
+% %
+
+Would be willing to:
+
+Spend a few hours a week of my own
+time to reduce the pollution problem
+
+Give up convenience products | now enjoy
+if it meant helping preserve our natural
+resources
+
+Pay as much as 10% more for groceries
+if | could be sure they would not harm
+the environment
+
+Boycott manufacturers whose products
+contribute to pollution
+
+* Not asked in 1987 and 1988.
+
+AUR712/MONITOR/mo/pt
+
+L686 9CETS
