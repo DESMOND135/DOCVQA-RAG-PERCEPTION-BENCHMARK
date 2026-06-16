@@ -202,17 +202,9 @@ def generate_defense_deck(md_path, pptx_path):
             rows, cols = len(table_data), len(table_data[0])
             t_width = Inches(11.733)
             t_left = Inches(0.8)
-            t_top = Inches(2.1) if bullets else Inches(1.5)
-            t_height = Inches(4.5) if bullets else Inches(5.2)
             
             if table_caption:
-                t_top = Inches(2.0) if bullets else Inches(1.4)
-                t_height = Inches(4.4) if bullets else Inches(5.0)
-            
-            table = slide.shapes.add_table(rows, cols, t_left, t_top, t_width, t_height).table
-            
-            if table_caption:
-                caption_top = t_top + t_height + Inches(0.1)
+                caption_top = Inches(1.6) if bullets else Inches(1.0)
                 captionBox = slide.shapes.add_textbox(t_left, caption_top, t_width, Inches(0.4))
                 cp = captionBox.text_frame.paragraphs[0]
                 cp.text = table_caption
@@ -221,6 +213,14 @@ def generate_defense_deck(md_path, pptx_path):
                 cp.font.bold = True
                 cp.font.color.rgb = BLUE_NAVY
                 cp.alignment = PP_ALIGN.CENTER
+                
+                t_top = Inches(2.1) if bullets else Inches(1.5)
+                t_height = Inches(4.4) if bullets else Inches(4.9)
+            else:
+                t_top = Inches(2.1) if bullets else Inches(1.5)
+                t_height = Inches(4.5) if bullets else Inches(5.2)
+            
+            table = slide.shapes.add_table(rows, cols, t_left, t_top, t_width, t_height).table
             for r in range(rows):
                 for c in range(cols):
                     cell = table.cell(r, c)

@@ -7,126 +7,86 @@ Academic Year 2025-2026
 
 ---
 
-## Introduction / Problem Statement
-- **Document AI Complexity**: Modern enterprise pipelines rely heavily on automated extraction of information from complex PDF documents.
-- **The PDF Challenge**: Unstructured documents contain rich multi-column formats, dense tabular grids, and geometric layouts that defy simple reading orders.
-- **Hallucination & Layout Risks**: Semantic understanding without visual awareness leads to layout-blindness, causing critical extraction failures.
-- **Critical Downstream Risk**: A tiny character reading error (e.g., distorting **$1,240.50** into a rounded **$1,200.00** on a scanned invoice) is not just a simple spelling mistake—it propagates into automated financial ledgers, causing catastrophic audit and compliance failures in finance and healthcare.
+## The Document AI Challenge
+- **Enterprise Bottleneck**: Modern pipelines rely heavily on extracting unstructured data from complex PDFs.
+- **Visual Complexity**: Dense tabular grids and multi-column geometries defy simple text reading orders.
+- **The Perception Gap**: Semantic LLMs without spatial awareness hallucinate structural data.
+- **Critical Risk**: A minor layout misread (e.g., distorting $1,240.50) triggers catastrophic failures in downstream financial audits.
 
 ---
 
 ## Data as the Core Foundation of AI
-- **The Ultimate Foundation**: Quality data is the absolute catalyst for AI; all downstream reasoning (ML, deep learning, and cognitive LLMs) is fundamentally capped by the accuracy of the perception layer.
-- **The Perception Gap**: Enterprise pipelines are saturated with unstructured forms (PDFs and scans) where robust layout understanding and literal character precision are required to unlock factual insights.
-
----
-
-## Data at the Core of Intelligence
+- **The Ultimate Catalyst**: All downstream cognitive reasoning is fundamentally capped by the accuracy of the perception layer.
+- **Bridging the Disconnect**: We must bridge the gap where LLMs show advanced linguistic reasoning but fail at structural, spatial perception.
 ![Data Foundation Infographic](../figures/diagrams/data_foundation_intelligence.jpg)
 **Figure 1.0: Data as the Core Foundation of AI Systems**
 
 ---
 
 ## Research Objective
-- **Addressing the Perception-Cognition Gap**: Bridging the disconnect where LLMs show advanced linguistic reasoning but fail at structural, spatial perception.
-- **Scientific Goal**: Formulating a rigorous, systems-level reliability evaluation framework for DocVQA architectures under zero-shot conditions.
-- **Robustness Benchmarking**: Swapping and analyzing perception modules to establish a reliable accuracy-efficiency frontier for real-world deployments.
+- **Formulate a Benchmark**: Create a rigorous reliability evaluation framework for DocVQA architectures under zero-shot conditions.
+- **Investigate Perception**: Isolate and evaluate the exact impact of spatial grounding on LLM hallucination rates.
+- **Establish a Frontier**: Map the accuracy-efficiency trade-offs across Traditional OCR, VLMs, and Hybrid models.
 
 ---
 
-## Traditional OCR (Tesseract)
-- **Heuristic Baseline**: Relies on classical layout algorithms to group and serialize characters.
-- **Linearization Fragmentation**: Converts multi-column text horizontally into a single continuous stream, destroying reading order and paragraph alignment.
-- **Fidelity Loss**: Separates tabular cells from headers, making spatial relation reasoning impossible.
+## Traditional Baseline: OCR (Tesseract)
+- **Heuristic Algorithms**: Relies on rigid rules to group characters.
+- **Linearization Failure**: Converts multi-column layouts into a single, corrupted horizontal text stream.
+- **Fidelity Loss**: Completely destroys spatial relationships inside complex tables.
 ![OCR Preprocessing](../figures/diagrams/ocr_preprocessing.png)
 **Figure 4.3: OCR Preprocessing Pipeline**
 
 ---
 
-## PaddleOCR
-- **Deep-Learning Spatial Detection**: Employs an academic DBNet detector combined with SVTR recognizer for raw character mapping.
-- **Layout Robustness**: Highly precise alphanumeric localization, minimizing character confusion.
-- **The Cognitive Limit**: Captures characters perfectly but lacks semantic context, requiring a downstream layout reconstruction layer.
-![PaddleOCR Academic](../figures/diagrams/paddleocr_academic.png)
-**Figure 2.2: PaddleOCR Advanced Multi-Stage Architecture**
-
----
-
-## Perception Layer
-- **Layout Detection & Text Localization**: Automatically mapping page regions, paragraphs, and nested table cells.
-- **Character Grounding**: Indexing absolute 2D bounding boxes $(x_1, y_1, x_2, y_2)$ to ensure alphanumeric fidelity.
-- **Spatial Alignment**: Preparing structured, geometry-preserved raw text streams for cognitive processing.
-![Layout Detection](../figures/diagrams/layout_detection.png)
-**Figure 2.3: Layout Detection and Document Structure Logic**
-
----
-
-## Vision-Language Models (VLMs)
-- **Multimodal Generation**: Treats document images natively as input patches, removing the need for heuristic pipelines.
-- **Resolution-Loss Hallucination**: Fixed patch resolutions (e.g., 336x336 pixels) compress fine-grained tabular data, leading to character distortion.
-- **The Perception Failure**: "Probabilistic guessing" of dense digits in complex zero-shot layouts due to resolution-loss and pixel alignment errors.
+## Modern Baseline: Vision-Language Models (VLMs)
+- **Multimodal Promising**: Treats entire document images natively as input patches.
+- **Resolution Constraints**: Fixed patch limits (e.g., 336x336 pixels) heavily compress dense tabular data.
+- **The Perception Failure**: Zero-shot VLMs probabilistically "guess" digits when pixel alignment is lost, leading to severe hallucination.
 ![VLM Limitations](../figures/diagrams/vlm_limitations.png)
 **Figure 2.4: VLM Projection Layer and Resolution Constraints**
 
 ---
 
-## Hybrid OCR-VLM Synchronization
-- **Dual-Stream Synchronization**: Merging the literal precision of PaddleOCR with the high-level semantic layout awareness of VLMs.
-- **Perception Safety Net**: Grounding VLM spatial reasonings inside verified deterministic OCR character coordinates.
-- **Robustness Fusing**: Drastically reduces layout confusion and generative hallucinations in zero-shot extractions.
+## Proposed Solution: Hybrid OCR-VLM
+- **Dual-Stream Synchronization**: Merges the literal character precision of PaddleOCR with the semantic layout awareness of VLMs.
+- **Spatial Anchoring**: Indexes exact 2D bounding boxes $(x_1, y_1, x_2, y_2)$ for absolute alphanumeric fidelity.
+- **Perception Safety Net**: Grounds VLM reasoning inside verified, deterministic OCR coordinates to eliminate hallucination.
 ![System Architecture](../figures/diagrams/system_architecture.png)
 **Figure 4.1: Advanced Global System Orchestration Architecture**
 
 ---
 
-## RAG / Connection Layer
-- **Vector Space Mapping**: Projecting layout-aware chunked documents into a FAISS vector database using `all-MiniLM-L6-v2`.
-- **Hybrid Context Retrieval**: Querying and fetching high-relevance chunks grounded with precise spatial metadata.
-- **Cognitive Reasoning**: Supplying localized context to the Mistral 7B Instruct reasoning engine.
+## RAG Connection Layer
+- **Vector Space Mapping**: Layout-aware documents are chunked and projected into a FAISS database using `all-MiniLM-L6-v2`.
+- **Hybrid Retrieval**: Fetches high-relevance chunks mathematically grounded with precise spatial metadata.
+- **Cognitive Reasoning**: Feeds deterministic context directly into the Mistral 7B Instruct reasoning engine.
 ![RAG Connection Layer](../figures/diagrams/rag_workflow_academic.png)
 **Figure 3.1: Semantic Embedding and Vector Storage Workflow**
 
 ---
 
-## Benchmark Framework
-- **Test Corpus**: Compiled 50 high-complexity PDFs from the DocVQA validation set (dense nested tables, scan noise, multi-column designs).
-- **Strict Zero-Shot Paradigm**: No domain-specific or layout-specific fine-tuning, evaluating raw generalization robustness.
-- **Swappable Architecture**: Systematically isolating and measuring the impact of each perception stream under identical reasoning conditions.
-
----
-
-## ANLS Accuracy Evaluation
-- **ANLS Definition**: Standard soft-spelling matching similarity metric for Document Visual QA.
-- **N**: Total size of the evaluation corpus (here N = 50 queries).
-- **a_i**: Predicted answer string generated by the cognitive model for query i.
-- **g_i**: Authoritative human-verified ground truth target answer for query i.
-- **s(a_i, g_i)**: Soft similarity score. If similarity is < 0.5, score is 0 to reject hallucinations.
+## Evaluation Benchmark & Metrics
+- **Test Corpus**: 50 high-complexity zero-shot PDFs from the DocVQA validation set (dense tables, scans, multi-columns).
+- **ANLS (Soft Similarity)**: Penalizes hallucinations while allowing minor formatting variances.
   $$ANLS = \frac{1}{N}\sum_{i=1}^{N} s(a_i,g_i) \quad (3.1)$$
-
----
-
-## Secondary Performance Metrics
-- **Exact Match (EM)**: Strictest binary accuracy requiring character-for-character agreement.
-- **F1-Score**: Token-level harmonic mean of Precision P and Recall R measuring lexical overlap.
-- **L_i**: System latency (seconds) to process query i through both dual-stream layers.
-- **T_p**: System throughput indicating processed query samples per second.
+- **Exact Match (EM)**: Strictest binary accuracy.
   $$EM = \mathbf{1}(a_i = g_i) \quad (3.2)$$
-  $$F1 = 2 \cdot \frac{P \cdot R}{P + R} \quad (3.3)$$
-  $$T_p = \frac{N}{\sum L_i} \quad (3.5)$$
+- **F1-Score**: Token-level lexical overlap measuring precision and recall.
 
 ---
 
 ## Experimental Results
-- **Empirical Breakthrough**: The proposed Hybrid model achieves the highest accuracy, outperforming standalone VLMs and OCR pipelines.
-- **The Performance Frontier**: Validating that visual layout synchronization is essential to resolve complex DocVQA prompts.
+- **Empirical Breakthrough**: The Hybrid model strictly outperforms standalone VLMs and Traditional OCR.
+- **Visual Evidence**: Synchronization successfully prevents layout-blindness.
 ![Accuracy Comparison](../figures/plots/accuracy_comparison.png)
 **Figure 7.2: Accuracy Benchmark Matrix (ANLS vs F1)**
 
 ---
 
-## Performance Metrics Table
-- **Comprehensive Evaluation**: Performance comparison across accuracy, operational latency, throughput, and system resource overhead.
-- **Accuracy vs. Efficiency**: The Hybrid model achieves the highest accuracy at the cost of higher latency and RAM consumption.
+## Key Performance Findings
+- **Massive Improvement**: The Hybrid model achieves a **41% improvement** in ANLS accuracy over standalone VLMs (0.17 $\rightarrow$ 0.24).
+- **Trade-off**: Superior accuracy requires significantly higher latency (14.2s) and RAM footprint (4.6GB) due to dual-stream processing.
 
 **Table 7.1: Exhaustive Performance Benchmarking Matrix**
 | System Model | ANLS | Exact Match (EM) | F1-Score | Inference Latency | Throughput | RAM Footprint | Search Efficiency |
@@ -138,9 +98,9 @@ Academic Year 2025-2026
 
 ---
 
-## Ablation Study
-- **Isolating Stream Contributions**: Systematic removal of layout spatial detection and character grounding streams.
-- **Perception Grounding Efficacy**: Proves that character coordinate anchoring is the primary driver in reducing hallucination rates.
+## Ablation Study: Why it Works
+- **Isolating Variables**: We systematically removed the layout parsing and character grounding layers.
+- **The Core Finding**: Removing deterministic character grounding collapses Exact Match accuracy back to zero.
 
 **Table 7.2: Perception Component Ablation Study**
 | Architecture | Layout Detection | Text Grounding | VLM Context | ANLS | EM |
@@ -151,36 +111,28 @@ Academic Year 2025-2026
 
 ---
 
-## Error Analysis / Case Studies
-- **Low ANLS Failure Modes**: Poor document contrast, low scanning resolution, and heavily overlapping text boundaries.
-- **Visual Evidence**: VLM resolution-loss vs. Hybrid character-grounding precision.
+## Error Analysis & Visual Evidence
+- **VLM Failure Mode**: Guessing digits incorrectly due to low patch resolution.
+- **Hybrid Precision**: Anchoring logic preserves exact numerical strings.
 ![Hallucination Comparison](../figures/diagrams/hallucination_comparison.png)
 **Figure 7.6: Visual Case Study of VLM Resolution-Loss vs. Hybrid Precision**
 
 ---
 
-## Deployment Considerations
-- **Accuracy-Efficiency Trade-off**: High-reliability synchronization demands dual neural network overhead (14.2s latency).
-- **Memory Footprint**: Fusing multiple streams increases RSS RAM footprint (4600MB).
-- **Recommendation**: Deploy in offline mission-critical pipelines, using async processing to mitigate CPU-bound latency.
-![Efficiency Comparison](../figures/plots/efficiency_comparison.png)
-**Figure 7.3: Accuracy-Efficiency Frontier and Latency Inversion**
-
----
-
 ## Conclusion
 - **Bridging the Gap**: Synchronized OCR-VLM architecture successfully bridges the perception-cognition disconnect.
-- **Grounding Efficacy**: Deterministic character grounding is vital for eliminating LLM hallucinations in structured documents.
-- **Standardized Framework**: Provides a repeatable system-level benchmark for modern Document AI research.
+- **Grounding Efficacy**: Deterministic character grounding is vital for eliminating LLM hallucinations in structured enterprise documents.
+- **Standardized Framework**: Provides a repeatable, zero-shot system-level benchmark for future Document AI research.
 
 ---
 
 ## Future Work: Multi-Agent System
-- **Agentic Pipeline Evolution**: Transitioning from a rigid pipeline to a cooperative multi-agent network.
-- **Layout Detection Agent**: Responsible for spatial column splits, tabular boundary parsing, and geometric structure.
-- **Text Detection & OCR Agent**: Specialized in high-fidelity character recognition, raw transcription, and bounding box coordinates.
-- **Image & Visual Perception Agent**: Dedicated to understanding non-textual primitives, charts, figures, and embedded artwork.
-- **Coordinator & Routing Agent**: Orchestrating agent dialogue, resolving data conflicts, and synthesizing unified factual contexts.
+- **Evolution**: Transitioning from a rigid linear pipeline to a cooperative multi-agent network.
+- **Agent Roles**:
+  - **Layout Agent**: Parses boundaries and geometric structures.
+  - **OCR Agent**: High-fidelity character transcription.
+  - **Visual Agent**: Processes embedded charts and figures.
+  - **Coordinator Agent**: Resolves spatial conflicts and synthesizes the final factual answer.
 
 ---
 

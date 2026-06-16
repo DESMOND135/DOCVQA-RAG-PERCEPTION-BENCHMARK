@@ -7,7 +7,7 @@
 
 ---
 
-## CHAPTER 1: INTRODUCTION
+## CHAPTER 1: Introduction
 
 This chapter introduces the fundamental challenges of automated document understanding and the critical necessity for systems-level reliability benchmarking. We define the Document Visual Question Answering (DocVQA) task within the context of mission-critical enterprise environments, identify the primary bottlenecks driving perception-induced hallucinations, and outline the core objectives that guide this research toward a more robust, hybrid evaluation framework.
 
@@ -39,7 +39,7 @@ The orchestration of the document reasoning system is illustrated in Figure 1.1,
 
 This high-level schematic illustrates the linear transition from document ingestion to cognitive answer generation, highlighting how the system's reasoning ability is fundamentally capped by the perceptual fidelity of the initial extraction stage.
 
-## CHAPTER 2: LITERATURE REVIEW AND ECOSYSTEM ANALYSIS
+## CHAPTER 2: Literature Review And Ecosystem Analysis
 
 The architecture of a Document Visual Question Answering (DocVQA) system requires the seamless orchestration of multiple independent technologies. This chapter reviews the core components of the RAG pipeline, detailing their definitions, operational mechanics, use cases, and inherent limitations.
 
@@ -105,7 +105,7 @@ Chunking is the process of segmenting long, extracted document text into smaller
 **Embedding, Indexing, and Retrieval Conceptual Flow**
 To successfully retrieve data without the interference of layout-structural limitations, the system follows a rigorous three-phase sequence consisting of embedding, indexing, and search. Embedding is the mathematical transformation of text into dense numerical vectors, where semantically similar chunks are mapped closer together to enable intuitive semantic search beyond literal keyword matching. These vectors are then indexed and stored in a structured vector space using specialized databases such as FAISS (Facebook AI Similarity Search), unlocking sub-millisecond scalability. Finally, the retrieval mechanism embeds the user's query and identifies the most relevant document fragments through mathematical alignment, returning the corresponding text chunks for cognitive processing.
 
-The fundamental conceptual flow of the Retrieval-Augmented Generation system is presented in Figure 3.1. This diagram maps the linear progression from initial document embedding, where text is converted into dense mathematical vectors, to the indexing phase in FAISS and the final semantic search. This visualization clarifies how a user's question acts as a catalyst within the vector space, retrieving only the top-k evidentiary fragments that are semantically relevant to the query to ensure that the Large Language Model operates on grounded, localized context.
+The mathematical mechanism governing context retrieval is detailed in Figure 2.5. This schematic illustrates how the system pulls relevant document fragments from the database by calculating the alignment between question vectors and context vectors. This process ensures that the most semantically dense segments are prioritized for the Large Language Model, effectively bridging the GAP between the raw perception data and the final cognitive synthesis of the answer.
 ![Semantic Embedding Workflow](../figures/diagrams/rag_workflow_academic.png)
 **Figure 2.5: Semantic Embedding and Vector Storage Workflow**
 
@@ -123,7 +123,7 @@ Retrieval-Augmented Generation (RAG) is a comprehensive framework that connects 
 ### 2.4 Justification for the Hybrid Strategy
 The literature reveals an inherent trade-off in the DocVQA ecosystem: OCR models provide literal precision but lack structural cognition, whereas VLMs provide structural cognition but lack literal precision. For mission-critical tasks (e.g., financial audits or medical diagnoses), neither extreme is sufficient. Therefore, a dual-stream Hybrid strategy—which leverages RAG to bind the precise literal tokens of PaddleOCR with the semantic layout awareness of a VLM—is fundamentally justified as the most rigorous solution to the Perception-Cognition Gap.
 
-## CHAPTER 3: EVALUATION FRAMEWORK
+## CHAPTER 3: Evaluation Framework
 
 This chapter establishes the formal evaluation framework used to quantify the systems-level reliability and operational efficiency of the DocVQA pipeline. We define the mathematical metrics and evaluation paradigms for both the Perception (Extraction) and Cognition (Reasoning) layers, ensuring a transparent and reproducible benchmark.
 
@@ -134,12 +134,12 @@ ANLS is the standard metric for DocVQA. It measures the edit distance between th
 
 $$ANLS = \frac{1}{N}\sum_{i=1}^{N} s(a_i,g_i) \quad (3.1)$$
 
-Where $a_i$ is the model's predicted answer for query $i$, and $g_i$ is the corresponding ground truth answer.
+where $a_i$ is the model's predicted answer for query $i$, and $g_i$ is the corresponding ground truth answer.
 
 The Normalized Levenshtein distance ($NL$) is defined as:
 $$NL(a_i,g_i)=\frac{LD(a_i,g_i)}{\max(|a_i|,|g_i|)}$$
 
-Where $LD$ denotes the Levenshtein Distance (minimum edit distance) between the two strings.
+where $LD$ denotes the Levenshtein Distance (minimum edit distance) between the two strings.
 
 Where the thresholded similarity score $s(a_i, g_i)$ is:
 $$s(a_i,g_i) = (1-NL(a_i,g_i)) \text{ if } NL(a_i,g_i) < 0.5 \text{ else } 0$$
@@ -156,7 +156,7 @@ Exact Match (EM) serves as the strictest measure of performance, requiring binar
 
 $$EM = \frac{1}{N}\sum_{i=1}^{N} \mathbf{1}(p_i=g_i) \quad (3.2)$$
 
-Where $p_i$ is the prediction and $g_i$ is the ground truth for query $i$.
+where $p_i$ is the prediction and $g_i$ is the ground truth for query $i$.
 
 ### 3.1.3 F1-Score
 In contrast, the F1-Score evaluates the harmonic mean of Precision ($Pr$) and Recall ($Re$), providing a more nuanced view of token-level overlap.
@@ -174,7 +174,7 @@ Prediction ($P$): `"cost is $400 USD"` (4 tokens).
 - $F1$:
   $$2 \cdot \frac{0.75 \cdot 0.5}{0.75 + 0.5} = 2 \cdot \frac{0.375}{1.25} = \mathbf{0.60}$$
 
-The mathematical mechanism governing context retrieval is detailed in Figure 3.1. This schematic illustrates how the system pulls relevant document fragments from the database by calculating the alignment between question vectors and context vectors. This process ensures that the most semantically dense segments are prioritized for the Large Language Model, effectively bridging the GAP between the raw perception data and the final cognitive synthesis of the answer.
+The fundamental conceptual flow of the Retrieval-Augmented Generation system is presented in Figure 3.1. This diagram maps the linear progression from initial document embedding, where text is converted into dense mathematical vectors, to the indexing phase in FAISS and the final semantic search. This visualization clarifies how a user's question acts as a catalyst within the vector space, retrieving only the top-k evidentiary fragments that are semantically relevant to the query to ensure that the Large Language Model operates on grounded, localized context.
 ![Minimal Retrieval Principle](../figures/diagrams/rag_workflow.png)
 **Figure 3.1: Minimal RAG Retrieval Principle**
 
@@ -188,7 +188,6 @@ $$\cos(\theta)=\frac{\mathbf{A}\cdot\mathbf{B}}{\Vert\mathbf{A}\Vert \Vert\mathb
 - $\mathbf{B}$: The candidate document segment vector.
 - $\mathbf{A} \cdot \mathbf{B}$: The dot product, measuring scalar interaction between vectors.
 - $\|\mathbf{A}\|, \|\mathbf{B}\|$: The Euclidean magnitudes (norms) used for vector normalization.
-
 
 The spatial organization of information within the RAG system is visualized in Figure 3.2. This diagram presents a geometric view of the vector space, demonstrating how document chunks are clustered based on their mathematical similarity to the user's inquiry. By mapping these semantic relationships into a high-dimensional territory, the system ensures that answer-bearing segments are consistently identified as the nearest neighbors to the query, thereby maximizing retrieval accuracy in complex, multi-column document environments.
 ![Vector Space Visualization](../figures/diagrams/vector_space.png)
@@ -221,45 +220,109 @@ Table 3.1 compares the indexing overhead and retrieval latency across the differ
 ### 3.3 Database and Search Efficiency
 Scaleability in DocVQA systems is determine by administrative overheads including Indexing Offset, Retrieval Latency, and Index Storage Size. Indexing Offset represents the time required to structurally build the search index in FAISS, while Retrieval Latency measures the time required to execute a high-speed similarity search against the stored vectors. The Index Size represents the physical storage footprint of the embeddings, directly impacting the system's ability to handle ultra-large document corpora in resource-constrained environments.
 
-
-
 With these metrics established, we now move to the implementation of the DocVQA RAG pipeline architecture.
 
-## CHAPTER 4: METHODOLOGY AND SYSTEM ARCHITECTURE
+## CHAPTER 4: Methodology And System Architecture
 
 This chapter details the methodology and system architecture of the systems-level evaluation framework. We describe the full pipeline design, the modular integrated components, and the dual-stream synchronization logic of our proposed Hybrid perception strategy, detailing how raw pixels are processed, vectorized, and parsed into a grounded context window.
 
 ### 4.1 Full Pipeline Design
-The system architecture follows a linear, highly deterministic flow from raw image ingestion, through OCR/VLM perception and embedding, to the generation of a final cognitive answer by the LLM. This process bridges the perception-cognition gap. A global view of this pipeline is shown in Figure 4.1.
-
-The comprehensive architectural design of the system is detailed in Figure 4.1. This global map illustrates the internal data synchronization and orchestration between the perception layer, the vector storage layer, and the final generative cognition engine. By adopting this modular "plug-and-play" architecture, the system allows for the independent evaluation of various extraction strategies without necessitating changes to the downstream reasoning logic, thereby providing a rigorous framework for benchmarking the performance and reliability of the Hybrid perception model.
+The system architecture follows a linear, highly deterministic flow from raw image ingestion, through OCR/VLM perception and embedding, to the generation of a final cognitive answer by the LLM. This process bridges the perception-cognition gap. As detailed in Figure 4.1, this global map illustrates the internal data synchronization and orchestration between the perception layer, the vector storage layer, and the final generative cognition engine. By adopting this modular "plug-and-play" architecture, the system allows for the independent evaluation of various extraction strategies without necessitating changes to the downstream reasoning logic, thereby providing a rigorous framework for benchmarking the performance and reliability of the Hybrid perception model.
 *(As previously illustrated in Figure 1.1, the global architecture details the synchronization between the perception, storage, and cognition layers.)*
-
 
 The cognitive lifecycle and temporal data flow of the system are governed by a rigorous sequential orchestration. The process initiates with the ingestion of raw document images, which undergo digital normalization and skew correction to ensure character fidelity. Following this, the perception layer executes either OCR or VLM-based extraction, producing raw textual context that is recursively chunked to accommodate the mathematical constraints of the Large Language Model. These segments are then vectorized using semantic embeddings and stored in a FAISS database, enabling high-speed Cosine Similarity searches to identify evidentiary fragments. Finally, the system retrieves the top-k relevant chunks and injects them into a grounded prompt for the Large Language Model, which synthesizes the final cognitive answer based exclusively on the provided visual and textual evidence.
 
-### 4.2 Integrated Architectural Components
-The system integrates several distinct machine learning models into a unified orchestration. OCR engines, including Tesseract and PaddleOCR, are used for literal character extraction, with PaddleOCR providing superior layout preservation for dense tables and columns. Multimodal Vision-Language Models are utilized either as standalone engines or as the semantic backend for the Hybrid synchronization strategy. To enable semantic search, the system employs SentenceTransformers to map document segments into dense 384-dimensional vectors, which are then rapidly cross-referenced via FAISS indexing. The final cognitive decisions are made using a unified Large Language Model accessed via OpenRouter, which synthesizes the retrieved evidence into a factual answer. For technical implementation details of these components, please refer to the code listings in Appendices A through E.
-
-### 4.3 The Hybrid Perception Strategy
-The Hybrid model is the primary contribution of this thesis. It operates on a "Dual-Stream Synchronization" principle.
-
-The internal synchronization mechanism of the Hybrid perception model is shown in Figure 4.2. This architecture runs two independent perception models in parallel: PaddleOCR extracts every alphanumeric character with exact coordinate precision to ensure literal factual grounding, while a Vision-Language Model generates a high-level semantic summary of the document's geometric layout (such as table structures and column partitions). By merging these parallel streams into the context buffer, the system establishes a "Perception Safety Net" that allows the cognitive model to verify visual layout hypotheses against deterministic OCR sequences. This dual-verification layer successfully bridges the perception-cognition gap, suppresses the risk of hallucinatory reasoning common in standalone multimodal models, and avoids structural layout fragmentation during semantic indexing.
-
-![Hybrid Dual-Stream Sync](../figures/diagrams/hybrid_workflow.png)
-**Figure 4.2: Dual-Stream Synchronization Principle**
-
-This schematic (where Sentence-BERT is utilized to embed the combined outputs and Mistral functions as the cognitive reasoning engine at the pipeline's conclusion) illustrates the parallel execution of OCR and VLM data streams, showing how the system synchronizes literal precision with structural layout awareness.
-
-### 4.4 Preprocessing Pipeline: Skew and Noise Correction
+### 4.2 Preprocessing Pipeline: Skew and Noise Correction
 (Note: This preprocessing occurs immediately upon document ingestion, preceding the extraction models.)
 Real-world document scans inherently suffer from various forms of visual degradation that can impede extraction accuracy. To mitigate this risk, we implement a four-stage preprocessing pipeline consisting of skew correction, noise removal, Gaussian smoothing, and Hough-space analysis. Skew correction ensures that tilted documents are reset to perfect horizontal alignment, while noise removal digitally eliminates scan grain that obscues character boundaries. Further refinement is achieved through Gaussian blurring to reduce background interference, and the Hough Transform is utilized to detect structural lines and calculate the precise tilt angle required for mathematical straightening.
 
-The visual impact of the preprocessing pipeline on raw document images is demonstrated in Figure 4.3. This visualization traces the transformation of degraded and tilted inputs into high-fidelity image data through the application of skew correction and noise removal algorithms. By physically cleaning and straightening the document image before perception is attempted, this stage drastically improves the character-level accuracy of both the traditional and deep-learning OCR modules used in the experiment.
+To achieve this, the system leverages OpenCV and NumPy for mathematical matrix transformations. The following code listing demonstrates the core implementation of the deskewing and binarization logic:
+
+```python
+import cv2
+import numpy as np
+
+def preprocess_document(image_path):
+    # 1. Load image in grayscale
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+    # 2. Gaussian Smoothing to reduce noise
+    blurred = cv2.GaussianBlur(image, (5, 5), 0)
+
+    # 3. Adaptive Binarization for high contrast
+    binary = cv2.adaptiveThreshold(
+        blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY, 11, 2
+    )
+
+    # 4. Hough-Space Analysis for Skew Correction
+    coords = np.column_stack(np.where(binary > 0))
+    angle = cv2.minAreaRect(coords)[-1]
+
+    if angle < -45:
+        angle = -(90 + angle)
+    else:
+        angle = -angle
+
+    # Rotate the image to correct the tilt
+    (h, w) = image.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    deskewed = cv2.warpAffine(
+        image, M, (w, h),
+        flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
+    )
+
+    return deskewed
+```
+
+The visual impact of the preprocessing pipeline on raw document images is demonstrated in Figure 4.2. This visualization traces the transformation of degraded and tilted inputs into high-fidelity image data through the application of skew correction and noise removal algorithms. By physically cleaning and straightening the document image before perception is attempted, this stage drastically improves the character-level accuracy of both the traditional and deep-learning OCR modules used in the experiment.
 ![OCR Preprocessing Pipeline](../figures/diagrams/ocr_preprocessing.png)
-**Figure 4.3: Visualizing the impact of Skew Correction and Noise Removal on raw document images**
+**Figure 4.2: Visualizing the impact of Skew Correction and Noise Removal on raw document images**
+*(Source: Own elaboration)*
 
 This comparison demonstrates how digital preprocessing transforms degraded scans into high-fidelity inputs suitable for reliable character extraction.
+
+### 4.3 Integrated Architectural Components
+
+The system integrates several distinct machine learning models into a unified orchestration. At the perception layer, OCR engines, particularly PaddleOCR, are utilized for their superior layout preservation and literal character extraction in dense tabular environments. 
+
+For the cognition and retrieval layer, the system leverages `SentenceTransformers` to convert document segments into dense 384-dimensional vectors. These vectors are indexed using `FAISS` (Facebook AI Similarity Search) with an `IndexFlatL2` structure for high-speed sub-millisecond retrieval. Below is an excerpt illustrating the core FAISS vector generation and indexing workflow utilized in the pipeline:
+
+```python
+import faiss
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# Initialize embedding model and FAISS Index
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+vector_dimension = 384
+index = faiss.IndexFlatL2(vector_dimension)
+
+def index_document_chunks(text_chunks):
+    """Encodes text chunks into dense vectors and adds them to FAISS index."""
+    # Convert text into dense mathematical vectors
+    embeddings = embedder.encode(text_chunks, convert_to_numpy=True)
+    
+    # Normalize vectors for accurate cosine/L2 distance search
+    faiss.normalize_L2(embeddings)
+    
+    # Add to the FAISS index structure
+    index.add(embeddings)
+    return index
+```
+
+Following the semantic search and retrieval phase, the final cognitive decisions are executed using a unified Large Language Model. The system interfaces with OpenRouter's API, routing the retrieved context vectors to models like Mistral or Claude, which synthesize the localized evidence into a factual, deterministic response.
+
+### 4.4 The Hybrid Perception Strategy
+The Hybrid model is the primary contribution of this thesis. It operates on a "Dual-Stream Synchronization" principle.
+
+The internal synchronization mechanism of the Hybrid perception model is shown in Figure 4.3. This architecture runs two independent perception models in parallel: PaddleOCR extracts every alphanumeric character with exact coordinate precision to ensure literal factual grounding, while a Vision-Language Model generates a high-level semantic summary of the document's geometric layout (such as table structures and column partitions). By merging these parallel streams into the context buffer, the system establishes a "Perception Safety Net" that allows the cognitive model to verify visual layout hypotheses against deterministic OCR sequences. This dual-verification layer successfully bridges the perception-cognition gap, suppresses the risk of hallucinatory reasoning common in standalone multimodal models, and avoids structural layout fragmentation during semantic indexing.
+
+![Hybrid Dual-Stream Sync](../figures/diagrams/hybrid_workflow.png)
+**Figure 4.3: Dual-Stream Synchronization Principle**
+
+This schematic (where Sentence-BERT is utilized to embed the combined outputs and Mistral functions as the cognitive reasoning engine at the pipeline's conclusion) illustrates the parallel execution of OCR and VLM data streams, showing how the system synchronizes literal precision with structural layout awareness.
 
 ### 4.5 Example Use-Case Scenarios
 
@@ -271,8 +334,7 @@ This comparison demonstrates how digital preprocessing transforms degraded scans
 - **Input**: A patient lab report.
 - **Internal Flow**: The preprocessing layer deskews the scanned report. PaddleOCR reads "HbA1c 6.5%". The VLM notes it is under the "Current Results" header. The LLM accurately answers "What is the patient's HbA1c result?" with "6.5%".
 
-
-## CHAPTER 5: DATASET AND EVALUATION SETUP
+## CHAPTER 5: Dataset And Evaluation Setup
 
 This chapter details the experimental environment and the characteristics of the evaluation data. We describe the selection of the DocVQA corpus, the formation of the benchmark questions, and the specific hardware and software configurations used to ensure a reproducible and fair comparison across all perception strategies.
 
@@ -294,7 +356,7 @@ Each document is paired with multiple question-answer sets. The questions range 
 - **Ground Truth**: `Acme Corp`
 
 ### 5.3 Benchmark Dataset and Scale
-This research utilizes a final dataset of 50 high-complexity document samples selected from the DocVQA corpus, providing a statistically significant baseline for scientific comparison. To ensure total transparency and avoid bias, we established a controlled benchmark where variables such as the embedding model, vector database settings, and downstream LLM parameters were strictly held constant. This allows for an isolated evaluation of the four perception strategies across identical document layouts.
+This research utilizes a final dataset of 50 high-complexity document samples selected from the DocVQA corpus, providing a statistically significant baseline for scientific comparison. To ensure total transparency and avoid bias, we established a controlled benchmark where variables such as the embedding model, vector database settings, and downstream LLM parameters were strictly held constant. This allows for an isolated evaluation of the four perception strategies (Traditional Tesseract OCR, Deep-Learning PaddleOCR, Standalone Vision-Language Model, and the synchronized Hybrid OCR-VLM) across identical document layouts.
 
 ### 5.4 Experimental Environment
 
@@ -328,7 +390,7 @@ Our evaluation methodology incorporates a comprehensive qualitative component wh
 
 The investigative utility of this approach is best illustrated through specific edge cases encountered during benchmarking. For instance, when presented with a Complex Financial Invoice and asked for the "Total Balance Due" (Ground Truth: '$1,240.50'), Tesseract failed to extract the decimal precision, returning '$1240', while the standalone VLM hallucinated a round figure of '$1,200'. Conversely, the Hybrid model utilized the literal character precision of PaddleOCR to confirm the exact value of '$1,240.50'. Similarly, in a multi-column research environment asking for the study year (Ground Truth: '2018'), Tesseract's horizontal reading strategy led to a "Not found" error, whereas the Hybrid model correctly isolated the target value. These granular records allow for a direct behavioral comparison, identifying precisely where a model like Tesseract suffers from literal character confusion versus where a standalone VLM suffers from semantic hallucination. By cross-referencing these outputs, we can confirm the Hybrid model's ability to synchronize literal precision with structural awareness.
 
-## CHAPTER 6: PROMPT ENGINEERING AND GROUNDING
+## CHAPTER 6: Prompt Engineering And Grounding
 
 The effectiveness of the cognitive layer is heavily dependent on the quality of the instructions provided to the Large Language Model. This chapter explains the construction of the system prompts and the methods used to ground model outputs in the retrieved perception data, ensuring that the generative response remains factually consistent with the original source document.
 
@@ -344,7 +406,7 @@ To enforce factual grounding, the prompt includes an absolute escape clause:
 
 This rule shifts the system's failure state from "confident hallucination" to "honest rejection." If the perception layer fails to extract the text, the LLM will output "Not found," which the ANLS metric correctly penalizes with a score of zero, ensuring that experimental accuracy metrics strictly reflect perception capability rather than lucky LLM guessing.
 
-## CHAPTER 7: EXPERIMENTAL RESULTS
+## CHAPTER 7: Experimental Results
 
 This chapter presents the quantitative and qualitative findings derived from the 50-document benchmark. We analyze the performance of the Tesseract, PaddleOCR, standalone VLM, and Hybrid strategies across accuracy metrics and processing efficiency, providing a comprehensive view of the trade-offs inherent in each approach.
 
@@ -368,9 +430,9 @@ As summarized in **Table 7.1**, the experimental results highlight significant v
 *Note: Approximate variability estimates are provided for comparative interpretation and were not derived from repeated experimental trials.*
 
 #### 7.2.1 Analytical Plots and Interpretation
-To analyze the structural trade-offs, we generated comparative visualizations based on the benchmark outputs.
+To better understand the structural and performance trade-offs, we present an analytical review of the benchmarking results.
 
-The accuracy results of the 50-document benchmark are synthesized in Figure 7.2. This matrix compares the performance of the four perception strategies across soft-similarity (ANLS) and exact literal grounding (F1) metrics, conclusively demonstrating the superiority of the Hybrid model in high-complexity environments. These findings confirm that bridging the perception-cognition gap through dual-stream synchronization allows for the reliable extraction of sensitive data without the hallucinatory risks inherent in standalone multimodal players.
+The accuracy results of the 50-document benchmark are synthesized in Figure 7.2. The Accuracy Benchmark Matrix compares the performance of the four perception strategies across soft-similarity (ANLS) and exact literal grounding (F1) metrics, conclusively demonstrating the superiority of the Hybrid model in high-complexity environments. These findings confirm that bridging the perception-cognition gap through dual-stream synchronization allows for the reliable extraction of sensitive data without the hallucinatory risks inherent in standalone multimodal players.
 ![Accuracy Matrix](../figures/plots/accuracy_comparison.png)
 **Figure 7.2: Accuracy Benchmark Matrix (ANLS vs F1)**
 
@@ -380,7 +442,7 @@ The operational trade-offs between processing speed and extraction quality are v
 ![Efficiency Inversion](../figures/plots/efficiency_comparison.png)
 **Figure 7.3: Latency vs Throughput Inversion**
 
-This visualization tracks the processing efficiency of the models, demonstrating the trade-off between the high-throughput of standalone VLMs and the high-accuracy of the Hybrid synchronization method. (Note: The latency in the Hybrid approach is lower than standalone PaddleOCR because the Hybrid pipeline optimizes PaddleOCR's detection parameters specifically for text regions and processes them in parallel with the VLM, bypassing exhaustive full-page scaling.)
+This visualization tracks the processing efficiency of the models, demonstrating the trade-off between the high-throughput of standalone VLMs and the high-accuracy of the Hybrid synchronization method. (Note: The latency in the Hybrid approach is lower than standalone PaddleOCR because the Hybrid pipeline optimizes PaddleOCR's detection parameters specifically for text regions and processes them in parallel with the VLM, bypassing exhaustive full-page scaling.) (Note: The latency in the Hybrid approach is lower than standalone PaddleOCR because the Hybrid pipeline optimizes PaddleOCR's detection parameters specifically for text regions and processes them in parallel with the VLM, bypassing exhaustive full-page scaling.)
 
 The hardware resource requirements for each perception strategy are compared in Figure 7.4. This chart tracking Peak Memory Usage (RSS) highlights the aggressive scaling of memory overhead when transitioning from lightweight heuristic OCR to heavy generative multimodal layers. Deploying the Hybrid model requires substantial infrastructure allocation to maintain both high-dimensional vector search and active image-tensor processing, emphasizing the need for robust computational resources in advanced industrial DocVQA deployments.
 ![Memory Footprint](../figures/plots/memory_comparison.png)
@@ -388,19 +450,39 @@ The hardware resource requirements for each perception strategy are compared in 
 
 This comparison chart tracks the physical memory requirements for each perception strategy, illustrating the increased resource overhead required for advanced hybrid document reasoning.
 
-![Database efficiency](../figures/plots/database_efficiency.png)
-**Figure 7.5: Retrieval vs Indexing Latency Isolated**
 
-This isolated efficiency visualization confirms that the similarity search component contributes only a negligible fraction to total system latency.
 
 ### 7.3 Qualitative Error Analysis & Deep Interpretation
 To truly understand the ANLS scores, we conducted a manual quantitative and qualitative review of the failed runs.
 
 #### 7.3.1 Case Study 1: The "Hallucination" Phenomenon in VLMs
-The first case study involves a densely packed financial table where the system was tasked with extracting the net revenue for Q3 2012. Although the authoritative ground truth reflects a value of "4,200,000", the traditional Tesseract baseline failed to identify the dense column, resulting in an "answer not found" state. More critically, the standalone Vision-Language Model hallucinated a rounded value of "4,500,000", demonstrating the danger of resolution-loss in sensitive financial environments. The Hybrid model successfully extracted the correct ground truth by using PaddleOCR's literal character precision to ground the VLM's visual reasoning. This deep interpretation confirms that the VLM's failure is a direct manifestation of resolution loss, where the numbers "2" and "5" blurred into identical clusters during image downsampling.
+The first case study involves a densely packed financial table. To demonstrate this phenomenon, we present the query, the expected result, and the comparative model responses:
+
+- **Input Document**: High-density financial report (See Figure 7.6)
+- **Question**: "What is the net revenue for Q3 2012?"
+- **Ground Truth**: `4,200,000`
+- **Output (Tesseract)**: `Not found` (Failed to identify the dense column)
+- **Output (VLM)**: `4,500,000` (Hallucinated rounded value)
+- **Output (Hybrid)**: `4,200,000` (Correct)
+
+**Analysis:**
+Although the authoritative ground truth reflects a value of "4,200,000", the traditional Tesseract baseline failed to identify the dense column, resulting in an "answer not found" state. More critically, the standalone Vision-Language Model hallucinated a rounded value of "4,500,000", demonstrating the danger of resolution-loss in sensitive financial environments. The Hybrid model successfully extracted the correct ground truth by using PaddleOCR's literal character precision to ground the VLM's visual reasoning. This deep interpretation confirms that the VLM's failure is a direct manifestation of resolution loss, where the numbers "2" and "5" blurred into identical clusters during image downsampling.
+
+![VLM Hallucination vs Hybrid](../figures/diagrams/hallucination_comparison.png)
+**Figure 7.6: Visual Case Study and Model Response Screenshots demonstrating VLM Resolution-Loss vs. Hybrid Precision**
 
 #### 7.3.2 Case Study 2: Layout Fragmentation in Traditional OCR
-The second case study examines a two-column academic paper where the model was queried for the author of a citation in the second paragraph. While the Hybrid model correctly isolated the author "John Smith", the Tesseract baseline generated a scrambled sequence of "Smith Abstract 2021 The". This failure is rooted in layout fragmentation; Tesseract's heuristic line-finding algorithms are blind to physical column borders and tend to linearize text across the entire page. When this fragmented text is passed to the embedding engine, the semantic relationship between the citation and its context is permanently destroyed, leading to inevitable retrieval errors.
+The second case study examines a two-column academic paper. We present the query, the expected result, and the comparative model responses below:
+
+- **Input Document**: Two-column academic paper
+- **Question**: "Who is the author of the citation in the second paragraph?"
+- **Ground Truth**: `John Smith`
+- **Output (Tesseract)**: `Smith Abstract 2021 The` (Scrambled textual sequence)
+- **Output (VLM)**: `John Smith` (Correctly identified)
+- **Output (Hybrid)**: `John Smith` (Correctly isolated)
+
+**Analysis:**
+While the Hybrid model correctly isolated the author "John Smith", the Tesseract baseline generated a scrambled sequence of "Smith Abstract 2021 The". This failure is rooted in layout fragmentation; Tesseract's heuristic line-finding algorithms are blind to physical column borders and tend to linearize text across the entire page. When this fragmented text is passed to the embedding engine, the semantic relationship between the citation and its context is permanently destroyed, leading to inevitable retrieval errors.
 
 #### 7.3.3 Case Study: Qualitative Evidence (10 Representative Samples)
 To further validate the performance of the 50-document experiment, we present exactly 10 representative evaluation questions. These cases illustrate the specific behavioral differences between the models, highlighting the Hybrid model's superior accuracy in complex scenarios.
@@ -495,7 +577,7 @@ The implementation code, benchmark configurations, and evaluation scripts will b
 ### 7.5 Ethical Considerations
 This work focuses on improving reliability and hallucination reduction in automated document reasoning systems. However, the proposed architecture should not be deployed autonomously in high-risk environments such as healthcare, finance, or legal decision-making without human verification. Additionally, appropriate safeguards are required when processing documents containing sensitive personal or financial information.
 
-## CHAPTER 8: CONCLUSION
+## CHAPTER 8: Conclusion
 
 This final chapter summarizes the research findings, addressing the initial reliability objectives, and outlines the primary contributions of this work to the field of Document AI evaluation. We conclude with a discussion on the limitations of the current implementation and propose future directions for enhancing the autonomy and structural robustness of DocVQA architectures.
 
@@ -539,9 +621,6 @@ This research contributes a comprehensive DocVQA robustness benchmark and formal
 
 ---
 
-
----
-
 ## List of Figures
 - Figure 1.1: Simplified RAG Pipeline Overview
 - Figure 2.1: Minimal Perception and Preprocessing Logic
@@ -582,7 +661,6 @@ This research contributes a comprehensive DocVQA robustness benchmark and formal
 - **$G$**: Ground Truth (The correct reference text)
 - **$L$**: Inference Latency (Seconds)
 - **$T_p$**: System Throughput (Samples per Second)
-
 
 ---
 
@@ -807,7 +885,8 @@ Istnieje jednak fundamentalna luka między percepcją a poznaniem (Perception-Co
 
 Nasza metodologia rygorystycznie ocenia te strategie na podzbiorze korpusu walidacyjnego DocVQA o wysokiej złożoności w ramach protokołu zero-shot. Wykorzystując Average Normalized Levenshtein Similarity (ANLS), F1-Score oraz Exact Match (EM), test porównawczy kwantyfikuje wierność ekstrakcji w stosunku do opóźnień sprzętowych. Wyniki ujawniają krytyczną dychotomię architektoniczną: podczas gdy samodzielne modele VLM oferują wysoką przepustowość, cierpią z powodu błędów związanych z halucynacjami w gęstych obszarach tabelarycznych, co czyni je zawodnymi w zastosowaniach wymagających dokładnego dopasowania (exact-match). Z kolei nasz proponowany model hybrydowy osiąga około 41% względnej poprawy w ANLS w stosunku do bazowych modeli VLM. Poprzez skuteczne łączenie dosłownej dokładności znaków z wnioskowaniem przestrzennym, praca ta ustanawia hybrydową strategię percepcji jako solidną architekturę dla wdrożeń korporacyjnych, w których wymagana jest precyzja danych.
 
-**Keywords:** Document AI, Document Visual Question Answering (DocVQA), Large Language Models (LLM), Optical Character Recognition (OCR), Retrieval-Augmented Generation (RAG), Hallucination, Multimodal Perception.
+## Keywords / Słowa kluczowe
 
-**Słowa kluczowe:** Document AI, Document Visual Question Answering (DocVQA), Duże Modele Językowe (LLM), Optyczne Rozpoznawanie Znaków (OCR), Retrieval-Augmented Generation (RAG), Halucynacje, Percepcja Multimodalna.
+**English:** Document AI, Document Visual Question Answering (DocVQA), Large Language Models (LLM), Optical Character Recognition (OCR), Retrieval-Augmented Generation (RAG), Hallucination, Multimodal Perception.
 
+**Polski:** Document AI, Document Visual Question Answering (DocVQA), Duże Modele Językowe (LLM), Optyczne Rozpoznawanie Znaków (OCR), Retrieval-Augmented Generation (RAG), Halucynacje, Percepcja Multimodalna.

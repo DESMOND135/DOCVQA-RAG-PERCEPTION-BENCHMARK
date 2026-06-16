@@ -148,6 +148,120 @@ def set_toc_styles(doc):
             style.paragraph_format.line_spacing = 1.15
             style.paragraph_format.space_after = Pt(2)
 
+
+def get_custom_omml(latex):
+    """Returns OMML XML string (m:oMath element) for the three known equations.
+    Returns plain <m:oMath> so it can be safely appended into a w:p element.
+    All characters are in the Basic Multilingual Plane to ensure XML 1.0 compatibility."""
+    NS = 'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"'
+    if "ANLS" in latex:
+        # ANLS = 1/N sum_{i=1}^N max_j ( 0, 1 - NL(p_i,g_{i,j})/max(|p_i|,|g_{i,j}|) )
+        return (
+            f'<m:oMath {NS}>'
+            '<m:r><m:rPr><m:nor/></m:rPr><m:t>ANLS = </m:t></m:r>'
+            # 1/N skewed fraction
+            '<m:f><m:fPr><m:type m:val="skw"/></m:fPr>'
+            '<m:num><m:r><m:t>1</m:t></m:r></m:num>'
+            '<m:den><m:r><m:t>N</m:t></m:r></m:den>'
+            '</m:f>'
+            # Summation i=1 to N
+            '<m:nary><m:naryPr>'
+            '<m:chr m:val="\u2211"/>'
+            '<m:limLoc m:val="undOvr"/><m:grow m:val="1"/>'
+            '<m:subHide m:val="0"/><m:supHide m:val="0"/>'
+            '</m:naryPr>'
+            '<m:sub><m:r><m:t>i=1</m:t></m:r></m:sub>'
+            '<m:sup><m:r><m:t>N</m:t></m:r></m:sup>'
+            '<m:e>'
+            # max_j
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>max</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>j</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            # ( 0 , 1 - fraction )
+            '<m:d><m:dPr>'
+            '<m:begChr m:val="("/><m:endChr m:val=")"/>'
+            '</m:dPr><m:e>'
+            '<m:r><m:t xml:space="preserve">0, 1\u2212</m:t></m:r>'
+            '<m:f><m:fPr><m:type m:val="bar"/></m:fPr>'
+            '<m:num>'
+            '<m:r><m:t xml:space="preserve">NL(</m:t></m:r>'
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>p</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>i</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            '<m:r><m:t>, </m:t></m:r>'
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>g</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>i,j</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            '<m:r><m:t>)</m:t></m:r>'
+            '</m:num>'
+            '<m:den>'
+            '<m:r><m:t xml:space="preserve">max(|</m:t></m:r>'
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>p</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>i</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            '<m:r><m:t>|, |</m:t></m:r>'
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>g</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>i,j</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            '<m:r><m:t>|)</m:t></m:r>'
+            '</m:den></m:f>'
+            '</m:e></m:d>'
+            '</m:e></m:nary>'
+            '</m:oMath>'
+        )
+    elif "EM =" in latex:
+        # EM = 1/N sum_{i=1}^N 1(p_i = g_i)
+        return (
+            f'<m:oMath {NS}>'
+            '<m:r><m:rPr><m:nor/></m:rPr><m:t>EM = </m:t></m:r>'
+            '<m:f><m:fPr><m:type m:val="skw"/></m:fPr>'
+            '<m:num><m:r><m:t>1</m:t></m:r></m:num>'
+            '<m:den><m:r><m:t>N</m:t></m:r></m:den>'
+            '</m:f>'
+            '<m:nary><m:naryPr>'
+            '<m:chr m:val="\u2211"/>'
+            '<m:limLoc m:val="undOvr"/><m:grow m:val="1"/>'
+            '<m:subHide m:val="0"/><m:supHide m:val="0"/>'
+            '</m:naryPr>'
+            '<m:sub><m:r><m:t>i=1</m:t></m:r></m:sub>'
+            '<m:sup><m:r><m:t>N</m:t></m:r></m:sup>'
+            '<m:e>'
+            # Bold 1 indicator function - bold plain "1" (no SMP Unicode chars)
+            '<m:r><m:rPr><m:b/></m:rPr><m:t>1</m:t></m:r>'
+            '<m:d><m:dPr>'
+            '<m:begChr m:val="("/><m:endChr m:val=")"/>'
+            '</m:dPr><m:e>'
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>p</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>i</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            '<m:r><m:t>=</m:t></m:r>'
+            '<m:sSub><m:sSubPr><m:ctrlPr/></m:sSubPr>'
+            '<m:e><m:r><m:t>g</m:t></m:r></m:e>'
+            '<m:sub><m:r><m:t>i</m:t></m:r></m:sub>'
+            '</m:sSub>'
+            '</m:e></m:d>'
+            '</m:e></m:nary>'
+            '</m:oMath>'
+        )
+    elif "F1 =" in latex:
+        # F1 = 2 * Precision*Recall / (Precision+Recall)
+        return (
+            f'<m:oMath {NS}>'
+            '<m:r><m:rPr><m:nor/></m:rPr><m:t>F1 = 2\u00b7</m:t></m:r>'
+            '<m:f><m:fPr><m:type m:val="bar"/></m:fPr>'
+            '<m:num><m:r><m:t>Precision\u00b7Recall</m:t></m:r></m:num>'
+            '<m:den><m:r><m:t>Precision+Recall</m:t></m:r></m:den>'
+            '</m:f>'
+            '</m:oMath>'
+        )
+    return get_omml_for_latex(latex)
+
 def get_omml_for_latex(latex):
     """Translates LaTeX string to native Word OMML XML using Microsoft's local MML2OMML XSLT."""
     try:
@@ -167,7 +281,7 @@ def get_omml_for_latex(latex):
         xslt = etree.parse(xsl_path)
         transform = etree.XSLT(xslt)
         
-        mathml_str = latex2mathml.converter.convert(latex)
+        mathml_str = latex2mathml.converter.convert(latex, display='block')
         mathml_tree = etree.fromstring(mathml_str)
         omml_tree = transform(mathml_tree)
         omml_str = etree.tostring(omml_tree, encoding='utf-8').decode('utf-8')
@@ -214,7 +328,7 @@ def add_caption(doc, label_text, raw_caption_text, chapter_num="1"):
     clean_caption = re.sub(r'^(Figure|Table|Equation|Formula)\s*[\dA-Z.]*[:.]?\s*', '', raw_caption_text, flags=re.IGNORECASE)
     
     if not hasattr(doc, '_caption_counts'): doc._caption_counts = {}
-    key = (label_text, chapter_num)
+    key = label_text
     doc._caption_counts[key] = doc._caption_counts.get(key, 0) + 1
     num = doc._caption_counts[key]
     
@@ -235,9 +349,9 @@ def add_caption(doc, label_text, raw_caption_text, chapter_num="1"):
     p = doc.add_paragraph(style='Caption')
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(6)
-    p.paragraph_format.space_after = Pt(24)
+    p.paragraph_format.space_after = Pt(6)
     
-    label_run = p.add_run(f"{label_text} {chapter_num}.{num}")
+    label_run = p.add_run(f"{label_text} {num}")
     label_run.bold = True
     
     if clean_caption:
@@ -253,32 +367,39 @@ def add_formatted_text(p, text, doc=None, chapter_num="1"):
     # Handle Block Math
     if text.strip().startswith('$$') and text.strip().endswith('$$'):
         latex = text.strip().strip('$').strip()
-        
-        # Parse equation number if present, e.g. \quad (3.1)
+
+        # Parse equation number if present, e.g. \quad (3)
         eq_num = None
-        m = re.search(r'(?:\\quad\s*|\\qquad\s*|\s+)\((\d+\.\d+)\)\s*$', latex)
+        m = re.search(r'(?:\\quad\s*|\\qquad\s*|\s+)\((\d+(?:\.\d+)?)\)\s*$', latex)
         if m:
             eq_num = m.group(1)
             latex = latex[:m.start()].strip()
-            
-        omml_str = get_omml_for_latex(latex)
+
+        omml_str = get_custom_omml(latex)
         if omml_str:
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            p.clear()
-            
-            # Setup centered and right-aligned tab stops based on A4 margins
-            # A4 printable area width is 15.5 cm (21.0 cm A4 width - 3.5 cm left - 2.0 cm right)
-            # Center of page is 7.75 cm, Right margin is at 15.5 cm
-            tab_stops = p.paragraph_format.tab_stops
-            tab_stops.add_tab_stop(Cm(7.75), WD_TAB_ALIGNMENT.CENTER)
-            tab_stops.add_tab_stop(Cm(15.5), WD_TAB_ALIGNMENT.RIGHT)
-            
-            p.add_run('\t')
+            # ------------------------------------------------------------------
+            # SAFE APPROACH: append the m:oMath element directly into p._p
+            # The paragraph stays in the document body (never inside a table),
+            # so Word renders it as proper display math (not linear notation).
+            # The equation number goes in a separate tight right-aligned para.
+            # ------------------------------------------------------------------
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_before = Pt(4)
+            p.paragraph_format.space_after = Pt(0)
+
+            # Append the oMath element into this paragraph's XML
             omml_element = parse_xml(omml_str)
             p._p.append(omml_element)
-            
-            if eq_num:
-                p.add_run(f'\t({eq_num})')
+
+            # Add tight right-aligned equation number paragraph
+            if eq_num and doc is not None:
+                num_p = doc.add_paragraph()
+                num_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                num_p.paragraph_format.space_before = Pt(0)
+                num_p.paragraph_format.space_after = Pt(4)
+                run = num_p.add_run(f"({eq_num})")
+                run.font.name = 'Cambria'
+                run.font.size = Pt(11)
             return
         else:
             # Fallback to high-resolution Matplotlib image rendering
@@ -298,7 +419,7 @@ def add_formatted_text(p, text, doc=None, chapter_num="1"):
         if not part: continue
         if part.startswith('$') and part.endswith('$'):
             latex = part.strip('$')
-            omml_str = get_omml_for_latex(latex)
+            omml_str = get_custom_omml(latex)
             if omml_str:
                 omml_element = parse_xml(omml_str)
                 p._p.append(omml_element)
@@ -337,8 +458,12 @@ def set_heading_styles(doc, is_paper=False):
             s = doc.styles[s_name]
             s.paragraph_format.keep_with_next = True
             s.paragraph_format.keep_together = True
-            s.paragraph_format.space_before = Pt(12)
-            s.paragraph_format.space_after = Pt(6)
+            if is_paper:
+                s.paragraph_format.space_before = Pt(0)
+                s.paragraph_format.space_after = Pt(0)
+            else:
+                s.paragraph_format.space_before = Pt(6)
+                s.paragraph_format.space_after = Pt(6)
             s.font.name = 'Cambria' if is_paper else 'Arial'
             if level == 1: s.font.size = Pt(16); s.font.bold = True
             elif level == 2: s.font.size = Pt(14); s.font.bold = True
@@ -396,10 +521,65 @@ def set_column_layout(section, num_columns=2):
     cols.set(ns.qn('w:num'), str(num_columns))
     cols.set(ns.qn('w:space'), '720') # 0.5 inch space between columns
 
+
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import RGBColor
+
+def format_custom_table(tbl):
+    # Set borders
+    tblPr = tbl._element.xpath('w:tblPr')
+    if tblPr:
+        tblBorders = OxmlElement('w:tblBorders')
+        for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+            border = OxmlElement(f'w:{border_name}')
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), '4F81BD')
+            tblBorders.append(border)
+        tblPr[0].append(tblBorders)
+
+    # Shade header row and bold text
+    for i, cell in enumerate(tbl.rows[0].cells):
+        tcPr = cell._element.get_or_add_tcPr()
+        shd = OxmlElement('w:shd')
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), '4F81BD')
+        tcPr.append(shd)
+        for p in cell.paragraphs:
+            for r in p.runs:
+                r.bold = True
+                r.font.color.rgb = RGBColor(255, 255, 255)
+    
+    # Shade alternating rows
+    for row_idx in range(1, len(tbl.rows)):
+        if row_idx % 2 == 1:
+            for cell in tbl.rows[row_idx].cells:
+                tcPr = cell._element.get_or_add_tcPr()
+                shd = OxmlElement('w:shd')
+                shd.set(qn('w:val'), 'clear')
+                shd.set(qn('w:color'), 'auto')
+                shd.set(qn('w:fill'), 'D3DFEE')
+                tcPr.append(shd)
+
 def convert_to_professional_docx(md_path, docx_path):
     print(f"Applying Global Corrections to: {docx_path}")
     is_paper = "paper" in docx_path.lower()
-    doc = Document()
+    
+    if is_paper:
+        doc = Document()
+    else:
+        # Load the official template Szablon.docx
+        # Resolve path correctly
+        template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(md_path))), "Szablon.docx")
+        try:
+            doc = Document(template_path)
+            print(f"Loaded official template: {template_path}")
+        except Exception as e:
+            print(f"Template load failed: {e}, falling back to blank document")
+            doc = Document()
     define_caption_style(doc)
     set_academic_styles(doc, is_paper=is_paper)
     set_heading_styles(doc, is_paper=is_paper)
@@ -440,7 +620,7 @@ def convert_to_professional_docx(md_path, docx_path):
                 i += 1
                 continue
             if in_abstract:
-                if line.startswith('##'):
+                if line.startswith('##') or line.startswith('Keywords:') or line.startswith('**Keywords:**'):
                     in_abstract = False
                     break
                 if line: abstract_lines.append(line)
@@ -479,29 +659,53 @@ def convert_to_professional_docx(md_path, docx_path):
             run = ab_head.add_run("Abstract")
             run.bold = True
             run.font.name = 'Cambria'
-            run.font.size = Pt(10)
+            run.font.size = Pt(12)
             
             ab_body = doc.add_paragraph()
             ab_body.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-            ab_body.paragraph_format.space_after = Pt(8)
-            ab_body.paragraph_format.line_spacing = 1.0
+            ab_body.paragraph_format.space_after = Pt(6)
+            ab_body.paragraph_format.line_spacing = 1.15
             run = ab_body.add_run(" ".join(abstract_lines))
-            run.italic = True
             run.font.name = 'Cambria'
-            run.font.size = Pt(9.5)
+            run.font.size = Pt(12)
             
         # Start processing from after abstract
         i = 0
-        while i < len(lines) and not (lines[i].strip().startswith('**Keywords:**') or lines[i].strip().startswith('## 1. INTRODUCTION')):
+        while i < len(lines) and not (lines[i].strip().startswith('**Keywords:**') or lines[i].strip().startswith('Keywords:') or lines[i].strip().startswith('## 1. INTRODUCTION')):
             i += 1
     else:
         # Thesis Header Logic
-        title_line = next((l.lstrip('#').strip() for l in lines if l.startswith('#')), "Document")
-        subtitle_line = next((l.strip('*').strip() for l in lines if l.strip().startswith('**')), "")
-        tp = doc.add_heading(title_line, 0); tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        if subtitle_line:
-            sp = doc.add_paragraph(subtitle_line, style='Subtitle'); sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            for r in sp.runs: r.font.size = Pt(14); r.bold = True
+        # Custom Professional Title Page using Szablon.docx
+        
+        def replace_para_text(p, new_text):
+            if not getattr(p, 'runs', []): return
+            if not p.runs: p.add_run(new_text)
+            else:
+                p.runs[0].text = new_text
+                for r in p.runs[1:]: r.text = ''
+            
+        try:
+            replace_para_text(doc.paragraphs[3], 'MASTER THESIS')
+            replace_para_text(doc.paragraphs[5], 'Systems-Level Reliability and Robustness Evaluation Framework for Document AI')
+            replace_para_text(doc.paragraphs[6], '')
+            replace_para_text(doc.paragraphs[8], 'Tifang Desmond Ngoe')
+            replace_para_text(doc.paragraphs[9], '')
+            replace_para_text(doc.paragraphs[10], 'Kierunek: Artificial Intelligence and Data Science')
+            replace_para_text(doc.paragraphs[11], '') 
+            replace_para_text(doc.paragraphs[12], 'Poziom studiów: II')
+            replace_para_text(doc.paragraphs[13], 'Promotor pracy: Prof. Piotr Duda')
+            replace_para_text(doc.paragraphs[21], 'Czestochowa University of Technology, 2026')
+            
+            # Delete dummy paragraphs from index 23 onwards
+            def delete_paragraph(paragraph):
+                p = paragraph._element
+                p.getparent().remove(p)
+                paragraph._p = paragraph._element = None
+                
+            for p in list(doc.paragraphs[23:]):
+                delete_paragraph(p)
+        except Exception as e:
+            print(f"Warning: Failed to map template placeholders. Expected Szablon.docx structure not found: {e}")
         
         # Section 1: Table of Contents (Page 3)
         doc.add_section(WD_SECTION.ODD_PAGE)
@@ -509,7 +713,7 @@ def convert_to_professional_docx(md_path, docx_path):
         
         toc_title_p = doc.add_paragraph()
         toc_title_p.paragraph_format.space_before = Pt(12)
-        toc_title_p.paragraph_format.space_after = Pt(24)
+        toc_title_p.paragraph_format.space_after = Pt(6)
         toc_title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = toc_title_p.add_run("TABLE OF CONTENTS")
         run.bold = True
@@ -540,51 +744,73 @@ def convert_to_professional_docx(md_path, docx_path):
             elif m_chap: current_chapter = m_chap.group(1)
             elif "Appendix" in title: current_chapter = title.split(':')[0].replace("Appendix", "").strip()
             
-            # Create section break first for chapter equivalents so that Abstract is properly sectioned
+            is_odd = False
             if not is_paper:
-                is_chapter = title.upper().startswith("CHAPTER")
+                is_chapter = title.upper().startswith("CHAPTER") or title.upper().startswith("APPENDIX")
                 if is_chapter:
                     is_odd = True
-                    just_added_chapter_break = True
                 else:
-                    if just_added_chapter_break:
-                        is_odd = False
-                        just_added_chapter_break = False
-                    else:
-                        is_odd = any(t.lower() in title.lower() for t in ["introduction", "conclusion", "references", "bibliography", "abstract", "table of contents", "list of"]) or (title and title[0].isdigit() and "." in title[:3])
-                
-                if is_odd:
-                    doc.add_section(WD_SECTION.NEW_PAGE)
-                    add_academic_footer(doc.sections[-1], has_numbering=True)
+                    is_odd = any(t.lower() in title.lower() for t in ["introduction", "conclusion", "references", "bibliography", "abstract", "table of contents", "list of"]) or (title and title[0].isdigit() and "." in title[:3])
             
-            if "Abstract" in title:
-                p = doc.add_paragraph()
-                p.paragraph_format.space_before = Pt(12); p.paragraph_format.space_after = Pt(12)
-                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                run = p.add_run("ABSTRACT")
-                run.bold = True
-                run.font.name = 'Arial'
-                run.font.size = Pt(14)
+            if "Abstract" in title or "Streszczenie" in title or "Keywords" in title:
+                heading_text = "ABSTRACT"
+                if "Streszczenie" in title:
+                    heading_text = "STRESZCZENIE"
+                elif "Keywords" in title:
+                    heading_text = "Keywords / Słowa kluczowe"
+                
+                h = doc.add_heading(heading_text, 1)
+                h.paragraph_format.space_before = Pt(12)
+                h.paragraph_format.space_after = Pt(12)
+                if is_odd and "Keywords" not in title:
+                    h.paragraph_format.page_break_before = True
+                h.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                
+                # Make sure the font matches other headings
+                for run in h.runs:
+                    run.font.name = 'Arial'
+                    run.bold = True
                 i += 1; continue
             
-            doc.add_heading(title, 1); i += 1; continue
-        if line.startswith('### '): doc.add_heading(line.lstrip('#').strip(), level=2); i += 1; continue
-        if line.startswith('#### '): p = doc.add_paragraph(); p.add_run(line.lstrip('#').strip()).bold = True; i += 1; continue
+            h = doc.add_heading(title, 1)
+            h.paragraph_format.keep_with_next = True
+            if is_odd:
+                h.paragraph_format.page_break_before = True
+            i += 1; continue
+        if line.startswith('### '): h = doc.add_heading(line.lstrip('#').strip(), level=2); h.paragraph_format.keep_with_next = True; i += 1; continue
+        if line.startswith('#### '): p = doc.add_paragraph(); p.add_run(line.lstrip('#').strip()).bold = True; p.paragraph_format.keep_with_next = True; i += 1; continue
         if line.startswith('|') or (line.startswith('**Table') and i+1 < len(lines) and '|' in lines[i+1]):
-            caption = ""; 
+            caption = ""; cap_p = None
             if line.startswith('**Table'): caption = line.strip('*').strip(); i += 1
-            if caption: add_caption(doc, "Table", caption, current_chapter)
+            if caption: 
+                cap_p = add_caption(doc, "Table", caption, current_chapter)
+                cap_p.paragraph_format.keep_with_next = True
+                cap_p.paragraph_format.space_after = Pt(6)
             data = []
             while i < len(lines) and lines[i].strip().startswith('|'):
                 if '---' not in lines[i]: data.append([c.strip() for c in lines[i].strip().split('|') if c.strip()])
                 i += 1
             if data:
-                tbl = doc.add_table(rows=len(data), cols=len(data[0])); tbl.style = 'Table Grid'
+                print(f'Created table with {len(data)} rows and {len(data[0])} cols')
+                tbl = doc.add_table(rows=len(data), cols=len(data[0]))
+                format_custom_table(tbl)
+                tbl.alignment = 1
+                tbl.autofit = True
+
+                # Force table to be 100% width
+                from docx.oxml import OxmlElement
+                from docx.oxml.ns import qn
+                tblPr = tbl._tbl.tblPr
+                tblW = OxmlElement('w:tblW')
+                tblW.set(qn('w:w'), '5000')
+                tblW.set(qn('w:type'), 'pct')
+                tblPr.append(tblW)
                 tbl.rows[0]._tr.get_or_add_trPr().append(OxmlElement('w:tblHeader'))
                 for r, row_data in enumerate(data):
                     tbl.rows[r]._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
                     for c, val in enumerate(row_data):
                         cp = tbl.rows[r].cells[c].paragraphs[0]
+                        cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         add_formatted_text(cp, val, doc, current_chapter)
                         if r < len(data) - 1: cp.paragraph_format.keep_with_next = True
             continue
@@ -614,14 +840,20 @@ def convert_to_professional_docx(md_path, docx_path):
                         cap = lines[i+1].strip().strip('*')
                         i += 1
                     # Image scaling for paper (columns) vs thesis (full page)
-                    width = Inches(3.25) if is_paper else Inches(6.0)
+                    width = Inches(3.1) if is_paper else Inches(6.0)
                     try: 
                         run.add_picture(img_path, width=width)
                         print(f"Loaded image: {img_path}")
                     except Exception as e: 
                         p.add_run(f"\n[Image Error: {img_path}]")
                         print(f"Error loading image: {img_path} ({e})")
-                    add_caption(doc, "Figure", cap, chapter_num=current_chapter)
+                    cap_p = add_caption(doc, "Figure", cap, chapter_num=current_chapter)
+                    # Keep the caption with any immediately following source/italic line
+                    next_i = i + 1
+                    while next_i < len(lines) and not lines[next_i].strip():
+                        next_i += 1
+                    if next_i < len(lines) and lines[next_i].strip().startswith('*(Source:'):
+                        cap_p.paragraph_format.keep_with_next = True
                 else:
                     print(f"CRITICAL WARNING: Image path not found: {rel_path}")
             i += 1; continue
@@ -642,10 +874,25 @@ def convert_to_professional_docx(md_path, docx_path):
                 i += 2
             i += 1; continue
         if line.startswith('- ') or line.startswith('* '):
-            p = doc.add_paragraph(style='List Bullet'); add_formatted_text(p, line[2:], doc, current_chapter); i += 1; continue
+            try: p = doc.add_paragraph(style='List Bullet')
+            except: p = doc.add_paragraph()
+            add_formatted_text(p, line[2:], doc, current_chapter); i += 1; continue
         if re.match(r'^\d+\. ', line):
-            p = doc.add_paragraph(style='List Number'); add_formatted_text(p, line[line.find(' ')+1:], doc, current_chapter); i += 1; continue
-        p = doc.add_paragraph(); add_formatted_text(p, line, doc, current_chapter); i += 1
+            try: p = doc.add_paragraph(style='List Number')
+            except: p = doc.add_paragraph()
+            add_formatted_text(p, line[line.find(' ')+1:], doc, current_chapter); i += 1; continue
+        p = doc.add_paragraph(); add_formatted_text(p, line, doc, current_chapter)
+        
+        # Keep paragraph with next if the next element is a Table, Image, or subheading
+        next_idx = i + 1
+        while next_idx < len(lines) and not lines[next_idx].strip():
+            next_idx += 1
+        if next_idx < len(lines):
+            next_line = lines[next_idx].strip()
+            if (next_line.startswith('###') or next_line.startswith('####')):
+                p.paragraph_format.keep_with_next = True
+                
+        i += 1
     # Apply standard margin configurations globally to all sections of the thesis (PROJECT FORMAT.pdf)
     if not is_paper:
         for section in doc.sections:
@@ -656,6 +903,19 @@ def convert_to_professional_docx(md_path, docx_path):
             section.top_margin = Cm(2.0)
             section.bottom_margin = Cm(2.0)
             
+    # Force keep_with_next explicitly on ALL heading paragraphs
+    for p in doc.paragraphs:
+        style_name = p.style.name if p.style else ""
+        if style_name.startswith('Heading') or style_name.startswith('Nag'):
+            p.paragraph_format.keep_with_next = True
+            p.paragraph_format.keep_together = True
+    # Force keep_with_next explicitly on ALL heading paragraphs
+    for p in doc.paragraphs:
+        style_name = p.style.name if p.style else ""
+        if style_name.startswith('Heading') or style_name.startswith('Nag'):
+            p.paragraph_format.keep_with_next = True
+            p.paragraph_format.keep_together = True
+
     doc.save(docx_path); print(f"Success: {docx_path}")
 
 if __name__ == "__main__":
