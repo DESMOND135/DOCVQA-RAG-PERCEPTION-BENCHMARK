@@ -2,6 +2,13 @@
 
 ## Academic Thesis Project: Large Language Model as a Tool for Automatic Extraction of Information from PDF Documents
 
+## 🎓 Master's Thesis
+The latest corrected and polished Master's Thesis document is available directly in this repository:
+👉 **[Download Master's Thesis PDF](MAIN/Tifang_Desmond_Ngoe_Masters_Thesis.pdf)**
+
+---
+
+
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-RAG%20--%20DocVQA-orange.svg)](https://github.com/DESMOND135/DOCVQA-RAG-PERCEPTION-BENCHMARK)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -98,10 +105,8 @@ This repository follows a strict, highly modular structure aligned with software
 │   ├── processing/        # Character chunking and mathematical embedding steps
 │   ├── utils/             # Document compilers and helper scripts (md_to_docx, md_to_pptx)
 │   └── vlm/               # Generative Vision-Language Model wrappers
-├── THESIS/                # Academic deliverables
-│   ├── Paper Folder/      # Research paper source (paper_SOURCE.md) and compiled artifact (paper.docx)
-│   ├── Thesis Folder/     # Master's Thesis source (thesis.md) and compiled artifact (Thesis.docx)
-│   └── presentation/      # Defense presentation slides (presentation.md, presentation.pptx)
+├── MAIN/                  # Master's Thesis deliverables
+│   └── Tifang_Desmond_Ngoe_Masters_Thesis.pdf  # Latest polished Master's Thesis PDF document
 ├── app.py                 # Interactive Streamlit demonstration web application
 ├── main.py                # Main benchmark execution and evaluation script
 ├── requirements.txt       # Unified environment dependency manifest
