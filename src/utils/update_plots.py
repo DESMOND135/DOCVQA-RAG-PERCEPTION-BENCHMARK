@@ -42,13 +42,13 @@ plt.ylim(0, 1.4)
 plt.legend(title="Accuracy Metric", loc='upper right', frameon=True, shadow=True)
 
 # MASSIVE ANNOTATION BOX 1 - HYBRID
-ax1.annotate('Hybrid model achieves highest accuracy (0.24 ANLS) by\nsynchronizing literal OCR precision with semantic VLM context.', 
-             xy=(0, 0.24), xytext=(0.4, 1.05),
+ax1.annotate('Hybrid model achieves highest accuracy (0.58 ANLS) by\nsynchronizing literal OCR precision with semantic VLM context.', 
+             xy=(0, 0.58), xytext=(0.4, 1.05),
              arrowprops=dict(facecolor='#1e3a8a', shrink=0.05, width=6, headwidth=20, headlength=20),
              fontsize=18, fontweight='bold', bbox=dict(facecolor='white', alpha=1.0, edgecolor='#1e3a8a', linewidth=3, boxstyle='round,pad=1.5'))
 
 # MASSIVE ANNOTATION BOX 2 - PADDLEOCR (SHIFTED INWARD TO PREVENT CLIPPING)
-ax1.annotate('PaddleOCR fails Correct Match (0%) due to strict string\nformatting and character dataset requirements.', 
+ax1.annotate('PaddleOCR achieves 0.18 EM and 0.35 ANLS due to strict string\nformatting and character dataset requirements.', 
              xy=(3, 0.05), xytext=(1.2, 0.6), # Shifted xytext inward from 2.0 to 1.2
              arrowprops=dict(facecolor='#991b1b', shrink=0.05, width=6, headwidth=20, headlength=20),
              fontsize=16, color='#991b1b', fontweight='bold', bbox=dict(facecolor='white', alpha=1.0, edgecolor='#991b1b', linewidth=3, boxstyle='round,pad=1.2'))
